@@ -21,6 +21,7 @@
 - `russia/financial-reporting/{ifrs,ras}/`
 - `russia/rosstat/`
 - `russia/bank-of-russia/`
+- `russia/ministry-of-economic-development/`
 
 ## Out of scope
 
