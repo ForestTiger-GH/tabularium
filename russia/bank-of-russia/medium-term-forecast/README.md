@@ -4,4 +4,4 @@ Source-faithful Markdown transcriptions of the recurring publication `Средн
 
 ## Route
 
-Name single-file issues by the Board meeting date as `YYYY-MM-DD.md`.
+Current corpus files use the issue-date naming pattern `forecast_YYMMDD.md`. Preserve the established series naming convention when adding further issues.

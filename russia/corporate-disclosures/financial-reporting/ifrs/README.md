@@ -2,6 +2,4 @@
 
 Machine-readable primary IFRS reporting published by Russian entities and groups.
 
-## Route
-
-Create one stable directory per reporting entity or group. Keep all periods for that reporting perimeter under the same entity route.
+Keep each report as a complete source-faithful artifact. Reporting perimeter is part of the source identity; do not infer equivalence between a legal entity and a consolidated group from similar names.

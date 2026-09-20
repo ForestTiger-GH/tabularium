@@ -1,6 +1,6 @@
 # Index Reviews
 
-Source-faithful machine-readable transcriptions of recurring Moscow Exchange index review releases.
+Preserved HTML copies of recurring official Moscow Exchange index review releases.
 
 Frequency: quarterly.
 

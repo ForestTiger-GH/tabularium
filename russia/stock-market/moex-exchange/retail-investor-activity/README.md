@@ -1,6 +1,6 @@
 # Retail Investor Activity
 
-Source-faithful machine-readable transcriptions of recurring Moscow Exchange releases on private investor activity.
+Preserved HTML copies of recurring official Moscow Exchange releases on private investor activity.
 
 Frequency: monthly; annual summary releases may also occur.
 

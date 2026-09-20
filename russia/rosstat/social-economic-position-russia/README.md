@@ -4,4 +4,4 @@ Source-faithful Markdown transcriptions of the recurring Rosstat publication `С
 
 ## Route
 
-Name single-file monthly issues by reference period as `YYYY-MM.md`.
+Current corpus files preserve the established issue naming pattern `osn-MM-YYYY.md`.
