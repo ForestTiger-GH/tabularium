@@ -1,0 +1,330 @@
+TABULARIUM
+LICENSING, THIRD-PARTY MATERIALS, AND SOURCE-FIDELITY NOTICE
+
+This file has two parts:
+
+Part I  — project-specific scope and notices for Tabularium.
+Part II — the Creative Commons CC0 1.0 Universal legal code.
+
+Part I defines the material to which Tabularium applies CC0 and the material
+that is excluded. Part I does not modify the CC0 legal code in Part II.
+
+
+PART I — TABULARIUM-SPECIFIC SCOPE AND NOTICES
+
+1. Project nature
+
+Tabularium is an independent, unofficial, source-faithful corpus of primary
+public financial, corporate, statistical, and institutional publications.
+Its purpose is to preserve primary-source material and machine-readable
+representations of that material for archival, research, computational, and
+other downstream uses.
+
+
+2. CC0-covered Tabularium contributions
+
+To the extent that Tabularium contributors hold the relevant copyright,
+database rights, or related rights, original Tabularium contributions are
+dedicated to the public domain under the Creative Commons CC0 1.0 Universal
+Public Domain Dedication.
+
+CC0-covered original contributions may include, where independently created
+by Tabularium contributors:
+
+- repository structure, routing, and organisation;
+- original metadata, cataloguing, and classification;
+- original documentation;
+- manifests, indexes, and registries;
+- original schemas, machine-readable markup, and other project-created
+  material, to the extent that such material is independently protected and
+  does not merely reproduce third-party source content; and
+- other original material explicitly identified as a Tabularium contribution.
+
+For purposes of Part II below, the "Work" to which Tabularium applies CC0
+means only the CC0-covered original contributions described above, together
+with any other material explicitly marked as CC0. It does not mean the entire
+contents of this repository.
+
+
+3. Third-party source materials are excluded
+
+Tabularium contains or may contain documents, datasets, spreadsheets,
+financial statements, statistical releases, reports, publications, images,
+and other materials originating from governments, public institutions,
+exchanges, companies, organisations, and other third parties.
+
+Those third-party materials are not relicensed or dedicated to the public
+domain by Tabularium under CC0.
+
+When a Tabularium artifact reproduces, transcribes, converts, reformats, or
+otherwise represents a third-party publication, the source-derived content
+remains excluded from the Tabularium CC0 dedication. To the extent that such
+an artifact also contains separable, independently protected original
+contributions created by Tabularium contributors, only those original
+contributions are covered by CC0.
+
+Any copyright, database rights, neighbouring rights, contractual restrictions,
+or other rights applicable to third-party materials remain with their
+respective rightsholders or are governed by applicable law and the terms of
+the original source.
+
+The inclusion of material in Tabularium does not represent or imply that
+Tabularium owns that material, has authority to license it, has cleared all
+rights in it, or has determined that it is in the public domain.
+
+Some third-party materials may be in the public domain, may not qualify for
+copyright protection, or may otherwise be freely reusable under applicable
+law. Other materials may remain protected. Tabularium makes no blanket
+determination regarding the legal status of every archived item.
+
+
+4. Machine-assisted processing and source fidelity
+
+Some machine-readable representations in Tabularium are created, assisted, or
+validated using automated tools, including AI-based transcription, extraction,
+format conversion, table reconstruction, classification, and validation.
+Human processing may also be involved.
+
+Tabularium aims to preserve the meaning, reported values, units, periods,
+structure, and provenance of the originating publication. Nevertheless,
+machine-assisted or human conversion may introduce accidental discrepancies
+from the primary source. Such discrepancies may include, without limitation:
+
+- omitted, duplicated, or substituted text;
+- character or digit substitutions;
+- incorrect signs, decimal separators, percentages, dates, or units;
+- row/column or period misalignment in tables;
+- omitted or misplaced notes, footnotes, labels, or headings;
+- formatting loss; or
+- incorrect structural reconstruction.
+
+Source-faithful representation is a methodological objective of Tabularium,
+not a warranty of perfect textual, numerical, structural, or semantic
+equivalence with the originating publication.
+
+Any accidental discrepancy is an error in the Tabularium representation. It
+does not amend, correct, supersede, supplement, or reinterpret the originating
+source.
+
+Where a Tabularium representation conflicts with the originating publication
+or a preserved native source artifact, the originating source is authoritative.
+Users should independently verify information that is important, material, or
+decision-relevant against the originating publication or source artifact.
+
+
+5. Provenance and source availability
+
+Tabularium aims to preserve sufficient provenance to identify the originating
+institution, publication series, release, period, and source artifact whenever
+reasonably possible.
+
+Original source URLs may be recorded when available, but are not guaranteed to
+remain available. Websites, publication systems, paths, and historical
+attachments may change or disappear over time.
+
+The absence of a working source URL does not imply ownership of the material by
+Tabularium and does not alter the legal status of the material.
+
+
+6. Independence and no endorsement
+
+Tabularium is not affiliated with, sponsored by, approved by, or endorsed by
+the institutions or other third parties whose public materials are preserved
+or represented in this repository, unless expressly stated otherwise.
+
+Names, marks, and other identifiers of source institutions are used for
+provenance and identification purposes.
+
+
+7. No professional advice; verification recommended
+
+Tabularium is an archival and research corpus. Its contents are not investment,
+legal, accounting, tax, regulatory, or other professional advice.
+
+Users remain responsible for evaluating whether a source or representation is
+suitable for their intended use. Important information should be checked
+against the originating publication, especially when it may affect financial,
+legal, regulatory, research, operational, or other material decisions.
+
+
+8. No additional warranties
+
+To the fullest extent permitted by applicable law, Tabularium is provided on
+an "as-is" and "as-available" basis. Tabularium makes no representation or
+warranty regarding completeness, accuracy, currentness, availability,
+non-infringement, or fitness for a particular purpose.
+
+The CC0 legal code below contains additional limitations and disclaimers
+applicable to the CC0-covered Work.
+
+
+9. Other rights and software
+
+Nothing in this file grants rights that Tabularium contributors do not hold or
+have authority to grant. Rights outside the scope of CC0, including third-party
+trademark, patent, privacy, publicity, personality, confidentiality, or similar
+rights, may continue to apply.
+
+Software code is not covered by the Tabularium CC0 dedication unless it is
+explicitly identified as covered. Substantial software, scripts, crawlers,
+parsers, validators, or other tooling may be licensed separately.
+
+
+PART II — CC0 1.0 UNIVERSAL LEGAL CODE
+
+The text below is the standard CC0 1.0 Universal legal code.
+
+---
+title: Creative Commons Zero v1.0 Universal
+spdx-id: CC0-1.0
+redirect_from: /licenses/cc0/
+hidden: false
+
+description: The <a href="https://creativecommons.org/publicdomain/zero/1.0/">Creative Commons CC0 Public Domain Dedication</a> waives copyright interest in a work you've created and dedicates it to the world-wide public domain. Use CC0 to opt out of copyright entirely and ensure your work has the widest reach. As with the Unlicense and typical software licenses, CC0 disclaims warranties. CC0 is very similar to the Unlicense.
+
+how: Create a text file (typically named LICENSE or LICENSE.txt) in the root of your source code and copy the text of the license into the file.
+
+note: Creative Commons recommends taking the additional step of adding a boilerplate notice to the top of each file. The boilerplate can be <a href="https://wiki.creativecommons.org/wiki/CC0_FAQ#May_I_apply_CC0_to_computer_software.3F_If_so.2C_is_there_a_recommended_implementation.3F">found on their website</a>.
+
+using:
+  Awesome: https://github.com/sindresorhus/awesome/blob/main/license
+  just: https://github.com/casey/just/blob/master/LICENSE
+  psdash: https://github.com/Jahaja/psdash/blob/master/LICENSE
+
+permissions:
+  - commercial-use
+  - modifications
+  - distribution
+  - private-use
+
+conditions: []
+
+limitations:
+  - liability
+  - trademark-use
+  - patent-use
+  - warranty
+
+---
+
+Creative Commons Legal Code
+
+CC0 1.0 Universal
+
+    CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND DOES NOT PROVIDE
+    LEGAL SERVICES. DISTRIBUTION OF THIS DOCUMENT DOES NOT CREATE AN
+    ATTORNEY-CLIENT RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS
+    INFORMATION ON AN "AS-IS" BASIS. CREATIVE COMMONS MAKES NO WARRANTIES
+    REGARDING THE USE OF THIS DOCUMENT OR THE INFORMATION OR WORKS
+    PROVIDED HEREUNDER, AND DISCLAIMS LIABILITY FOR DAMAGES RESULTING FROM
+    THE USE OF THIS DOCUMENT OR THE INFORMATION OR WORKS PROVIDED
+    HEREUNDER.
+
+Statement of Purpose
+
+The laws of most jurisdictions throughout the world automatically confer
+exclusive Copyright and Related Rights (defined below) upon the creator
+and subsequent owner(s) (each and all, an "owner") of an original work of
+authorship and/or a database (each, a "Work").
+
+Certain owners wish to permanently relinquish those rights to a Work for
+the purpose of contributing to a commons of creative, cultural and
+scientific works ("Commons") that the public can reliably and without fear
+of later claims of infringement build upon, modify, incorporate in other
+works, reuse and redistribute as freely as possible in any form whatsoever
+and for any purposes, including without limitation commercial purposes.
+These owners may contribute to the Commons to promote the ideal of a free
+culture and the further production of creative, cultural and scientific
+works, or to gain reputation or greater distribution for their Work in
+part through the use and efforts of others.
+
+For these and/or other purposes and motivations, and without any
+expectation of additional consideration or compensation, the person
+associating CC0 with a Work (the "Affirmer"), to the extent that he or she
+is an owner of Copyright and Related Rights in the Work, voluntarily
+elects to apply CC0 to the Work and publicly distribute the Work under its
+terms, with knowledge of his or her Copyright and Related Rights in the
+Work and the meaning and intended legal effect of CC0 on those rights.
+
+1. Copyright and Related Rights. A Work made available under CC0 may be
+protected by copyright and related or neighboring rights ("Copyright and
+Related Rights"). Copyright and Related Rights include, but are not
+limited to, the following:
+
+  i. the right to reproduce, adapt, distribute, perform, display,
+     communicate, and translate a Work;
+ ii. moral rights retained by the original author(s) and/or performer(s);
+iii. publicity and privacy rights pertaining to a person's image or
+     likeness depicted in a Work;
+ iv. rights protecting against unfair competition in regards to a Work,
+     subject to the limitations in paragraph 4(a), below;
+  v. rights protecting the extraction, dissemination, use and reuse of data
+     in a Work;
+ vi. database rights (such as those arising under Directive 96/9/EC of the
+     European Parliament and of the Council of 11 March 1996 on the legal
+     protection of databases, and under any national implementation
+     thereof, including any amended or successor version of such
+     directive); and
+vii. other similar, equivalent or corresponding rights throughout the
+     world based on applicable law or treaty, and any national
+     implementations thereof.
+
+2. Waiver. To the greatest extent permitted by, but not in contravention
+of, applicable law, Affirmer hereby overtly, fully, permanently,
+irrevocably and unconditionally waives, abandons, and surrenders all of
+Affirmer's Copyright and Related Rights and associated claims and causes
+of action, whether now known or unknown (including existing as well as
+future claims and causes of action), in the Work (i) in all territories
+worldwide, (ii) for the maximum duration provided by applicable law or
+treaty (including future time extensions), (iii) in any current or future
+medium and for any number of copies, and (iv) for any purpose whatsoever,
+including without limitation commercial, advertising or promotional
+purposes (the "Waiver"). Affirmer makes the Waiver for the benefit of each
+member of the public at large and to the detriment of Affirmer's heirs and
+successors, fully intending that such Waiver shall not be subject to
+revocation, rescission, cancellation, termination, or any other legal or
+equitable action to disrupt the quiet enjoyment of the Work by the public
+as contemplated by Affirmer's express Statement of Purpose.
+
+3. Public License Fallback. Should any part of the Waiver for any reason
+be judged legally invalid or ineffective under applicable law, then the
+Waiver shall be preserved to the maximum extent permitted taking into
+account Affirmer's express Statement of Purpose. In addition, to the
+extent the Waiver is so judged Affirmer hereby grants to each affected
+person a royalty-free, non transferable, non sublicensable, non exclusive,
+irrevocable and unconditional license to exercise Affirmer's Copyright and
+Related Rights in the Work (i) in all territories worldwide, (ii) for the
+maximum duration provided by applicable law or treaty (including future
+time extensions), (iii) in any current or future medium and for any number
+of copies, and (iv) for any purpose whatsoever, including without
+limitation commercial, advertising or promotional purposes (the
+"License"). The License shall be deemed effective as of the date CC0 was
+applied by Affirmer to the Work. Should any part of the License for any
+reason be judged legally invalid or ineffective under applicable law, such
+partial invalidity or ineffectiveness shall not invalidate the remainder
+of the License, and in such case Affirmer hereby affirms that he or she
+will not (i) exercise any of his or her remaining Copyright and Related
+Rights in the Work or (ii) assert any associated claims and causes of
+action with respect to the Work, in either case contrary to Affirmer's
+express Statement of Purpose.
+
+4. Limitations and Disclaimers.
+
+ a. No trademark or patent rights held by Affirmer are waived, abandoned,
+    surrendered, licensed or otherwise affected by this document.
+ b. Affirmer offers the Work as-is and makes no representations or
+    warranties of any kind concerning the Work, express, implied,
+    statutory or otherwise, including without limitation warranties of
+    title, merchantability, fitness for a particular purpose, non
+    infringement, or the absence of latent or other defects, accuracy, or
+    the present or absence of errors, whether or not discoverable, all to
+    the greatest extent permissible under applicable law.
+ c. Affirmer disclaims responsibility for clearing rights of other persons
+    that may apply to the Work or any use thereof, including without
+    limitation any person's Copyright and Related Rights in the Work.
+    Further, Affirmer disclaims responsibility for obtaining any necessary
+    consents, permissions or other rights required for any use of the
+    Work.
+ d. Affirmer understands and acknowledges that Creative Commons is not a
+    party to this document and has no duty or obligation with respect to
+    this CC0 or use of the Work.
