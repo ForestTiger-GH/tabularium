@@ -21,6 +21,7 @@
 
 - `russia/corporate-disclosures/financial-reporting/{ifrs,ras}/`
 - `russia/corporate-disclosures/{annual-reports,issuer-reports}/`
+- `russia/dom-rf-analytics/largest-mortgage-banks-results/`
 - `russia/rosstat/`
 - `russia/bank-of-russia/`
 - `russia/ministry-of-economic-development/`
