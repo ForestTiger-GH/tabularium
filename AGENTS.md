@@ -8,7 +8,7 @@
 
 1. Store primary public-source artifacts only.
 2. Preserve source meaning and reported values. Do not add analysis, interpretation, normalization, derived calculations, or private/internal data.
-3. Route by country first. Within a country, use stable routes documented by that country. Financial reporting remains under its dedicated reporting family; recurring official publications may route by source institution and stable publication series. An established domain route may group closely related source institutions when explicitly documented by the country route.
+3. Route by country first. Within a country, use stable routes documented by that country. Corporate financial reporting remains under its dedicated reporting family within `russia/corporate-disclosures/`; recurring official publications may route by source institution and stable publication series. An established domain route may group closely related source institutions when explicitly documented by the country route.
 4. Do not add new industry or topic taxonomies to the physical directory tree unless the repository contract is explicitly revised. Existing documented domain routes are part of the repository contract.
 5. Keep paths and repository control files in English, lowercase, and ASCII where practical.
 6. Routing directories and stable publication-series directories must contain a minimal `README.md`. Period/issue directories do not require one.
@@ -19,7 +19,7 @@
 
 ## Current routes
 
-- `russia/financial-reporting/{ifrs,ras}/`
+- `russia/corporate-disclosures/financial-reporting/{ifrs,ras}/`
 - `russia/corporate-disclosures/{annual-reports,issuer-reports}/`
 - `russia/rosstat/`
 - `russia/bank-of-russia/`
