@@ -1,0 +1,39 @@
+bridge_version: 1
+kind: remote-primary-source
+publisher: Bank of Russia
+form_code: "0409135"
+form_short_code: "135"
+title: "Information on Mandatory Ratios and Other Performance Indicators of a Credit Institution"
+data_mirrored: false
+
+identity:
+  discovery_identifier: ogrn
+  reporting_identifier: regnum
+
+discovery:
+  institution_reports:
+    url_template: "https://www.cbr.ru/finorg/foinfo/reports/?ogrn={ogrn}"
+  bulk_reporting_index:
+    url: "https://www.cbr.ru/banking_sector/otchetnost-kreditnykh-organizaciy/"
+
+access:
+  web_service:
+    protocol: soap
+    endpoint: "https://www.cbr.ru/CreditInfoWebServ/CreditOrgInfo.asmx"
+    documentation: "https://www.cbr.ru/development/wsco/"
+    operations:
+      dates: "GetDatesForF135"
+      full_form: "Data135FormFullXML"
+      metadata: "Data135MetaFullXML"
+  bulk_archive:
+    index: "https://www.cbr.ru/banking_sector/otchetnost-kreditnykh-organizaciy/"
+
+disclosure:
+  date_sensitive: true
+  decision_2026: "https://www.cbr.ru/rbr/dir_decisions/rsd_2025-12-19_23_02/"
+  missing_detail_is_zero: false
+
+retrieval_priority:
+  - institution_reports
+  - web_service
+  - bulk_archive

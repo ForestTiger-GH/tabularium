@@ -1,0 +1,42 @@
+bridge_version: 1
+kind: remote-primary-source
+publisher: Bank of Russia
+form_code: "0409101"
+form_short_code: "101"
+title: "Turnover Balance Sheet by Accounting Accounts of a Credit Institution"
+data_mirrored: false
+
+identity:
+  discovery_identifier: ogrn
+  reporting_identifier: regnum
+
+discovery:
+  institution_reports:
+    url_template: "https://www.cbr.ru/finorg/foinfo/reports/?ogrn={ogrn}"
+  bulk_reporting_index:
+    url: "https://www.cbr.ru/banking_sector/otchetnost-kreditnykh-organizaciy/"
+
+access:
+  primary_html:
+    url_template: "https://www.cbr.ru/banking_sector/credit/coinfo/f101?dt={date}&regnum={regnum}"
+  web_service:
+    protocol: soap
+    endpoint: "https://www.cbr.ru/CreditInfoWebServ/CreditOrgInfo.asmx"
+    documentation: "https://www.cbr.ru/development/wsco/"
+    operations:
+      dates: "GetDatesForF101"
+      indicators: "Form101IndicatorsEnumXML"
+      full_single: "Data101FullV2XML"
+      full_multiple: "Data101FullExV2XML"
+  bulk_archive:
+    index: "https://www.cbr.ru/banking_sector/otchetnost-kreditnykh-organizaciy/"
+
+disclosure:
+  date_sensitive: true
+  decision_2026: "https://www.cbr.ru/rbr/dir_decisions/rsd_2025-12-19_23_02/"
+  missing_detail_is_zero: false
+
+retrieval_priority:
+  - primary_html
+  - web_service
+  - bulk_archive
