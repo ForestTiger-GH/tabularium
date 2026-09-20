@@ -15,6 +15,7 @@
 7. Keep natively machine-readable source artifacts such as XLSX, CSV, XML, and JSON in their original format. Store PDF publications as complete source-faithful Markdown transcriptions.
 8. Keep all artifacts belonging to the same publication issue or release together. A single-artifact issue may remain a period/date-named file; create an issue directory when a release contains multiple related artifacts.
 9. Add new top-level taxonomies only when a real source class requires them. Avoid speculative empty structure.
+10. Do not infer the licence or legal status of a third-party artifact from its inclusion in the repository or from the root `LICENSE`. The root CC0 dedication applies only to original Tabularium contributions as defined in `NOTICE.md`. Preserve source provenance and do not assign CC0 or other Tabularium licensing metadata to third-party or source-derived content unless that legal status is explicitly established.
 
 ## Current routes
 
