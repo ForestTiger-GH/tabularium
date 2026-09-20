@@ -20,6 +20,7 @@
 ## Current routes
 
 - `russia/financial-reporting/{ifrs,ras}/`
+- `russia/corporate-disclosures/{annual-reports,issuer-reports}/`
 - `russia/rosstat/`
 - `russia/bank-of-russia/`
 - `russia/ministry-of-economic-development/`
