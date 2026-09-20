@@ -28,7 +28,7 @@ access:
       indicators: "Form102IndicatorsEnumXML"
       series_by_symbol: "Data102FormXML"
       multiple_organizations: "Data102FormExXML"
-      current_full_form: "Data102FXML"
+      current_layout: "Data102FXML"
   bulk_archive:
     index: "https://www.cbr.ru/banking_sector/otchetnost-kreditnykh-organizaciy/"
 
