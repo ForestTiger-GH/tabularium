@@ -26,7 +26,7 @@ This map lists populated material classes and documented remote-source bridge fa
   - [Short-Term Economic Indicators of the Russian Federation](russia/rosstat/short-term-economic-indicators/).
   - [Social and Economic Situation of Russia](russia/rosstat/social-economic-position-russia/).
 - [Stock market](russia/stock-market/)
-  - [Moscow Exchange](russia/stock-market/moex-exchange/) — retail investor activity, index reviews, and trading volumes.
+  - [Moscow Exchange](russia/stock-market/moex-exchange/) — index reviews, cumulative trading-volume data, bond-market secondary trading, market-wide trading results, and retail investor activity.
   - [SPB Exchange](russia/stock-market/spb-exchange/) — trading results.
 
 ## Scope

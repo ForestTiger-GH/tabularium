@@ -4,9 +4,10 @@ Primary machine-readable publications issued by Moscow Exchange.
 
 ## Route
 
-- [`retail-investor-activity/`](retail-investor-activity/) — recurring releases on private investor activity.
 - [`index-reviews/`](index-reviews/) — quarterly index review releases.
-- [`bond-secondary-trading/`](bond-secondary-trading/) — monthly releases on the bond market and secondary trading.
-- [`trading-volumes/`](trading-volumes/) — cumulative historical trading-volume data.
+- [`trade-volumes/`](trade-volumes/) — cumulative historical trading-volume data.
+- [`trading-bond-secondary/`](trading-bond-secondary/) — monthly releases on the bond market and secondary trading.
+- [`trading-results/`](trading-results/) — recurring releases summarizing trading results across Moscow Exchange markets.
+- [`trading-retail-investor-activity/`](trading-retail-investor-activity/) — recurring releases on private investor activity.
 
 Source: official Moscow Exchange website.
