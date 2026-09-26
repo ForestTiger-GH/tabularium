@@ -1,0 +1,39 @@
+name: Update corporate disclosures registry
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: corporate-disclosures-registry
+  cancel-in-progress: false
+
+jobs:
+  update-registry:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out default branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+
+      - name: Generate registry
+        run: python3 scripts/generate_corporate_disclosures_registry.py
+
+      - name: Commit registry if changed
+        shell: bash
+        run: |
+          if git diff --quiet -- registry/corporate-disclosures.md; then
+            echo "Corporate disclosures registry is already up to date."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add registry/corporate-disclosures.md
+          git commit -m "chore: update corporate disclosures registry"
+          git push origin "HEAD:${{ github.event.repository.default_branch }}"
