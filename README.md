@@ -1,4 +1,4 @@
-# Tabularium
+# 📜 Tabularium
 
 Machine-readable corpus of primary public financial, corporate, statistical, and institutional publications, plus documented bridges to canonical high-volume primary datasets.
 
