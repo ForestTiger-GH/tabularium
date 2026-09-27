@@ -10,7 +10,7 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-CORPORATE_ROOT = Path("russia/corporate-disclosures")
+CORPORATE_ROOT = Path("scrolls/russia/corporate-disclosures")
 EXCLUDED_ROOT = CORPORATE_ROOT / "financial-reporting" / "ras-banks"
 OUTPUT_PATH = Path("registry/corporate-disclosures.md")
 SUPPORTED_EXTENSIONS = {".md", ".html"}
@@ -149,11 +149,11 @@ def render_registry(latest: list[Artifact]) -> str:
         "# Corporate disclosures registry",
         "",
         "This file is generated automatically from publication artifacts under "
-        "`russia/corporate-disclosures/`.",
+        "`scrolls/russia/corporate-disclosures/`.",
         "",
         "Rules:",
         "",
-        "- `russia/corporate-disclosures/financial-reporting/ras-banks/` is excluded.",
+        "- `scrolls/russia/corporate-disclosures/financial-reporting/ras-banks/` is excluded.",
         "- Only `.md` and `.html` publication artifacts are included.",
         "- Publication filenames follow "
         "`<COMPANY>_<YYYYМ#>_<DOCUMENT_KIND>.{md,html}`.",

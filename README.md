@@ -4,9 +4,10 @@ Machine-readable corpus of primary public financial, corporate, statistical, and
 
 ## Route
 
-Start from the country directory.
+Start from the source corpus.
 
-- [russia/](russia/) — Russian public-source corpus.
+- [scrolls/](scrolls/) — authoritative primary-source corpus.
+  - [russia/](scrolls/russia/) — Russian public-source corpus.
 
 ## Corpus map
 
@@ -14,20 +15,20 @@ This map lists populated material classes and documented remote-source bridge fa
 
 ### Russia
 
-- [Corporate disclosures](russia/corporate-disclosures/)
-  - [Financial reporting](russia/corporate-disclosures/financial-reporting/) — IFRS, Russian Accounting Standards reporting, and Bank of Russia regulatory bank-reporting bridges.
-  - [Annual reports](russia/corporate-disclosures/annual-reports/).
-  - [Issuer reports](russia/corporate-disclosures/issuer-reports/).
-- [Bank of Russia](russia/bank-of-russia/)
-  - [Medium-Term Forecast](russia/bank-of-russia/medium-term-forecast/).
-- [DOM.RF Analytics](russia/dom-rf-analytics/)
-  - [Largest Mortgage Banks Results](russia/dom-rf-analytics/largest-mortgage-banks-results/).
-- [Rosstat](russia/rosstat/)
-  - [Short-Term Economic Indicators of the Russian Federation](russia/rosstat/short-term-economic-indicators/).
-  - [Social and Economic Situation of Russia](russia/rosstat/social-economic-position-russia/).
-- [Stock market](russia/stock-market/)
-  - [Moscow Exchange](russia/stock-market/moex-exchange/) — index reviews, cumulative trading-volume data, bond-market secondary trading, market-wide trading results, and retail investor activity.
-  - [SPB Exchange](russia/stock-market/spb-exchange/) — trading results.
+- [Corporate disclosures](scrolls/russia/corporate-disclosures/)
+  - [Financial reporting](scrolls/russia/corporate-disclosures/financial-reporting/) — IFRS, Russian Accounting Standards reporting, and Bank of Russia regulatory bank-reporting bridges.
+  - [Annual reports](scrolls/russia/corporate-disclosures/annual-reports/).
+  - [Issuer reports](scrolls/russia/corporate-disclosures/issuer-reports/).
+- [Bank of Russia](scrolls/russia/bank-of-russia/)
+  - [Medium-Term Forecast](scrolls/russia/bank-of-russia/medium-term-forecast/).
+- [DOM.RF Analytics](scrolls/russia/dom-rf-analytics/)
+  - [Largest Mortgage Banks Results](scrolls/russia/dom-rf-analytics/largest-mortgage-banks-results/).
+- [Rosstat](scrolls/russia/rosstat/)
+  - [Short-Term Economic Indicators of the Russian Federation](scrolls/russia/rosstat/short-term-economic-indicators/).
+  - [Social and Economic Situation of Russia](scrolls/russia/rosstat/social-economic-position-russia/).
+- [Stock market](scrolls/russia/stock-market/)
+  - [Moscow Exchange](scrolls/russia/stock-market/moex-exchange/) — index reviews, cumulative trading-volume data, bond-market secondary trading, market-wide trading results, and retail investor activity.
+  - [SPB Exchange](scrolls/russia/stock-market/spb-exchange/) — trading results.
 
 ## Scope
 
