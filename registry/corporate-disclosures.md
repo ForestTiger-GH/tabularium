@@ -1,18 +1,19 @@
 # Corporate disclosures registry
 
-This file is generated automatically from publication artifacts under `scrolls/russia/corporate-disclosures/`.
+This file is generated automatically from the corporate-disclosure source routes under `scrolls/russia/` and `scrolls/world/`.
 
-Rules:
+The registry has four independent sections. Report tables are latest-period navigational projections; strategy blocks are publication inventories and are not reduced to a latest-period view.
 
-- `scrolls/russia/corporate-disclosures/financial-reporting/ras-banks/` is excluded.
-- `scrolls/russia/corporate-disclosures/strategies/` is excluded because it is organized by publication date rather than reporting period.
-- Only `.md` and `.html` publication artifacts are included.
-- Publication filenames follow `<COMPANY>_<YYYYМ#>_<DOCUMENT_KIND>.{md,html}`.
-- The document kind is the literal filename suffix after the reporting period; it is not normalized or reinterpreted.
-- For each company and document kind, only the latest reporting period present in the repository is shown.
-- Document kinds whose latest artifacts share the same reporting period are shown together in one table cell.
+Generation rules:
 
-This registry is a navigational projection of repository contents. It does not assert semantic equivalence between documents or reporting perimeters.
+- Russian report identity follows `<COMPANY>_<YYYYМ#>_<DOCUMENT_KIND>.{md,html}`.
+- World report identity follows `<CC>_<ENTITY>_<YYYY-MM-DD>_<PUBLICATION-TYPE>[...].{md,html}`.
+- Strategy inventories use their publication-year directories and publication-date filenames; strategy or forecast horizon is not used as the registry year.
+- Control files are excluded. Strategy documents are listed separately from report tables.
+
+## 1. Russian company reports
+
+Included routes: Russian financial reporting, annual reports, and issuer reports. Bank of Russia `ras-banks` bridge material is excluded.
 
 | Company | Latest reporting period | Report type |
 |---|---:|---|
@@ -68,3 +69,24 @@ This registry is a navigational projection of repository contents. It does not a
 | ЭТАЛОН | 2026М6 | [МСФО](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/ЭТАЛОН_2026М6_МСФО.md) |
 | ЯНДЕКС | 2026М6 | [МСФО](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/ЯНДЕКС_2026М6_МСФО.md)<br>[ЭМИТЕНТ](../scrolls/russia/corporate-disclosures/issuer-reports/ЯНДЕКС_2026М6_ЭМИТЕНТ.md) |
 | ЯНДЕКС | 2025М12 | [ESG](../scrolls/russia/corporate-disclosures/annual-reports/ЯНДЕКС_2025М12_ESG.md)<br>[ГОДОВОЙ](../scrolls/russia/corporate-disclosures/annual-reports/ЯНДЕКС_2025М12_ГОДОВОЙ.md) |
+
+## 2. Russian strategic documents
+
+Grouped by source publication year, newest year first. The year is the publication year, not the strategy or forecast horizon.
+
+_No strategy documents are currently loaded._
+
+## 3. World company reports
+
+Included routes: world financial reporting and annual reports. Company identity retains the ISO country prefix used by the world corpus.
+
+| Company | Latest reporting period | Report type |
+|---|---:|---|
+
+## 4. World strategic documents
+
+Grouped by source publication year, newest year first. The year is the publication year, not the strategy or forecast horizon.
+
+_No strategy documents are currently loaded._
+
+This registry is a navigational projection of repository contents. It does not assert semantic equivalence between documents, reporting perimeters, strategy horizons, targets, forecasts, or outcomes.

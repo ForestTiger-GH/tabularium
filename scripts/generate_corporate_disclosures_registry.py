@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the latest corporate-disclosures registry for Tabularium."""
+"""Generate the corporate-disclosures registry for Tabularium."""
 
 from __future__ import annotations
 
@@ -8,18 +8,33 @@ import os
 import re
 import sys
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 
-CORPORATE_ROOT = Path("scrolls/russia/corporate-disclosures")
-EXCLUDED_ROOTS = (
-    CORPORATE_ROOT / "financial-reporting" / "ras-banks",
-    CORPORATE_ROOT / "strategies",
+RUSSIA_CORPORATE_ROOT = Path("scrolls/russia/corporate-disclosures")
+WORLD_CORPORATE_ROOT = Path("scrolls/world/corporate-disclosures")
+
+RUSSIA_REPORT_ROOTS = (
+    RUSSIA_CORPORATE_ROOT / "financial-reporting",
+    RUSSIA_CORPORATE_ROOT / "annual-reports",
+    RUSSIA_CORPORATE_ROOT / "issuer-reports",
 )
+RUSSIA_REPORT_EXCLUDED_ROOTS = (
+    RUSSIA_CORPORATE_ROOT / "financial-reporting" / "ras-banks",
+)
+WORLD_REPORT_ROOTS = (
+    WORLD_CORPORATE_ROOT / "financial-reporting",
+    WORLD_CORPORATE_ROOT / "annual-reports",
+)
+
+RUSSIA_STRATEGY_ROOT = RUSSIA_CORPORATE_ROOT / "strategies"
+WORLD_STRATEGY_ROOT = WORLD_CORPORATE_ROOT / "strategies"
+
 OUTPUT_PATH = Path("registry/corporate-disclosures.md")
 SUPPORTED_EXTENSIONS = {".md", ".html"}
 CONTROL_FILENAMES = {"README.md", "AGENTS.md"}
 
-FILENAME_RE = re.compile(
+RUSSIA_REPORT_FILENAME_RE = re.compile(
     r"^(?P<entity>.+?)_"
     r"(?P<year>\d{4})М(?P<month>1[0-2]|[1-9])_"
     r"(?P<kind>.+)\."
@@ -27,23 +42,50 @@ FILENAME_RE = re.compile(
     re.UNICODE,
 )
 
+WORLD_REPORT_FILENAME_RE = re.compile(
+    r"^(?P<country>[A-Z]{2})_"
+    r"(?P<entity>.+?)_"
+    r"(?P<period>\d{4}-\d{2}-\d{2})_"
+    r"(?P<kind>.+)\."
+    r"(?P<extension>md|html)$",
+    re.UNICODE,
+)
+
+RUSSIA_STRATEGY_FILENAME_RE = re.compile(
+    r"^(?P<entity>.+?)_"
+    r"(?P<publication_date>\d{4}(?:-\d{2}(?:-\d{2})?)?)_"
+    r"(?P<kind>.+)\."
+    r"(?P<extension>md|html)$",
+    re.UNICODE,
+)
+
+WORLD_STRATEGY_FILENAME_RE = re.compile(
+    r"^(?P<country>[A-Z]{2})_"
+    r"(?P<entity>.+?)_"
+    r"(?P<publication_date>\d{4}(?:-\d{2}(?:-\d{2})?)?)_"
+    r"(?P<kind>.+)\."
+    r"(?P<extension>md|html)$",
+    re.UNICODE,
+)
+
 
 @dataclass(frozen=True)
-class Artifact:
+class ReportArtifact:
     entity: str
-    year: int
-    month: int
+    period_label: str
+    period_key: tuple[int, int, int]
     kind: str
-    extension: str
     path: Path
 
-    @property
-    def period(self) -> str:
-        return f"{self.year}М{self.month}"
 
-    @property
-    def period_key(self) -> tuple[int, int]:
-        return (self.year, self.month)
+@dataclass(frozen=True)
+class StrategyArtifact:
+    entity: str
+    publication_year: int
+    publication_date: str
+    publication_key: tuple[int, int, int]
+    kind: str
+    path: Path
 
 
 def is_within(path: Path, parent: Path) -> bool:
@@ -54,73 +96,217 @@ def is_within(path: Path, parent: Path) -> bool:
         return False
 
 
-def discover_artifacts() -> list[Artifact]:
-    if not CORPORATE_ROOT.is_dir():
-        raise RuntimeError(f"Corporate disclosures root not found: {CORPORATE_ROOT}")
-
-    artifacts: list[Artifact] = []
-    malformed: list[Path] = []
-
-    for path in sorted(CORPORATE_ROOT.rglob("*"), key=lambda item: item.as_posix()):
+def iter_publication_files(root: Path):
+    if not root.is_dir():
+        return
+    for path in sorted(root.rglob("*"), key=lambda item: item.as_posix()):
         if not path.is_file():
-            continue
-        if any(is_within(path, root) for root in EXCLUDED_ROOTS):
-            continue
-        if path.suffix.lower() not in SUPPORTED_EXTENSIONS:
             continue
         if path.name in CONTROL_FILENAMES:
             continue
+        if path.suffix.lower() not in SUPPORTED_EXTENSIONS:
+            continue
+        yield path
 
-        match = FILENAME_RE.fullmatch(path.name)
+
+def discover_russia_reports() -> list[ReportArtifact]:
+    artifacts: list[ReportArtifact] = []
+    malformed: list[Path] = []
+
+    for root in RUSSIA_REPORT_ROOTS:
+        if not root.is_dir():
+            continue
+        for path in iter_publication_files(root):
+            if any(is_within(path, excluded) for excluded in RUSSIA_REPORT_EXCLUDED_ROOTS):
+                continue
+            match = RUSSIA_REPORT_FILENAME_RE.fullmatch(path.name)
+            if match is None:
+                malformed.append(path)
+                continue
+            year = int(match.group("year"))
+            month = int(match.group("month"))
+            artifacts.append(
+                ReportArtifact(
+                    entity=match.group("entity"),
+                    period_label=f"{year}М{month}",
+                    period_key=(year, month, 0),
+                    kind=match.group("kind"),
+                    path=path,
+                )
+            )
+
+    if malformed:
+        details = "\n".join(f"  - {path.as_posix()}" for path in malformed)
+        raise RuntimeError(
+            "Russian report files do not match "
+            "<COMPANY>_<YYYYМ#>_<DOCUMENT_KIND>.{md,html}:\n"
+            f"{details}"
+        )
+    return artifacts
+
+
+def discover_world_reports() -> list[ReportArtifact]:
+    artifacts: list[ReportArtifact] = []
+    malformed: list[Path] = []
+
+    for root in WORLD_REPORT_ROOTS:
+        if not root.is_dir():
+            continue
+        for path in iter_publication_files(root):
+            match = WORLD_REPORT_FILENAME_RE.fullmatch(path.name)
+            if match is None:
+                malformed.append(path)
+                continue
+            period = match.group("period")
+            try:
+                parsed = date.fromisoformat(period)
+            except ValueError:
+                malformed.append(path)
+                continue
+            artifacts.append(
+                ReportArtifact(
+                    entity=f"{match.group('country')}_{match.group('entity')}",
+                    period_label=period,
+                    period_key=(parsed.year, parsed.month, parsed.day),
+                    kind=match.group("kind"),
+                    path=path,
+                )
+            )
+
+    if malformed:
+        details = "\n".join(f"  - {path.as_posix()}" for path in malformed)
+        raise RuntimeError(
+            "World report files do not match "
+            "<CC>_<ENTITY>_<YYYY-MM-DD>_<PUBLICATION-TYPE>[...].{md,html}:\n"
+            f"{details}"
+        )
+    return artifacts
+
+
+def parse_partial_iso_date(value: str) -> tuple[int, int, int]:
+    parts = value.split("-")
+    year = int(parts[0])
+    month = int(parts[1]) if len(parts) >= 2 else 0
+    day = int(parts[2]) if len(parts) >= 3 else 0
+
+    if len(parts) == 1:
+        return (year, 0, 0)
+    if len(parts) == 2:
+        if not 1 <= month <= 12:
+            raise ValueError(value)
+        return (year, month, 0)
+
+    date(year, month, day)
+    return (year, month, day)
+
+
+def discover_strategies(
+    root: Path,
+    pattern: re.Pattern[str],
+    *,
+    world: bool,
+) -> list[StrategyArtifact]:
+    artifacts: list[StrategyArtifact] = []
+    malformed: list[Path] = []
+
+    if not root.is_dir():
+        return artifacts
+
+    for path in iter_publication_files(root):
+        try:
+            relative = path.relative_to(root)
+        except ValueError:
+            malformed.append(path)
+            continue
+
+        if len(relative.parts) < 2 or not relative.parts[0].isdigit():
+            malformed.append(path)
+            continue
+
+        directory_year = int(relative.parts[0])
+        match = pattern.fullmatch(path.name)
         if match is None:
             malformed.append(path)
             continue
 
+        publication_date = match.group("publication_date")
+        try:
+            publication_key = parse_partial_iso_date(publication_date)
+        except ValueError:
+            malformed.append(path)
+            continue
+
+        if publication_key[0] != directory_year:
+            malformed.append(path)
+            continue
+
+        entity = match.group("entity")
+        if world:
+            entity = f"{match.group('country')}_{entity}"
+
         artifacts.append(
-            Artifact(
-                entity=match.group("entity"),
-                year=int(match.group("year")),
-                month=int(match.group("month")),
+            StrategyArtifact(
+                entity=entity,
+                publication_year=directory_year,
+                publication_date=publication_date,
+                publication_key=publication_key,
                 kind=match.group("kind"),
-                extension=match.group("extension").lower(),
                 path=path,
             )
         )
 
     if malformed:
+        contract = (
+            "<CC>_<ENTITY>_<PUBLICATION-DATE>_<PUBLICATION-TYPE>[...].{md,html}"
+            if world
+            else "<ENTITY>_<PUBLICATION-DATE>_<DOCUMENT-KIND>[...].{md,html}"
+        )
         details = "\n".join(f"  - {path.as_posix()}" for path in malformed)
         raise RuntimeError(
-            "Found .md/.html files outside excluded routes that do not match the "
-            "corporate publication filename contract "
-            "<COMPANY>_<YYYYМ#>_<DOCUMENT_KIND>.{md,html}:\n"
+            f"Strategy files must sit under their publication-year directory and match "
+            f"{contract}; the filename publication year must equal the directory year:\n"
             f"{details}"
         )
-
-    if not artifacts:
-        raise RuntimeError("No corporate publication artifacts found.")
 
     return artifacts
 
 
-def validate_no_collisions(artifacts: list[Artifact]) -> None:
-    by_identity: dict[tuple[str, int, int, str], list[Artifact]] = {}
+def validate_report_collisions(artifacts: list[ReportArtifact], label: str) -> None:
+    by_identity: dict[tuple[str, tuple[int, int, int], str], list[ReportArtifact]] = {}
     for artifact in artifacts:
-        key = (artifact.entity, artifact.year, artifact.month, artifact.kind)
+        key = (artifact.entity, artifact.period_key, artifact.kind)
         by_identity.setdefault(key, []).append(artifact)
 
     collisions = {key: items for key, items in by_identity.items() if len(items) > 1}
     if not collisions:
         return
 
-    lines = ["Duplicate corporate publication identities detected:"]
-    for (entity, year, month, kind), items in sorted(collisions.items()):
-        lines.append(f"  - {entity}_{year}М{month}_{kind}")
+    lines = [f"Duplicate {label} report identities detected:"]
+    for (entity, _, kind), items in sorted(collisions.items()):
+        lines.append(f"  - {entity}: {kind}")
         lines.extend(f"      {item.path.as_posix()}" for item in items)
     raise RuntimeError("\n".join(lines))
 
 
-def select_latest(artifacts: list[Artifact]) -> list[Artifact]:
-    latest: dict[tuple[str, str], Artifact] = {}
+def validate_strategy_collisions(artifacts: list[StrategyArtifact], label: str) -> None:
+    by_identity: dict[tuple[str, str, str], list[StrategyArtifact]] = {}
+    for artifact in artifacts:
+        key = (artifact.entity, artifact.publication_date, artifact.kind)
+        by_identity.setdefault(key, []).append(artifact)
+
+    collisions = {key: items for key, items in by_identity.items() if len(items) > 1}
+    if not collisions:
+        return
+
+    lines = [f"Duplicate {label} strategy identities detected:"]
+    for (entity, publication_date, kind), items in sorted(collisions.items()):
+        lines.append(f"  - {entity}_{publication_date}_{kind}")
+        lines.extend(f"      {item.path.as_posix()}" for item in items)
+    raise RuntimeError("\n".join(lines))
+
+
+def select_latest_reports(artifacts: list[ReportArtifact]) -> list[ReportArtifact]:
+    latest: dict[tuple[str, str], ReportArtifact] = {}
     for artifact in artifacts:
         key = (artifact.entity, artifact.kind)
         current = latest.get(key)
@@ -137,62 +323,148 @@ def relative_link(path: Path) -> str:
     return Path(os.path.relpath(path, OUTPUT_PATH.parent)).as_posix()
 
 
-def render_registry(latest: list[Artifact]) -> str:
-    grouped: dict[tuple[str, int, int], list[Artifact]] = {}
+def render_report_table(artifacts: list[ReportArtifact]) -> list[str]:
+    latest = select_latest_reports(artifacts)
+    grouped: dict[tuple[str, str, tuple[int, int, int]], list[ReportArtifact]] = {}
     for artifact in latest:
-        key = (artifact.entity, artifact.year, artifact.month)
+        key = (artifact.entity, artifact.period_label, artifact.period_key)
         grouped.setdefault(key, []).append(artifact)
 
     rows = sorted(
         grouped.items(),
-        key=lambda item: (item[0][0].casefold(), -item[0][1], -item[0][2]),
+        key=lambda item: (item[0][0].casefold(), tuple(-v for v in item[0][2])),
     )
+
+    lines = [
+        "| Company | Latest reporting period | Report type |",
+        "|---|---:|---|",
+    ]
+    for (entity, period_label, _), items in rows:
+        docs = []
+        for artifact in sorted(items, key=lambda item: item.kind.casefold()):
+            label = escape_table_text(artifact.kind)
+            docs.append(f"[{label}]({relative_link(artifact.path)})")
+        lines.append(
+            f"| {escape_table_text(entity)} | {period_label} | "
+            f"{'<br>'.join(docs)} |"
+        )
+    return lines
+
+
+def render_strategy_block(artifacts: list[StrategyArtifact]) -> list[str]:
+    if not artifacts:
+        return ["_No strategy documents are currently loaded._"]
+
+    by_year: dict[int, list[StrategyArtifact]] = {}
+    for artifact in artifacts:
+        by_year.setdefault(artifact.publication_year, []).append(artifact)
+
+    lines: list[str] = []
+    for year in sorted(by_year, reverse=True):
+        items = sorted(
+            by_year[year],
+            key=lambda item: (
+                item.entity.casefold(),
+                tuple(-value for value in item.publication_key),
+                item.kind.casefold(),
+            ),
+        )
+        rendered = [
+            f"{escape_table_text(item.entity)} - "
+            f"[{escape_table_text(item.kind)}]({relative_link(item.path)})"
+            for item in items
+        ]
+        lines.append(f"- **{year}:** " + "; ".join(rendered))
+    return lines
+
+
+def generate() -> str:
+    russia_reports = discover_russia_reports()
+    world_reports = discover_world_reports()
+    russia_strategies = discover_strategies(
+        RUSSIA_STRATEGY_ROOT,
+        RUSSIA_STRATEGY_FILENAME_RE,
+        world=False,
+    )
+    world_strategies = discover_strategies(
+        WORLD_STRATEGY_ROOT,
+        WORLD_STRATEGY_FILENAME_RE,
+        world=True,
+    )
+
+    validate_report_collisions(russia_reports, "Russian")
+    validate_report_collisions(world_reports, "world")
+    validate_strategy_collisions(russia_strategies, "Russian")
+    validate_strategy_collisions(world_strategies, "world")
 
     lines = [
         "# Corporate disclosures registry",
         "",
-        "This file is generated automatically from publication artifacts under "
-        "`scrolls/russia/corporate-disclosures/`.",
+        "This file is generated automatically from the corporate-disclosure source "
+        "routes under `scrolls/russia/` and `scrolls/world/`.",
         "",
-        "Rules:",
+        "The registry has four independent sections. Report tables are latest-period "
+        "navigational projections; strategy blocks are publication inventories and are "
+        "not reduced to a latest-period view.",
         "",
-        "- `scrolls/russia/corporate-disclosures/financial-reporting/ras-banks/` is excluded.",
-        "- `scrolls/russia/corporate-disclosures/strategies/` is excluded because it is organized by publication date rather than reporting period.",
-        "- Only `.md` and `.html` publication artifacts are included.",
-        "- Publication filenames follow "
-        "`<COMPANY>_<YYYYМ#>_<DOCUMENT_KIND>.{md,html}`.",
-        "- The document kind is the literal filename suffix after the reporting period; "
-        "it is not normalized or reinterpreted.",
-        "- For each company and document kind, only the latest reporting period present "
-        "in the repository is shown.",
-        "- Document kinds whose latest artifacts share the same reporting period are "
-        "shown together in one table cell.",
+        "Generation rules:",
         "",
-        "This registry is a navigational projection of repository contents. It does not "
-        "assert semantic equivalence between documents or reporting perimeters.",
+        "- Russian report identity follows `<COMPANY>_<YYYYМ#>_<DOCUMENT_KIND>.{md,html}`.",
+        "- World report identity follows `<CC>_<ENTITY>_<YYYY-MM-DD>_<PUBLICATION-TYPE>[...].{md,html}`.",
+        "- Strategy inventories use their publication-year directories and publication-date filenames; "
+        "strategy or forecast horizon is not used as the registry year.",
+        "- Control files are excluded. Strategy documents are listed separately from report tables.",
         "",
-        "| Company | Latest reporting period | Report type |",
-        "|---|---:|---|",
+        "## 1. Russian company reports",
+        "",
+        "Included routes: Russian financial reporting, annual reports, and issuer reports. "
+        "Bank of Russia `ras-banks` bridge material is excluded.",
+        "",
     ]
-
-    for (entity, year, month), artifacts in rows:
-        docs = []
-        for artifact in sorted(artifacts, key=lambda item: item.kind.casefold()):
-            label = escape_table_text(artifact.kind)
-            docs.append(f"[{label}]({relative_link(artifact.path)})")
-        lines.append(
-            f"| {escape_table_text(entity)} | {year}М{month} | "
-            f"{'<br>'.join(docs)} |"
-        )
-
-    lines.append("")
+    lines.extend(render_report_table(russia_reports))
+    lines.extend(
+        [
+            "",
+            "## 2. Russian strategic documents",
+            "",
+            "Grouped by source publication year, newest year first. The year is the "
+            "publication year, not the strategy or forecast horizon.",
+            "",
+        ]
+    )
+    lines.extend(render_strategy_block(russia_strategies))
+    lines.extend(
+        [
+            "",
+            "## 3. World company reports",
+            "",
+            "Included routes: world financial reporting and annual reports. Company "
+            "identity retains the ISO country prefix used by the world corpus.",
+            "",
+        ]
+    )
+    lines.extend(render_report_table(world_reports))
+    lines.extend(
+        [
+            "",
+            "## 4. World strategic documents",
+            "",
+            "Grouped by source publication year, newest year first. The year is the "
+            "publication year, not the strategy or forecast horizon.",
+            "",
+        ]
+    )
+    lines.extend(render_strategy_block(world_strategies))
+    lines.extend(
+        [
+            "",
+            "This registry is a navigational projection of repository contents. It does "
+            "not assert semantic equivalence between documents, reporting perimeters, "
+            "strategy horizons, targets, forecasts, or outcomes.",
+            "",
+        ]
+    )
     return "\n".join(lines)
-
-
-def generate() -> str:
-    artifacts = discover_artifacts()
-    validate_no_collisions(artifacts)
-    return render_registry(select_latest(artifacts))
 
 
 def main() -> int:
