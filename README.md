@@ -8,7 +8,7 @@ Start from the source corpus.
 
 - [scrolls/](scrolls/) — authoritative primary-source corpus.
   - [russia/](scrolls/russia/) — Russian public-source corpus.
-  - [world/](scrolls/world/) — non-Russian corporate primary-source corpus.
+  - [world/](scrolls/world/) — non-Russian and international public-source corpus.
 
 ## Corpus map
 
@@ -30,6 +30,15 @@ This map lists populated material classes and documented remote-source bridge fa
 - [Stock market](scrolls/russia/stock-market/)
   - [Moscow Exchange](scrolls/russia/stock-market/moex-exchange/) — index reviews, cumulative trading-volume data, bond-market secondary trading, market-wide trading results, and retail investor activity.
   - [SPB Exchange](scrolls/russia/stock-market/spb-exchange/) — trading results.
+
+### World
+
+- [Corporate disclosures](scrolls/world/corporate-disclosures/)
+  - [Financial reporting](scrolls/world/corporate-disclosures/financial-reporting/) — non-Russian corporate financial statements and admitted financial-reporting filings, including SEC representations where applicable.
+  - [Annual reports](scrolls/world/corporate-disclosures/annual-reports/) — broad annual and integrated corporate reports.
+- [Stanford](scrolls/world/usa-stanford/) — admitted public-source publications from Stanford University and its units.
+- [McKinsey](scrolls/world/usa-mckinsey/) — admitted public publications from McKinsey & Company preserved as source objects of that publisher.
+- [ICCO](scrolls/world/icco/) — primary public publications of the International Cocoa Organization.
 
 ## Scope
 

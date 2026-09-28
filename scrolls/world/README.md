@@ -1,15 +1,19 @@
 # World
 
-Primary machine-readable corporate publications from reporting entities outside the Russian Federation.
+Primary machine-readable public-source publications outside the Russian route.
 
 ## Route
 
-- [financial-reporting/](financial-reporting/) — general-purpose annual, interim, and quarterly financial reporting and closely related statutory or regulatory financial filings whose principal evidentiary value is the financial statements.
-- [annual-reports/](annual-reports/) — broad annual or integrated corporate reports published as a distinct primary publication class.
+- [corporate-disclosures/](corporate-disclosures/) — non-Russian corporate financial reporting and annual-report publications.
+- [usa-stanford/](usa-stanford/) — admitted public-source publications from Stanford University and its units.
+- [usa-mckinsey/](usa-mckinsey/) — admitted public publications from McKinsey & Company preserved as source objects of that publisher.
+- [icco/](icco/) — primary public publications of the International Cocoa Organization.
 
-## Artifact identity
+Corporate disclosures are routed by publication class. Institution routes are used only where the publisher or institution is itself a durable source axis. Do not duplicate one source artifact across routes.
 
-World-corpus filenames should expose only the small set of source-identity fields that are useful for stable routing and human inspection. Richer attributes belong in registry metadata rather than in deeper directory trees.
+## Corporate artifact identity
+
+For artifacts under `corporate-disclosures/`, filenames should expose only the small set of source-identity fields useful for stable routing and human inspection. Richer attributes belong in registry metadata rather than in deeper directory trees.
 
 Preferred pattern:
 
@@ -46,50 +50,21 @@ CN_AGRICULTURAL-BANK-OF-CHINA
 
 Use the reporting-period end rather than the filing date, publication date, or fiscal-year label. This matters for issuers whose fiscal years do not end on a calendar month-end.
 
-For example, a fiscal 2026 report for a period ending 25 January 2026 uses:
-
-```text
-2026-01-25
-```
-
 Do not invent a day or period boundary that the source does not support.
 
 ### Publication type
 
-`<PUBLICATION-TYPE>` describes the primary publication or filing class, not the accounting framework.
-
-Use a short, source-recognizable token such as:
-
-```text
-ANNUAL
-INTERIM
-10-K
-20-F
-```
-
-A Form 10-K prepared under US GAAP therefore carries both concepts separately: `10-K` is the filing type; `US-GAAP` is the accounting framework.
+`<PUBLICATION-TYPE>` describes the primary publication or filing class, not the accounting framework. Use a short, source-recognizable token such as `ANNUAL`, `INTERIM`, `10-K`, or `20-F`.
 
 ### Accounting framework
 
-`<ACCOUNTING-FRAMEWORK>` is optional.
+`<ACCOUNTING-FRAMEWORK>` is optional. Include it only when the source supports an unambiguous framework classification useful for distinguishing the representation, for example `IFRS`, `EU-IFRS`, `US-GAAP`, `PRC-ASBE`, or `HKFRS`.
 
-Include it only when the source supports an unambiguous framework classification that is useful for distinguishing the representation, for example:
-
-```text
-IFRS
-EU-IFRS
-US-GAAP
-PRC-ASBE
-HKFRS
-```
-
-Do not force a single framework token onto a publication containing multiple accounting representations. In that case, omit the token from the filename and preserve the framework distinctions in the source representation and registry metadata.
+Do not force a single framework token onto a publication containing multiple accounting representations.
 
 ### Variant
 
-`<VARIANT>` is optional and should be used only when a source-level distinction is needed to distinguish otherwise colliding publications or representations.
-
-Examples include A-share versus H-share versions or another publisher-defined filing variant. Do not use variants to encode analytical classifications.
+`<VARIANT>` is optional and should be used only when a source-level distinction is needed to distinguish otherwise colliding publications or representations. Do not use variants to encode analytical classifications.
 
 ## Examples
 
@@ -104,14 +79,6 @@ GB_SHELL_2025-12-31_20-F_IFRS.html
 GB_SHELL_2025-12-31_ANNUAL.md
 ```
 
-These examples illustrate the intended separation of dimensions:
+SEC is a filing channel, not a separate physical source route for these corporate financial-reporting artifacts. An admitted SEC filing is stored once under `corporate-disclosures/financial-reporting/`.
 
-- the country prefix identifies the reporting entity's jurisdiction;
-- the period token preserves the actual reporting-period boundary;
-- the publication token identifies what the source publication is;
-- the accounting-framework token identifies how the financial statements are represented when that classification is unambiguous;
-- the optional variant distinguishes parallel source versions without creating another directory level.
-
-This keeps `scrolls/world/` physically flat while preserving enough identity in each filename for reliable intake, routing, registry generation, and later provenance checks.
-
-Do not create country, industry, or accounting-framework subdirectories here unless a real source class and an explicit repository-contract change require them. Preserve all source-fidelity, provenance, format, and publication-unit rules from the repository root.
+Do not create country, industry, or accounting-framework subdirectories inside `corporate-disclosures/` unless a real source class and an explicit repository-contract change require them. Source-institution routes may add stable publication-series subdirectories only when actual admitted publications require them. Preserve all source-fidelity, provenance, format, and publication-unit rules from the repository root.

@@ -26,6 +26,6 @@ When the user asks to process arrivals:
 
 For Russian corpus routes, use the naming contract documented by the applicable `scrolls/russia/` route.
 
-For non-Russian corporate publications under `scrolls/world/`, follow `scrolls/world/README.md`, including the reporting-entity jurisdiction prefix and actual reporting-period end date where applicable.
+For non-Russian corporate publications under `scrolls/world/corporate-disclosures/`, follow `scrolls/world/README.md`, including the reporting-entity jurisdiction prefix and actual reporting-period end date where applicable. For source-institution routes under `scrolls/world/`, follow the target route README and preserve the publisher, series, edition/date, version, and provenance supported by the source.
 
 The filename is an identity aid, not a substitute for source provenance. A successful move must preserve the distinction between source, representation, observation, derivation/bridge, and analytical claim.
