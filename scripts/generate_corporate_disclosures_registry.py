@@ -332,7 +332,7 @@ def render_report_table(artifacts: list[ReportArtifact]) -> list[str]:
 
     rows = sorted(
         grouped.items(),
-        key=lambda item: (item[0][0].casefold(), tuple(-v for v in item[0][2])),
+        key=lambda item: (item[0][0], tuple(-v for v in item[0][2])),
     )
 
     lines = [
@@ -341,7 +341,7 @@ def render_report_table(artifacts: list[ReportArtifact]) -> list[str]:
     ]
     for (entity, period_label, _), items in rows:
         docs = []
-        for artifact in sorted(items, key=lambda item: item.kind.casefold()):
+        for artifact in sorted(items, key=lambda item: item.kind):
             label = escape_table_text(artifact.kind)
             docs.append(f"[{label}]({relative_link(artifact.path)})")
         lines.append(
@@ -364,9 +364,9 @@ def render_strategy_block(artifacts: list[StrategyArtifact]) -> list[str]:
         items = sorted(
             by_year[year],
             key=lambda item: (
-                item.entity.casefold(),
+                item.entity,
                 tuple(-value for value in item.publication_key),
-                item.kind.casefold(),
+                item.kind,
             ),
         )
         rendered = [
