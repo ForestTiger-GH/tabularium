@@ -27,7 +27,8 @@ tabularium is a public, source-faithful corpus of machine-readable primary publi
 - scrolls/russia/authorities/ministry-of-economic-development/
 - scrolls/russia/authorities/rosstat/
 - scrolls/russia/surveys/dom-rf-analytics/largest-mortgage-banks-results/
-- scrolls/russia/surveys/stock-market/{moex-exchange,spb-exchange}/
+- scrolls/russia/surveys/moex-exchange/
+- scrolls/russia/surveys/spb-exchange/
 - scrolls/world/corporate-disclosures/{financial-reporting,annual-reports}/
 - scrolls/world/corporate-disclosures/strategies/{2024,2025,2026}/
 - scrolls/world/authorities/

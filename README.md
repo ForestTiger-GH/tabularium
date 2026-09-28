@@ -32,9 +32,8 @@ This map lists populated material classes and documented source routes.
 - [Surveys](scrolls/russia/surveys/)
   - [DOM.RF Analytics](scrolls/russia/surveys/dom-rf-analytics/)
     - [Largest Mortgage Banks Results](scrolls/russia/surveys/dom-rf-analytics/largest-mortgage-banks-results/).
-  - [Stock market](scrolls/russia/surveys/stock-market/)
-    - [Moscow Exchange](scrolls/russia/surveys/stock-market/moex-exchange/) — index reviews, cumulative trading-volume data, bond-market secondary trading, market-wide trading results, and retail investor activity.
-    - [SPB Exchange](scrolls/russia/surveys/stock-market/spb-exchange/) — trading results.
+  - [Moscow Exchange](scrolls/russia/surveys/moex-exchange/) — index reviews, cumulative trading-volume data, bond-market secondary trading, market-wide trading results, and retail investor activity.
+  - [SPB Exchange](scrolls/russia/surveys/spb-exchange/) — trading results.
 
 ### World
 

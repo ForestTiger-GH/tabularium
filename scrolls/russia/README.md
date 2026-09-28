@@ -11,4 +11,5 @@ Primary machine-readable publications for the Russian Federation.
   - [`rosstat/`](authorities/rosstat/) — primary recurring publications issued by Rosstat.
 - [`surveys/`](surveys/) — admitted analytical, research, statistical, and market-survey publication routes.
   - [`dom-rf-analytics/`](surveys/dom-rf-analytics/) — primary recurring analytical publications issued by DOM.RF Analytics.
-  - [`stock-market/`](surveys/stock-market/) — recurring publications from Russian stock exchanges, with documented historical preservation proxies where original exchange publications are no longer publicly available.
+  - [`moex-exchange/`](surveys/moex-exchange/) — recurring publications from Moscow Exchange.
+  - [`spb-exchange/`](surveys/spb-exchange/) — recurring SPB Exchange trading-results materials, including documented historical preservation proxies where original exchange publications are no longer publicly available.
