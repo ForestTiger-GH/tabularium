@@ -5,11 +5,13 @@ Primary machine-readable public-source publications outside the Russian route.
 ## Route
 
 - [corporate-disclosures/](corporate-disclosures/) — non-Russian corporate financial reporting, annual-report, and standalone strategy or forward-looking publications.
-- [usa-stanford/](usa-stanford/) — admitted public-source publications from Stanford University and its units.
-- [usa-mckinsey/](usa-mckinsey/) — admitted public publications from McKinsey & Company preserved as source objects of that publisher.
-- [icco/](icco/) — primary public publications of the International Cocoa Organization.
+- [authorities/](authorities/) — publications from non-Russian and international public authorities, central banks, statistical agencies, regulators, and similar public bodies.
+- [surveys/](surveys/) — admitted analytical, research, statistical, and market-survey publication routes.
+  - [usa-stanford/](surveys/usa-stanford/) — admitted public-source publications from Stanford University and its units.
+  - [usa-mckinsey/](surveys/usa-mckinsey/) — admitted public publications from McKinsey & Company preserved as source objects of that publisher.
+  - [icco/](surveys/icco/) — primary public publications of the International Cocoa Organization.
 
-Corporate disclosures are routed by publication class. Institution routes are used only where the publisher or institution is itself a durable source axis. Do not duplicate one source artifact across routes.
+Corporate disclosures are routed by publication class. Public-authority publications are routed under `authorities/`; admitted research and survey publishers are routed under `surveys/`. Within those containers, institution routes are used where the publisher or institution is itself a durable source axis. Do not duplicate one source artifact across routes.
 
 ## Financial and annual-report artifact identity
 

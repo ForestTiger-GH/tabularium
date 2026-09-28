@@ -12,7 +12,7 @@ Start from the source corpus.
 
 ## Corpus map
 
-This map lists populated material classes and documented remote-source bridge families.
+This map lists populated material classes and documented source routes.
 
 ### Russia
 
@@ -21,16 +21,20 @@ This map lists populated material classes and documented remote-source bridge fa
   - [Annual reports](scrolls/russia/corporate-disclosures/annual-reports/).
   - [Issuer reports](scrolls/russia/corporate-disclosures/issuer-reports/).
   - [Strategies](scrolls/russia/corporate-disclosures/strategies/) — standalone corporate strategy, development-plan, guidance, outlook, and forecast publications, grouped by publication year.
-- [Bank of Russia](scrolls/russia/bank-of-russia/)
-  - [Medium-Term Forecast](scrolls/russia/bank-of-russia/medium-term-forecast/).
-- [DOM.RF Analytics](scrolls/russia/dom-rf-analytics/)
-  - [Largest Mortgage Banks Results](scrolls/russia/dom-rf-analytics/largest-mortgage-banks-results/).
-- [Rosstat](scrolls/russia/rosstat/)
-  - [Short-Term Economic Indicators of the Russian Federation](scrolls/russia/rosstat/short-term-economic-indicators/).
-  - [Social and Economic Situation of Russia](scrolls/russia/rosstat/social-economic-position-russia/).
-- [Stock market](scrolls/russia/stock-market/)
-  - [Moscow Exchange](scrolls/russia/stock-market/moex-exchange/) — index reviews, cumulative trading-volume data, bond-market secondary trading, market-wide trading results, and retail investor activity.
-  - [SPB Exchange](scrolls/russia/stock-market/spb-exchange/) — trading results.
+- [Authorities](scrolls/russia/authorities/)
+  - [Bank of Russia](scrolls/russia/authorities/bank-of-russia/)
+    - [Medium-Term Forecast](scrolls/russia/authorities/bank-of-russia/medium-term-forecast/).
+  - [Ministry of Economic Development](scrolls/russia/authorities/ministry-of-economic-development/)
+    - [Socio-Economic Development Forecast](scrolls/russia/authorities/ministry-of-economic-development/socio-economic-development-forecast/).
+  - [Rosstat](scrolls/russia/authorities/rosstat/)
+    - [Short-Term Economic Indicators of the Russian Federation](scrolls/russia/authorities/rosstat/short-term-economic-indicators/).
+    - [Social and Economic Situation of Russia](scrolls/russia/authorities/rosstat/social-economic-position-russia/).
+- [Surveys](scrolls/russia/surveys/)
+  - [DOM.RF Analytics](scrolls/russia/surveys/dom-rf-analytics/)
+    - [Largest Mortgage Banks Results](scrolls/russia/surveys/dom-rf-analytics/largest-mortgage-banks-results/).
+  - [Stock market](scrolls/russia/surveys/stock-market/)
+    - [Moscow Exchange](scrolls/russia/surveys/stock-market/moex-exchange/) — index reviews, cumulative trading-volume data, bond-market secondary trading, market-wide trading results, and retail investor activity.
+    - [SPB Exchange](scrolls/russia/surveys/stock-market/spb-exchange/) — trading results.
 
 ### World
 
@@ -38,9 +42,11 @@ This map lists populated material classes and documented remote-source bridge fa
   - [Financial reporting](scrolls/world/corporate-disclosures/financial-reporting/) — non-Russian corporate financial statements and admitted financial-reporting filings, including SEC representations where applicable.
   - [Annual reports](scrolls/world/corporate-disclosures/annual-reports/) — broad annual and integrated corporate reports.
   - [Strategies](scrolls/world/corporate-disclosures/strategies/) — standalone corporate strategy, development-plan, guidance, outlook, and forecast publications, grouped by publication year.
-- [Stanford](scrolls/world/usa-stanford/) — admitted public-source publications from Stanford University and its units.
-- [McKinsey](scrolls/world/usa-mckinsey/) — admitted public publications from McKinsey & Company preserved as source objects of that publisher.
-- [ICCO](scrolls/world/icco/) — primary public publications of the International Cocoa Organization.
+- [Authorities](scrolls/world/authorities/) — publications from non-Russian and international public authorities, central banks, statistical agencies, regulators, and similar public bodies.
+- [Surveys](scrolls/world/surveys/)
+  - [Stanford](scrolls/world/surveys/usa-stanford/) — admitted public-source publications from Stanford University and its units.
+  - [McKinsey](scrolls/world/surveys/usa-mckinsey/) — admitted public publications from McKinsey & Company preserved as source objects of that publisher.
+  - [ICCO](scrolls/world/surveys/icco/) — primary public publications of the International Cocoa Organization.
 
 ## Scope
 
