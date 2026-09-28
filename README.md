@@ -40,8 +40,10 @@ Analytical work, derived calculations, commentary, and private/internal material
 
 When an original primary publication is no longer publicly accessible, an explicitly documented third-party preservation proxy may be retained to preserve the historical record. Such a proxy must retain its actual provenance and must not be represented as the unavailable primary-source original.
 
+## Data verification notice
+
 > [!WARNING]
-> **Data quality notice.** Tabularium is a source-faithful research corpus and may contain transcription, extraction, parsing, conversion, or source-level errors. Do not rely on the repository as the sole source for material decisions. Verify important information against the original primary source.
+> Tabularium is a source-faithful research corpus and may contain transcription, extraction, parsing, conversion, or source-level errors. Do not rely on the repository as the sole source for material decisions. Verify important information against the original primary source.
 
 ## Licensing
 
