@@ -8,6 +8,7 @@ This workspace is outside the public-source corpus under `russia/`. Research mat
 
 ## Route
 
+- [`_arrivals/`](_arrivals/) — temporary intake staging for newly added source files awaiting identification, naming, conversion where required, and routing into the authoritative corpus.
 - [`research/`](research/) — bounded studies and exploratory engineering work.
 
 Use the current MADARAII `FOUNDATION`, `MADARAII-01`, and `MADARAII-02` as the organizational basis. Add physical structure only when a real responsibility requires it.
