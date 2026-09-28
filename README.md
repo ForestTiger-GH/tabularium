@@ -8,6 +8,7 @@ Start from the source corpus.
 
 - [scrolls/](scrolls/) — authoritative primary-source corpus.
   - [russia/](scrolls/russia/) — Russian public-source corpus.
+  - [world/](scrolls/world/) — non-Russian corporate primary-source corpus.
 
 ## Corpus map
 
