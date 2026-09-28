@@ -4,16 +4,18 @@ Primary machine-readable public-source publications outside the Russian route.
 
 ## Route
 
-- [corporate-disclosures/](corporate-disclosures/) — non-Russian corporate financial reporting and annual-report publications.
+- [corporate-disclosures/](corporate-disclosures/) — non-Russian corporate financial reporting, annual-report, and standalone strategy or forward-looking publications.
 - [usa-stanford/](usa-stanford/) — admitted public-source publications from Stanford University and its units.
 - [usa-mckinsey/](usa-mckinsey/) — admitted public publications from McKinsey & Company preserved as source objects of that publisher.
 - [icco/](icco/) — primary public publications of the International Cocoa Organization.
 
 Corporate disclosures are routed by publication class. Institution routes are used only where the publisher or institution is itself a durable source axis. Do not duplicate one source artifact across routes.
 
-## Corporate artifact identity
+## Financial and annual-report artifact identity
 
-For artifacts under `corporate-disclosures/`, filenames should expose only the small set of source-identity fields useful for stable routing and human inspection. Richer attributes belong in registry metadata rather than in deeper directory trees.
+For artifacts under `corporate-disclosures/financial-reporting/` and `corporate-disclosures/annual-reports/`, filenames should expose only the small set of source-identity fields useful for stable routing and human inspection. Richer attributes belong in registry metadata rather than in deeper directory trees.
+
+Artifacts under `corporate-disclosures/strategies/` use publication-date identity instead; follow that route's README. A strategy horizon or target year must never substitute for the source publication date.
 
 Preferred pattern:
 

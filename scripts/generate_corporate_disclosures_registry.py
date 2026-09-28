@@ -11,7 +11,10 @@ from dataclasses import dataclass
 from pathlib import Path
 
 CORPORATE_ROOT = Path("scrolls/russia/corporate-disclosures")
-EXCLUDED_ROOT = CORPORATE_ROOT / "financial-reporting" / "ras-banks"
+EXCLUDED_ROOTS = (
+    CORPORATE_ROOT / "financial-reporting" / "ras-banks",
+    CORPORATE_ROOT / "strategies",
+)
 OUTPUT_PATH = Path("registry/corporate-disclosures.md")
 SUPPORTED_EXTENSIONS = {".md", ".html"}
 CONTROL_FILENAMES = {"README.md", "AGENTS.md"}
@@ -61,7 +64,7 @@ def discover_artifacts() -> list[Artifact]:
     for path in sorted(CORPORATE_ROOT.rglob("*"), key=lambda item: item.as_posix()):
         if not path.is_file():
             continue
-        if is_within(path, EXCLUDED_ROOT):
+        if any(is_within(path, root) for root in EXCLUDED_ROOTS):
             continue
         if path.suffix.lower() not in SUPPORTED_EXTENSIONS:
             continue
@@ -87,7 +90,7 @@ def discover_artifacts() -> list[Artifact]:
     if malformed:
         details = "\n".join(f"  - {path.as_posix()}" for path in malformed)
         raise RuntimeError(
-            "Found .md/.html files outside ras-banks that do not match the "
+            "Found .md/.html files outside excluded routes that do not match the "
             "corporate publication filename contract "
             "<COMPANY>_<YYYYМ#>_<DOCUMENT_KIND>.{md,html}:\n"
             f"{details}"
@@ -154,6 +157,7 @@ def render_registry(latest: list[Artifact]) -> str:
         "Rules:",
         "",
         "- `scrolls/russia/corporate-disclosures/financial-reporting/ras-banks/` is excluded.",
+        "- `scrolls/russia/corporate-disclosures/strategies/` is excluded because it is organized by publication date rather than reporting period.",
         "- Only `.md` and `.html` publication artifacts are included.",
         "- Publication filenames follow "
         "`<COMPANY>_<YYYYМ#>_<DOCUMENT_KIND>.{md,html}`.",

@@ -4,7 +4,7 @@ Primary machine-readable publications for the Russian Federation.
 
 ## Route
 
-- [`corporate-disclosures/`](corporate-disclosures/) — corporate financial reporting, annual reports, and periodic issuer reports.
+- [`corporate-disclosures/`](corporate-disclosures/) — corporate financial reporting, annual reports, periodic issuer reports, and standalone strategy or forward-looking publications.
 - [`dom-rf-analytics/`](dom-rf-analytics/) — primary recurring analytical publications issued by DOM.RF Analytics.
 - [`rosstat/`](rosstat/) — primary recurring publications issued by Rosstat.
 - [`bank-of-russia/`](bank-of-russia/) — primary recurring publications issued by the Bank of Russia.

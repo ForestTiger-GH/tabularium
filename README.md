@@ -20,6 +20,7 @@ This map lists populated material classes and documented remote-source bridge fa
   - [Financial reporting](scrolls/russia/corporate-disclosures/financial-reporting/) — IFRS, Russian Accounting Standards reporting, and Bank of Russia regulatory bank-reporting bridges.
   - [Annual reports](scrolls/russia/corporate-disclosures/annual-reports/).
   - [Issuer reports](scrolls/russia/corporate-disclosures/issuer-reports/).
+  - [Strategies](scrolls/russia/corporate-disclosures/strategies/) — standalone corporate strategy, development-plan, guidance, outlook, and forecast publications, grouped by publication year.
 - [Bank of Russia](scrolls/russia/bank-of-russia/)
   - [Medium-Term Forecast](scrolls/russia/bank-of-russia/medium-term-forecast/).
 - [DOM.RF Analytics](scrolls/russia/dom-rf-analytics/)
@@ -36,6 +37,7 @@ This map lists populated material classes and documented remote-source bridge fa
 - [Corporate disclosures](scrolls/world/corporate-disclosures/)
   - [Financial reporting](scrolls/world/corporate-disclosures/financial-reporting/) — non-Russian corporate financial statements and admitted financial-reporting filings, including SEC representations where applicable.
   - [Annual reports](scrolls/world/corporate-disclosures/annual-reports/) — broad annual and integrated corporate reports.
+  - [Strategies](scrolls/world/corporate-disclosures/strategies/) — standalone corporate strategy, development-plan, guidance, outlook, and forecast publications, grouped by publication year.
 - [Stanford](scrolls/world/usa-stanford/) — admitted public-source publications from Stanford University and its units.
 - [McKinsey](scrolls/world/usa-mckinsey/) — admitted public publications from McKinsey & Company preserved as source objects of that publisher.
 - [ICCO](scrolls/world/icco/) — primary public publications of the International Cocoa Organization.

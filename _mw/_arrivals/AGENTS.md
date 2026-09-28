@@ -28,4 +28,6 @@ For Russian corpus routes, use the naming contract documented by the applicable 
 
 For non-Russian corporate publications under `scrolls/world/corporate-disclosures/`, follow `scrolls/world/README.md`, including the reporting-entity jurisdiction prefix and actual reporting-period end date where applicable. For source-institution routes under `scrolls/world/`, follow the target route README and preserve the publisher, series, edition/date, version, and provenance supported by the source.
 
+For corporate strategy and forward-looking publications routed to `strategies/`, use the year of public publication or release for the year directory. Do not use the strategy horizon, target year, reporting period, or approval year as a substitute for publication year unless they are in fact the same source-supported publication date.
+
 The filename is an identity aid, not a substitute for source provenance. A successful move must preserve the distinction between source, representation, observation, derivation/bridge, and analytical claim.

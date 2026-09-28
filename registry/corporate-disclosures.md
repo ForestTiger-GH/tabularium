@@ -5,6 +5,7 @@ This file is generated automatically from publication artifacts under `scrolls/r
 Rules:
 
 - `scrolls/russia/corporate-disclosures/financial-reporting/ras-banks/` is excluded.
+- `scrolls/russia/corporate-disclosures/strategies/` is excluded because it is organized by publication date rather than reporting period.
 - Only `.md` and `.html` publication artifacts are included.
 - Publication filenames follow `<COMPANY>_<YYYYМ#>_<DOCUMENT_KIND>.{md,html}`.
 - The document kind is the literal filename suffix after the reporting period; it is not normalized or reinterpreted.

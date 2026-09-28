@@ -22,12 +22,14 @@ tabularium is a public, source-faithful corpus of machine-readable primary publi
 
 - scrolls/russia/corporate-disclosures/financial-reporting/{ifrs,ras,ras-banks}/
 - scrolls/russia/corporate-disclosures/{annual-reports,issuer-reports}/
+- scrolls/russia/corporate-disclosures/strategies/{2024,2025,2026}/
 - scrolls/russia/dom-rf-analytics/largest-mortgage-banks-results/
 - scrolls/russia/rosstat/
 - scrolls/russia/bank-of-russia/
 - scrolls/russia/ministry-of-economic-development/
 - scrolls/russia/stock-market/{moex-exchange,spb-exchange}/
 - scrolls/world/corporate-disclosures/{financial-reporting,annual-reports}/
+- scrolls/world/corporate-disclosures/strategies/{2024,2025,2026}/
 - scrolls/world/{usa-stanford,usa-mckinsey,icco}/
 
 ## Out of scope
