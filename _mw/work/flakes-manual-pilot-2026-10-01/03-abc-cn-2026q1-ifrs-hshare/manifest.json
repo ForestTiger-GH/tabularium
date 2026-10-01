@@ -17,14 +17,28 @@
     "language": "en"
   },
   "scope": {
-    "mode": "sampled_blocks",
-    "pages": [
-      2,
-      7,
-      8,
-      9
-    ],
-    "purpose": "test compact IFRS data, narrative/table duplicates, business dimensions, regulatory ratios and basis overrides",
-    "full_report_extraction_complete": false
+    "mode": "full_document_profiled_manual_pass",
+    "pages": "1-16",
+    "extraction_profile": {
+      "id": "financial_core_v0",
+      "include": [
+        "financial statements and comparative columns",
+        "summary financial indicators",
+        "financial performance and balance-sheet narrative",
+        "asset quality",
+        "regulatory capital and liquidity ratios",
+        "dividend events and quantitative parameters",
+        "accounting-basis and comparability assertions"
+      ],
+      "exclude_with_explicit_coverage": [
+        "shareholder register detail and individual top-holder positions",
+        "contact details, stock codes and document identifiers",
+        "director roster"
+      ]
+    },
+    "purpose": "test complete block coverage for one entire report under an explicit financial-core profile",
+    "full_report_block_coverage_complete": true,
+    "all_numeric_candidates_profile": false,
+    "note": "Complete means every page/block has an explicit status under financial_core_v0; it does not mean every number in excluded shareholder-register/identifier material was promoted to an observation."
   }
 }
