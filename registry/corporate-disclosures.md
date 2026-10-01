@@ -21,6 +21,10 @@ Included routes: Russian financial reporting, annual reports, and issuer reports
 | АКБАРС | 2025М12 | [ГОДОВОЙ](../scrolls/russia/corporate-disclosures/annual-reports/АКБАРС_2025М12_ГОДОВОЙ.md) |
 | АЛЬФАБАНК | 2026М6 | [МСФО](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/АЛЬФАБАНК_2026М6_МСФО.md)<br>[РСБУ](../scrolls/russia/corporate-disclosures/financial-reporting/ras/АЛЬФАБАНК_2026М6_РСБУ.md) |
 | АЛЬФАБАНК | 2025М12 | [ГОДОВОЙ](../scrolls/russia/corporate-disclosures/annual-reports/АЛЬФАБАНК_2025М12_ГОДОВОЙ.md)<br>[ГОДОВОЙ_ESG](../scrolls/russia/corporate-disclosures/annual-reports/АЛЬФАБАНК_2025М12_ГОДОВОЙ_ESG.md)<br>[ЭМИТЕНТ](../scrolls/russia/corporate-disclosures/issuer-reports/АЛЬФАБАНК_2025М12_ЭМИТЕНТ.md) |
+| АФКСИСТЕМА | 2026М6 | [МСФО](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/АФКСИСТЕМА_2026М6_МСФО.md)<br>[МСФО_ПРЕЗ](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/АФКСИСТЕМА_2026М6_МСФО_ПРЕЗ.md)<br>[МСФО_РЕЛИЗ](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/АФКСИСТЕМА_2026М6_МСФО_РЕЛИЗ.md) |
+| АФКСИСТЕМА | 2025М12 | [ESG](../scrolls/russia/corporate-disclosures/annual-reports/АФКСИСТЕМА_2025М12_ESG.md)<br>[ГОДОВОЙ](../scrolls/russia/corporate-disclosures/annual-reports/АФКСИСТЕМА_2025М12_ГОДОВОЙ.md)<br>[ЭМИТЕНТ](../scrolls/russia/corporate-disclosures/issuer-reports/АФКСИСТЕМА_2025М12_ЭМИТЕНТ.md) |
+| АЭРОФЛОТ | 2026М6 | [МСФО](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/АЭРОФЛОТ_2026М6_МСФО.md)<br>[МСФО_ПРЕЗ](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/АЭРОФЛОТ_2026М6_МСФО_ПРЕЗ.md)<br>[МСФО_РЕЛИЗ](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/АЭРОФЛОТ_2026М6_МСФО_РЕЛИЗ.md) |
+| АЭРОФЛОТ | 2025М12 | [ГОДОВОЙ](../scrolls/russia/corporate-disclosures/annual-reports/АЭРОФЛОТ_2025М12_ГОДОВОЙ.md)<br>[ЭМИТЕНТ](../scrolls/russia/corporate-disclosures/issuer-reports/АЭРОФЛОТ_2025М12_ЭМИТЕНТ.md) |
 | БАНКДОМРФ | 2026М6 | [МСФО](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/БАНКДОМРФ_2026М6_МСФО.md)<br>[МСФО_ПРЕЗ](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/БАНКДОМРФ_2026М6_МСФО_ПРЕЗ.md)<br>[РСБУ](../scrolls/russia/corporate-disclosures/financial-reporting/ras/БАНКДОМРФ_2026М6_РСБУ.md)<br>[ЭМИТЕНТ](../scrolls/russia/corporate-disclosures/issuer-reports/БАНКДОМРФ_2026М6_ЭМИТЕНТ.md) |
 | БАНКДОМРФ | 2025М12 | [ГОДОВОЙ](../scrolls/russia/corporate-disclosures/annual-reports/БАНКДОМРФ_2025М12_ГОДОВОЙ.md) |
 | БАНКДОМРФ | 2024М12 | [ESG](../scrolls/russia/corporate-disclosures/annual-reports/БАНКДОМРФ_2024М12_ESG.md) |
@@ -28,6 +32,7 @@ Included routes: Russian financial reporting, annual reports, and issuer reports
 | БСПБ | 2025М12 | [ГОДОВОЙ](../scrolls/russia/corporate-disclosures/annual-reports/БСПБ_2025М12_ГОДОВОЙ.md) |
 | ВАЙЛДБЕРРИЗ | 2024М12 | [РСБУ](../scrolls/russia/corporate-disclosures/financial-reporting/ras/ВАЙЛДБЕРРИЗ_2024М12_РСБУ.md) |
 | ВАЙЛДБЕРРИЗ | 2023М12 | [РСБУ_КОММЕНТ](../scrolls/russia/corporate-disclosures/financial-reporting/ras/ВАЙЛДБЕРРИЗ_2023М12_РСБУ_КОММЕНТ.md) |
+| ВББАНК | 2026М6 | [РСБУ](../scrolls/russia/corporate-disclosures/financial-reporting/ras/ВББАНК_2026М6_РСБУ.md) |
 | ВБРР | 2026М6 | [МСФО](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/ВБРР_2026М6_МСФО.md) |
 | ВБРР | 2025М6 | [ЭМИТЕНТ](../scrolls/russia/corporate-disclosures/issuer-reports/ВБРР_2025М6_ЭМИТЕНТ.md) |
 | ВБРР | 2020М12 | [ГОДОВОЙ](../scrolls/russia/corporate-disclosures/annual-reports/ВБРР_2020М12_ГОДОВОЙ.md) |
@@ -41,6 +46,8 @@ Included routes: Russian financial reporting, annual reports, and issuer reports
 | ДОМРФ | 2026М6 | [МСФО](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/ДОМРФ_2026М6_МСФО.md)<br>[МСФО_ПРЕЗ](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/ДОМРФ_2026М6_МСФО_ПРЕЗ.md)<br>[ЭМИТЕНТ](../scrolls/russia/corporate-disclosures/issuer-reports/ДОМРФ_2026М6_ЭМИТЕНТ.md) |
 | ДОМРФ | 2025М12 | [ГОДОВОЙ](../scrolls/russia/corporate-disclosures/annual-reports/ДОМРФ_2025М12_ГОДОВОЙ.md) |
 | ДОМРФ | 2024М12 | [ESG](../scrolls/russia/corporate-disclosures/annual-reports/ДОМРФ_2024М12_ESG.md) |
+| ИКС5 | 2026М6 | [МСФО](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/ИКС5_2026М6_МСФО.md)<br>[ЭМИТЕНТ](../scrolls/russia/corporate-disclosures/issuer-reports/ИКС5_2026М6_ЭМИТЕНТ.md) |
+| ИКС5 | 2025М12 | [ГОДОВОЙ](../scrolls/russia/corporate-disclosures/annual-reports/ИКС5_2025М12_ГОДОВОЙ.md) |
 | ЛСР | 2026М6 | [МСФО](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/ЛСР_2026М6_МСФО.md) |
 | МКБ | 2026М6 | [МСФО](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/МКБ_2026М6_МСФО.md)<br>[РСБУ](../scrolls/russia/corporate-disclosures/financial-reporting/ras/МКБ_2026М6_РСБУ.md) |
 | МКБ | 2025М12 | [ГОДОВОЙ](../scrolls/russia/corporate-disclosures/annual-reports/МКБ_2025М12_ГОДОВОЙ.md)<br>[ГОДОВОЙ_ПРЕЗ](../scrolls/russia/corporate-disclosures/annual-reports/МКБ_2025М12_ГОДОВОЙ_ПРЕЗ.md)<br>[ЭМИТЕНТ](../scrolls/russia/corporate-disclosures/issuer-reports/МКБ_2025М12_ЭМИТЕНТ.md) |
@@ -53,7 +60,10 @@ Included routes: Russian financial reporting, annual reports, and issuer reports
 | МТС | 2025М12 | [ESG](../scrolls/russia/corporate-disclosures/annual-reports/МТС_2025М12_ESG.md)<br>[ГОДОВОЙ](../scrolls/russia/corporate-disclosures/annual-reports/МТС_2025М12_ГОДОВОЙ.md)<br>[ЭМИТЕНТ](../scrolls/russia/corporate-disclosures/issuer-reports/МТС_2025М12_ЭМИТЕНТ.md) |
 | МТСБАНК | 2026М6 | [МСФО](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/МТСБАНК_2026М6_МСФО.md)<br>[РСБУ](../scrolls/russia/corporate-disclosures/financial-reporting/ras/МТСБАНК_2026М6_РСБУ.md)<br>[ЭМИТЕНТ](../scrolls/russia/corporate-disclosures/issuer-reports/МТСБАНК_2026М6_ЭМИТЕНТ.md) |
 | МТСБАНК | 2025М12 | [ГОДОВОЙ](../scrolls/russia/corporate-disclosures/annual-reports/МТСБАНК_2025М12_ГОДОВОЙ.md) |
-| ОЗОН | 2026М6 | [МСФО](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/ОЗОН_2026М6_МСФО.md)<br>[МСФО_ПРЕЗ](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/ОЗОН_2026М6_МСФО_ПРЕЗ.md)<br>[ЭМИТЕНТ](../scrolls/russia/corporate-disclosures/issuer-reports/ОЗОН_2026М6_ЭМИТЕНТ.md) |
+| ОАК | 2026М6 | [МСФО](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/ОАК_2026М6_МСФО.md) |
+| ОАК | 2025М12 | [ЭМИТЕНТ](../scrolls/russia/corporate-disclosures/issuer-reports/ОАК_2025М12_ЭМИТЕНТ.md) |
+| ОАК | 2024М12 | [ГОДОВОЙ](../scrolls/russia/corporate-disclosures/annual-reports/ОАК_2024М12_ГОДОВОЙ.md) |
+| ОЗОН | 2026М6 | [МСФО](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/ОЗОН_2026М6_МСФО.md)<br>[МСФО_ПРЕЗ](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/ОЗОН_2026М6_МСФО_ПРЕЗ.md)<br>[РСБУ](../scrolls/russia/corporate-disclosures/financial-reporting/ras/ОЗОН_2026М6_РСБУ.md)<br>[ЭМИТЕНТ](../scrolls/russia/corporate-disclosures/issuer-reports/ОЗОН_2026М6_ЭМИТЕНТ.md) |
 | ОЗОН | 2025М12 | [ГОДОВОЙ](../scrolls/russia/corporate-disclosures/annual-reports/ОЗОН_2025М12_ГОДОВОЙ.md) |
 | ОЗОНБАНК | 2026М6 | [РСБУ](../scrolls/russia/corporate-disclosures/financial-reporting/ras/ОЗОНБАНК_2026М6_РСБУ.md) |
 | ОТПБАНК | 2026М6 | [МСФО](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/ОТПБАНК_2026М6_МСФО.md)<br>[РСБУ](../scrolls/russia/corporate-disclosures/financial-reporting/ras/ОТПБАНК_2026М6_РСБУ.md) |
@@ -61,6 +71,8 @@ Included routes: Russian financial reporting, annual reports, and issuer reports
 | ПСБ | 2026М6 | [МСФО](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/ПСБ_2026М6_МСФО.md)<br>[РСБУ](../scrolls/russia/corporate-disclosures/financial-reporting/ras/ПСБ_2026М6_РСБУ.md) |
 | ПСБ | 2025М12 | [ESG](../scrolls/russia/corporate-disclosures/annual-reports/ПСБ_2025М12_ESG.md)<br>[ГОДОВОЙ](../scrolls/russia/corporate-disclosures/annual-reports/ПСБ_2025М12_ГОДОВОЙ.md)<br>[ЭМИТЕНТ](../scrolls/russia/corporate-disclosures/issuer-reports/ПСБ_2025М12_ЭМИТЕНТ.md) |
 | РВБ | 2025М12 | [РСБУ](../scrolls/russia/corporate-disclosures/financial-reporting/ras/РВБ_2025М12_РСБУ.md)<br>[РСБУ_КОММЕНТ](../scrolls/russia/corporate-disclosures/financial-reporting/ras/РВБ_2025М12_РСБУ_КОММЕНТ.md) |
+| РЖД | 2026М6 | [МСФО](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/РЖД_2026М6_МСФО.md)<br>[РСБУ](../scrolls/russia/corporate-disclosures/financial-reporting/ras/РЖД_2026М6_РСБУ.md)<br>[ЭМИТЕНТ](../scrolls/russia/corporate-disclosures/issuer-reports/РЖД_2026М6_ЭМИТЕНТ.md) |
+| РЖД | 2025М12 | [ГОДОВОЙ](../scrolls/russia/corporate-disclosures/annual-reports/РЖД_2025М12_ГОДОВОЙ.md) |
 | РОСНЕФТЬ | 2026М6 | [МСФО](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/РОСНЕФТЬ_2026М6_МСФО.md)<br>[МСФО_РЕЛИЗ](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/РОСНЕФТЬ_2026М6_МСФО_РЕЛИЗ.html) |
 | РОСНЕФТЬ | 2025М12 | [ESG](../scrolls/russia/corporate-disclosures/annual-reports/РОСНЕФТЬ_2025М12_ESG.md)<br>[ГОДОВОЙ](../scrolls/russia/corporate-disclosures/annual-reports/РОСНЕФТЬ_2025М12_ГОДОВОЙ.md) |
 | РСХБ | 2026М6 | [МСФО](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/РСХБ_2026М6_МСФО.md)<br>[РСБУ](../scrolls/russia/corporate-disclosures/financial-reporting/ras/РСХБ_2026М6_РСБУ.md)<br>[ЭМИТЕНТ](../scrolls/russia/corporate-disclosures/issuer-reports/РСХБ_2026М6_ЭМИТЕНТ.md) |
@@ -85,8 +97,9 @@ Included routes: Russian financial reporting, annual reports, and issuer reports
 | УРАЛСИБ | 2026М6 | [МСФО](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/УРАЛСИБ_2026М6_МСФО.md)<br>[ЭМИТЕНТ](../scrolls/russia/corporate-disclosures/issuer-reports/УРАЛСИБ_2026М6_ЭМИТЕНТ.md) |
 | УРАЛСИБ | 2025М12 | [ГОДОВОЙ](../scrolls/russia/corporate-disclosures/annual-reports/УРАЛСИБ_2025М12_ГОДОВОЙ.md) |
 | ЭТАЛОН | 2026М6 | [МСФО](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/ЭТАЛОН_2026М6_МСФО.md) |
-| ЯНДЕКС | 2026М6 | [МСФО](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/ЯНДЕКС_2026М6_МСФО.md)<br>[ЭМИТЕНТ](../scrolls/russia/corporate-disclosures/issuer-reports/ЯНДЕКС_2026М6_ЭМИТЕНТ.md) |
+| ЯНДЕКС | 2026М6 | [МСФО](../scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/ЯНДЕКС_2026М6_МСФО.md)<br>[РСБУ](../scrolls/russia/corporate-disclosures/financial-reporting/ras/ЯНДЕКС_2026М6_РСБУ.md)<br>[ЭМИТЕНТ](../scrolls/russia/corporate-disclosures/issuer-reports/ЯНДЕКС_2026М6_ЭМИТЕНТ.md) |
 | ЯНДЕКС | 2025М12 | [ESG](../scrolls/russia/corporate-disclosures/annual-reports/ЯНДЕКС_2025М12_ESG.md)<br>[ГОДОВОЙ](../scrolls/russia/corporate-disclosures/annual-reports/ЯНДЕКС_2025М12_ГОДОВОЙ.md) |
+| ЯНДЕКСБАНК | 2026М6 | [РСБУ](../scrolls/russia/corporate-disclosures/financial-reporting/ras/ЯНДЕКСБАНК_2026М6_РСБУ.md) |
 
 ## 2. Russian strategic documents
 
