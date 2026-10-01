@@ -38,15 +38,15 @@ OTP’s executive summary contains reported results, normalized/counterfactual m
 
 ## 7. Coverage must be explicit from the first manual pass
 
-All three packages are marked `sampled`. Without this, a large-looking JSONL file could easily be mistaken for a complete extraction. A future “process report” command needs block inventory before it can truthfully say `extraction_complete`.
+Sber and OTP remain `sampled`; ABC has now been taken through all 16 pages under an explicit `financial_core_v0` profile. Without this distinction, a large-looking JSONL file could easily be mistaken for a complete extraction. A future “process report” command needs block inventory **and profile identity** before it can truthfully say anything like `extraction_complete`.
 
 ## 8. Source revision beats path stability
 
 OTP is still in `_mw/_arrivals/`. The pilot remains reproducible because the manifest freezes its Git blob SHA. If the report later moves into `scrolls/` unchanged, that should not create a new economic observation history.
 
-## 9. Suggested next test
+## 9. Full-profile pass result
 
-Do **one report completely**, page by page, with every block assigned a coverage status and every numeric candidate explained. Sber is large enough to stress the model; ABC (16 pages) is better for the first full-close exercise. I would use ABC first because a complete manual pass is feasible and already contains several semantic traps.
+ABC was taken through all 16 pages. Every page/block now has an explicit status under `financial_core_v0`; financial statements, financial/operating narrative, asset quality, regulatory ratios and dividend events are included, while holder-by-holder shareholder-register detail and document identifiers are explicitly excluded. The important result is that **completeness has two axes**: document/block coverage and extraction-profile scope.
 
 ## 10. A residual may be a source-basis bridge, not an error
 
@@ -56,3 +56,34 @@ The deposit disclosure behaves the same way: headline deposits are RMB34,517,455
 
 This is exactly why a reproducible subtraction does not by itself justify an economic label for the residual.
 
+
+
+## 11. Statement hierarchy must survive extraction
+
+ABC’s equity statement contains a parent line `Other equity instruments = RMB470,000m` followed by `Preference shares = RMB80,000m` and `Perpetual bonds = RMB390,000m`. The children sum exactly to the parent. A flat list of valid numbers is therefore not enough: naive aggregation would double-count RMB470,000m.
+
+The representation layer needs row relationships such as parent/child or subtotal membership, not only row labels.
+
+## 12. Empty row labels are real evidence occurrences
+
+ABC contains numeric rows with no visible row label: attribution totals and an intermediate cash-flow subtotal. They are perfectly valid source values but their meaning comes from surrounding rows and headings.
+
+Therefore a locator must carry block/structural context. `source_label` cannot be the sole semantic anchor.
+
+## 13. Source dash must not become zero by parser habit
+
+Five cells in the extracted ABC financial statements contain `–`. They are preserved as a source state with no parsed decimal. Some statement identities happen to be consistent with a zero contribution, but that is a contextual validation inference, not a universal lexical rule.
+
+This directly preserves `missing/none/dash ≠ zero`.
+
+## 14. Multiple evidence occurrences need a selection policy, not deletion
+
+ABC repeats the same core figures in the summary table, narrative discussion and IFRS statements. The full pass intentionally preserves those occurrences separately and then verifies equality with `check` records.
+
+A future query layer should choose a preferred occurrence by explicit policy while retaining the others as evidence. Extraction-time deduplication would destroy provenance.
+
+## 15. Validation checks deserve their own record type
+
+The manual pass now contains source-subtotal checks, balance identities, cross-occurrence checks, reported-ratio recalculations and cash-flow identities. They are neither source observations nor analytical claims.
+
+A small `check` type appears justified. It records exactly what was tested and, crucially, what the successful arithmetic **does not** prove.
