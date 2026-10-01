@@ -1,0 +1,27 @@
+{
+  "lab_schema": "flakes-manual-pilot/0.1",
+  "package_id": "sber-2026m6-ifrs-manual-sample",
+  "status": "manual_sample_non_authoritative",
+  "source": {
+    "path": "scrolls/russia/corporate-disclosures/financial-reporting/ifrs/2026/СБЕР_2026М6_МСФО.md",
+    "git_blob_sha": "19671fcac13e8c54f2a201316d9d1fcd6be86692",
+    "corpus_status": "authoritative_source_representation"
+  },
+  "report": {
+    "reporting_entity": "ПАО «Сбербанк России» и его дочерние организации",
+    "publication_role": "interim_condensed_consolidated_financial_statements",
+    "accounting_framework": "IFRS",
+    "reporting_period_end": "2026-06-30",
+    "period_label": "1H 2026",
+    "language": "ru"
+  },
+  "scope": {
+    "mode": "sampled_blocks",
+    "pages": [
+      5,
+      6
+    ],
+    "purpose": "test statement stocks, flows, comparative columns, units and EPS exception",
+    "full_report_extraction_complete": false
+  }
+}
