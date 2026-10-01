@@ -14,7 +14,13 @@
     "reporting_period_end": "2026-03-31",
     "period_label": "Q1 2026",
     "assurance_status": "unaudited",
-    "language": "en"
+    "language": "en",
+    "publication_date": "2026-04-29",
+    "publication_date_evidence": {
+      "page": 10,
+      "line": 236,
+      "literal": "Beijing, the PRC / 29 April 2026"
+    }
   },
   "scope": {
     "mode": "full_document_profiled_manual_pass",
