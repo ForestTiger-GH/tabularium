@@ -1,0 +1,28 @@
+{
+  "lab_schema": "flakes-manual-pilot/0.1",
+  "package_id": "otp-hu-2026h1-results-manual-sample",
+  "status": "manual_sample_non_authoritative",
+  "source": {
+    "path": "_mw/_arrivals/HU_OTP-BANK_2026-06-30_RESULTS.md",
+    "git_blob_sha": "d7cbd5519fa95e41843ece8b80e74df8ac2493ab",
+    "corpus_status": "arrival_staging_not_authoritative_corpus"
+  },
+  "report": {
+    "reporting_entity": "OTP Bank Plc. / OTP Group",
+    "publication_role": "half_year_financial_report_results",
+    "reporting_period_end": "2026-06-30",
+    "publication_date": "2026-08-05",
+    "period_label": "1H 2026",
+    "language": "en"
+  },
+  "scope": {
+    "mode": "sampled_blocks",
+    "pages": [
+      2,
+      4,
+      5
+    ],
+    "purpose": "test reported/adjusted/normalized roles, FX-adjusted balances, management ratios and narrative explanations",
+    "full_report_extraction_complete": false
+  }
+}
