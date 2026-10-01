@@ -47,3 +47,12 @@ OTP is still in `_mw/_arrivals/`. The pilot remains reproducible because the man
 ## 9. Suggested next test
 
 Do **one report completely**, page by page, with every block assigned a coverage status and every numeric candidate explained. Sber is large enough to stress the model; ABC (16 pages) is better for the first full-close exercise. I would use ABC first because a complete manual pass is feasible and already contains several semantic traps.
+
+## 10. A residual may be a source-basis bridge, not an error
+
+ABC immediately produced a useful decomposition trap. The headline loan balance is RMB28,482,604m, while the four disclosed business-type components are explicitly **excluding accrued interest** and sum to RMB28,424,118m. The RMB58,486m difference is therefore a bridge/residual caused by different source grain/basis unless separately explained by the source.
+
+The deposit disclosure behaves the same way: headline deposits are RMB34,517,455m; business-line components excluding accrued interest sum to RMB34,076,038m; residual RMB441,417m.
+
+This is exactly why a reproducible subtraction does not by itself justify an economic label for the residual.
+
