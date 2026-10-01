@@ -1,0 +1,30 @@
+{
+  "lab_schema": "flakes-manual-pilot/0.1",
+  "package_id": "abc-cn-2026q1-ifrs-hshare-manual-sample",
+  "status": "manual_sample_non_authoritative",
+  "source": {
+    "path": "scrolls/world/corporate-disclosures/financial-reporting/2026/CN_AGRICULTURAL-BANK-OF-CHINA_2026-03-31_Q1_IFRS_HSHARE.md",
+    "git_blob_sha": "1ec935e0e108702d499a967640f53396718eb6eb",
+    "corpus_status": "authoritative_source_representation"
+  },
+  "report": {
+    "reporting_entity": "Agricultural Bank of China Limited and subsidiaries",
+    "publication_role": "first_quarterly_report_h_share",
+    "accounting_framework": "IFRS Accounting Standards",
+    "reporting_period_end": "2026-03-31",
+    "period_label": "Q1 2026",
+    "assurance_status": "unaudited",
+    "language": "en"
+  },
+  "scope": {
+    "mode": "sampled_blocks",
+    "pages": [
+      2,
+      7,
+      8,
+      9
+    ],
+    "purpose": "test compact IFRS data, narrative/table duplicates, business dimensions, regulatory ratios and basis overrides",
+    "full_report_extraction_complete": false
+  }
+}
