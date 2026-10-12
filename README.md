@@ -24,6 +24,7 @@ This map lists populated material classes and documented source routes.
 - [Authorities](scrolls/russia/authorities/)
   - [Bank of Russia](scrolls/russia/authorities/bank-of-russia/)
     - [Medium-Term Forecast](scrolls/russia/authorities/bank-of-russia/medium-term-forecast/).
+    - [Banking Sector Dynamics](scrolls/russia/authorities/bank-of-russia/banking-sector-dynamics/) — monthly information-analytical publications on the development of Russia’s banking sector.
   - [Ministry of Economic Development](scrolls/russia/authorities/ministry-of-economic-development/)
     - [Socio-Economic Development Forecast](scrolls/russia/authorities/ministry-of-economic-development/socio-economic-development-forecast/).
   - [Rosstat](scrolls/russia/authorities/rosstat/)
