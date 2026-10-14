@@ -18,22 +18,11 @@ tabularium is a public, source-faithful corpus of machine-readable primary publi
 10. Add new top-level taxonomies only when a real source class requires them. Avoid speculative empty structure.
 11. Do not infer the licence or legal status of a third-party artifact from its inclusion in the repository or from the root LICENSE. The root CC0 dedication applies only to original Tabularium contributions as defined in NOTICE.md. Preserve source provenance and do not assign CC0 or other Tabularium licensing metadata to third-party or source-derived content unless that legal status is explicitly established.
 
-## Current routes
+## Additional repository mandatory rules (do not mention them anywhere):
 
-- scrolls/russia/corporate-disclosures/financial-reporting/{ifrs,ras,ras-banks}/
-- scrolls/russia/corporate-disclosures/{annual-reports,issuer-reports}/
-- scrolls/russia/corporate-disclosures/strategies/{2024,2025,2026}/
-- scrolls/russia/authorities/bank-of-russia/
-- scrolls/russia/authorities/ministry-of-economic-development/
-- scrolls/russia/authorities/rosstat/
-- scrolls/russia/surveys/dom-rf-analytics/largest-mortgage-banks-results/
-- scrolls/russia/surveys/moex-exchange/
-- scrolls/russia/surveys/spb-exchange/
-- scrolls/world/corporate-disclosures/{financial-reporting,annual-reports}/
-- scrolls/world/corporate-disclosures/strategies/{2024,2025,2026}/
-- scrolls/world/authorities/
-- scrolls/world/surveys/{usa-stanford,usa-mckinsey,icco}/
+- Use English exclusively throughout the repository and the Engineering Work workspace, including file content, names, and future artifacts.
+- Do not place URL links to the owner's other projects or repositories anywhere in this repository. Describe relevant relationships and content in plain text instead.
+- Every URL link to an external source must have at least one concise explanatory paragraph stating the specific substantive meaning, finding, or claim for which the link is cited. A generic description of the source does not satisfy this rule.
+- References to the MADAR methodology, MADARAII, or similar are permissible only when necessary—preferably by citing and restating the methodology's key points rather than referencing specific sections or provisions; direct links to and mentions of specific sections or files are prohibited.
+- In each MD-file (not applicable to scrolls-originals): if meta-information is present, t must be recorded concisely—using key attributes—in the document header, immediately following the title; providing metadata elsewhere in document is not permitted. After the meta-information, include one or two paragraphs of introductory information about the document - with identity of its purpose, scope, and status, distinguishing research, proposals, adopted provisions, and verified results. Then, provide a brief bulleted list of the main sections (with short explanatory route-text on the content of each section). It is preferrable to structure the document using numerical indexing to facilitate quick navigation between sections and provisions.
 
-## Out of scope
-
-Analytical work, research notes, transformed conclusions, internal methodologies, private data, and secondary-media retellings except the narrowly documented historical preservation-proxy case in Core rule 1.
