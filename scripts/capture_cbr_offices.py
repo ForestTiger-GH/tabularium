@@ -343,7 +343,8 @@ def extract_records(html: str) -> tuple[list[tuple[str, ...]], int]:
     for physical_index, cells in enumerate(rows, header_count + 1):
         if not cells:
             fail("SOURCE_EMPTY_ROW")
-        if len(cells) == 1 and cells[0].colspan == width and cells[0].rowspan == 1:
+        # The source can overspecify a full-width territorial row (e.g. 10 vs 7). 
+        if len(cells) == 1 and cells[0].colspan >= width and cells[0].rowspan == 1:
             flush()
             if cells[0].text:
                 current_section = cells[0].text
