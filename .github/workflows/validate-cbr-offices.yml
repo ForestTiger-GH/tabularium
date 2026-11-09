@@ -91,7 +91,33 @@ jobs:
           })
           from pathlib import Path
           Path("/tmp/cbr-reg-acceptance-sample.xlsx").write_bytes(xlsx)
-          result = m.convert_xlsx(xlsx)
+          try:
+              result = m.convert_xlsx(xlsx)
+          except m.CaptureError as exc:
+              if str(exc) == "XLSX_UNRECOGNIZED_TERRITORY":
+                  sheet, items, _ = m.xlsx_rows(xlsx)
+                  starts = [(i, k) for i, (_, cells) in enumerate(items)
+                            for k, value in cells.items()
+                            if "российская федерация" in value.casefold()
+                            and sum(bool(m.re.fullmatch(r"[+-]?\\d+(?:[.,]\\d+)?", v))
+                                    for v in cells.values()) >= 2]
+                  if len(starts) == 1:
+                      start, territory_col = starts[0]
+                      for i in range(start, len(items)):
+                          rid, cells = items[i]
+                          label = cells.get(territory_col, "")
+                          others = [v for col, v in cells.items() if col > territory_col]
+                          if (label and not m.is_territory(label)
+                              and not m.re.search(r"(?:^|\\s)в\\s+том\\s+числе", label, m.re.I)
+                              and any(m.re.fullmatch(r"[+-]?\\d+(?:[.,]\\d+)?", v)
+                                      for v in others)):
+                              print(f"REGIONAL_SOURCE_DIAGNOSTIC worksheet={sheet!r} row={rid}"
+                                    f" name={label[:180]!r} samples={others[:8]!r}", flush=True)
+                              for near_row, near_cells in items[max(start, i - 3):i + 4]:
+                                  print(f"REGIONAL_CONTEXT row={near_row}"
+                                        f" fields={str(near_cells)[:380]}", flush=True)
+                              break
+              raise
           rows = m.validate_csv(result)
           print(f"REGIONAL_LIVE_CONVERSION_OK reference_date={period} rows={rows}")
           PY
