@@ -484,7 +484,7 @@ def publish(root, input_dir, manifest_path, code_sha):
                         and isinstance(formula, dict) and isinstance(formula.get("formula"), str)
                         and isinstance(formula.get("attributes"), dict),
                         "MANIFEST_FORMULAS_INVALID")
-        relative = f"{CORPUS}/{name[:4]}/{name}
+        relative = f"{CORPUS}/{name[:4]}/{name}"
         additions[relative] = (data, item)
     require(all(not (root / f).is_symlink() for f in additions), "TARGET_SYMLINK")
     for attempt in range(3):
