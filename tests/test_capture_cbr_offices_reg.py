@@ -65,18 +65,20 @@ class Parsing(unittest.TestCase):
         blob = m.convert_xlsx(sample_xlsx())
         self.assertEqual(m.validate_csv(blob), 46)
         rs = list(csv.reader(io.StringIO(blob.decode('utf-8'))))
-        self.assertEqual(rs[0], ['source_sheet','source_row','source_formulas','section_label','Территория','Кредитные организации','Филиалы','Мобильные офисы','Всего'])
-        self.assertEqual(rs[1], ['Региональный разрез','3','','','Российская Федерация','2','3','5','10'])
-        self.assertEqual(rs[-1][4], 'Республика Алтай')
-        self.assertEqual(rs[-1][7], '5')
+        self.assertEqual(rs[0], ['source_row','section_label','Территория','Кредитные организации','Филиалы','Мобильные офисы','Всего'])
+        self.assertEqual(rs[1], ['3','','Российская Федерация','2','3','5','10'])
+        self.assertEqual(rs[-1][2], 'Республика Алтай')
+        self.assertEqual(rs[-1][5], '5')
 
     def test_formula_cached_value_and_source_formula_preserved(self):
         rows = list(csv.reader(io.StringIO(m.convert_xlsx(sample_xlsx(formula=True)).decode('utf-8'))))
-        self.assertEqual(rows[1][8], '10')
-        self.assertEqual(rows[1][7], '5')
-        lineage = json.loads(rows[1][2])
-        self.assertEqual(lineage['4']['formula'], '2+3')
-        self.assertEqual(lineage['4']['attributes'], {})
+        self.assertEqual(rows[1][6], '10')
+        self.assertEqual(rows[1][5], '5')
+        data, lineage = m.convert_xlsx(sample_xlsx(formula=True), return_formula_lineage=True)
+        self.assertEqual(data, m.convert_xlsx(sample_xlsx(formula=True)))
+        self.assertEqual(lineage['3']['4']['formula'], '2+3')
+        self.assertEqual(lineage['3']['4']['attributes'], {})
+        self.assertNotIn('source_formulas', rows[0])
 
     def test_formula_without_cached_value_rejected(self):
         original = sample_xlsx(formula=True)
@@ -149,7 +151,7 @@ class Parsing(unittest.TestCase):
             for name, value in parts.items():
                 target.writestr(name, value)
         rows = list(csv.reader(io.StringIO(m.convert_xlsx(buf.getvalue()).decode())))
-        self.assertEqual(rows[0][4], 'Территория')
+        self.assertEqual(rows[0][2], 'Территория')
         self.assertEqual(len(rows), 47)
         self.assertFalse(any('Статистика территориального присутствия' in str(row)
                              or 'Explanatory notes' in str(row) for row in rows))
@@ -175,14 +177,14 @@ class Parsing(unittest.TestCase):
             for name, value in parts.items():
                 target.writestr(name, value)
         records = list(csv.reader(io.StringIO(m.convert_xlsx(buf.getvalue()).decode())))
-        indexed = {int(row[1]): row for row in records[1:]}
+        indexed = {int(row[0]): row for row in records[1:]}
         self.assertEqual(len(indexed), 45)
         self.assertNotIn(4, indexed)  # The district's subtotal is a section label.
         for i in range(5, 45):
-            self.assertEqual(indexed[i][3], 'ПРИМЕР ФЕДЕРАЛЬНЫЙ ОКРУГ')
+            self.assertEqual(indexed[i][1], 'ПРИМЕР ФЕДЕРАЛЬНЫЙ ОКРУГ')
         for i in range(45, 49):
-            self.assertEqual(indexed[i][3], '')
-        self.assertFalse(any(row[4] == 'ПРИМЕР ФЕДЕРАЛЬНЫЙ ОКРУГ'
+            self.assertEqual(indexed[i][1], '')
+        self.assertFalse(any(row[2] == 'ПРИМЕР ФЕДЕРАЛЬНЫЙ ОКРУГ'
                              for row in records[1:]))
 
     def test_bad_final_district_balance_fails_closed(self):
@@ -192,11 +194,34 @@ class Parsing(unittest.TestCase):
         with self.assertRaisesRegex(m.CaptureError, 'XLSX_FINAL_DISTRICT_BALANCE_AMBIGUOUS'):
             m.last_district_boundary(data, 0, 1, [2, 3])
 
+    def test_collect_keeps_formula_lineage_outside_csv(self):
+        original = sample_xlsx(formula=True)
+        with tempfile.TemporaryDirectory() as t:
+            directory = Path(t)
+            with patch.object(m, 'CORPUS', str(directory / 'empty-archive')), patch.object(
+                    m, 'download', side_effect=lambda url, *_: sample_page().encode()
+                    if url == m.SOURCE_PAGE else original):
+                manifest = m.collect('backfill', date(2026,10,1), date(2026,10,1), directory)
+            self.assertEqual(len(manifest), 1)
+            self.assertEqual(manifest[0]['formula_cells']['3']['4']['formula'], '2+3')
+            rows = list(csv.reader(io.StringIO(
+                (directory / '2026-10-01_OFFICES-REG.csv').read_text(encoding='utf-8'))))
+            self.assertEqual(rows[0][:3], ['source_row', 'section_label', 'Территория'])
+            self.assertEqual(rows[1][5], '5')
+
+    def test_old_three_metadata_columns_are_not_accepted(self):
+        original = m.convert_xlsx(sample_xlsx())
+        rows = list(csv.reader(io.StringIO(original.decode('utf-8'))))
+        old = [['source_sheet', 'source_row', 'source_formulas'] + rows[0][1:]]
+        old += [['Лист1', row[0], ''] + row[1:] for row in rows[1:]]
+        with self.assertRaisesRegex(m.CaptureError, 'CSV_HEADER_INVALID'):
+            m.validate_csv(m.serialize(old))
+
     def test_daily_only_latest_and_backfill_skips_present(self):
         xlsx = sample_xlsx()
         with tempfile.TemporaryDirectory() as t:
             directory = Path(t)
-            with patch.object(m, 'download', side_effect=lambda url, *_: sample_page().encode() if url == m.SOURCE_PAGE else xlsx):
+            with patch.object(m, 'CORPUS', str(directory / 'empty-archive')), patch.object(m, 'download', side_effect=lambda url, *_: sample_page().encode() if url == m.SOURCE_PAGE else xlsx):
                 manifest = m.collect('daily', None, None, directory)
             self.assertEqual(len(manifest), 1)
             self.assertEqual(manifest[0]['file'], '2026-10-01_OFFICES-REG.csv')

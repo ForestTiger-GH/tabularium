@@ -289,7 +289,7 @@ def last_district_boundary(data, district_index, territory_col, indicator_cols):
     return matches[0]
 
 
-def convert_xlsx(blob):
+def convert_xlsx(blob, *, return_formula_lineage=False):
     """Keep only the published table and attach source-derived district context."""
     sheet, rows, formulas = xlsx_rows(blob)
     starts = [(i, k) for i, (_, cells) in enumerate(rows) for k, value in cells.items()
@@ -348,8 +348,8 @@ def convert_xlsx(blob):
     final_boundary = (last_district_boundary(data, districts[-1], territory_col,
                                              indicator_cols) if districts else None)
     last_section = ""
-    records = [["source_sheet", "source_row", "source_formulas",
-                "section_label", *header]]
+    records = [["source_row", "section_label", *header]]
+    formula_lineage = {}
     for i, (rid, cells) in enumerate(data):
         name = cells[territory_col]
         if i in districts:
@@ -363,11 +363,11 @@ def convert_xlsx(blob):
             section = last_section
         source_formulas = {str(col): formula for (r, col), formula in formulas.items()
                            if r == rid}
-        provenance = (json.dumps(source_formulas, ensure_ascii=False, sort_keys=True,
-                                 separators=(",", ":")) if source_formulas else "")
-        records.append([sheet, str(rid), provenance, section,
-                        *(cells.get(k, "") for k in cols)])
-    return serialize(records)
+        if source_formulas:
+            formula_lineage[str(rid)] = source_formulas
+        records.append([str(rid), section, *(cells.get(k, "") for k in cols)])
+    result = serialize(records)
+    return (result, formula_lineage) if return_formula_lineage else result
 
 
 def serialize(records):
@@ -385,24 +385,15 @@ def validate_csv(blob):
         raise CaptureError("CSV_READ_FAILED") from None
     require(len(rows) >= 31, "CSV_TOO_FEW_ROWS")
     width = len(rows[0])
-    require(8 <= width <= MAX_WIDTH + 4 and rows[0][:4] == ["source_sheet", "source_row", "source_formulas", "section_label"]
-            and all(rows[0][3:]) and len(set(rows[0])) == width, "CSV_HEADER_INVALID")
+    require(6 <= width <= MAX_WIDTH + 2 and rows[0][:2] == ["source_row", "section_label"]
+            and all(rows[0][2:]) and len(set(rows[0])) == width, "CSV_HEADER_INVALID")
     previous = 0
     for row in rows[1:]:
-        require(len(row) == width and row[0] and row[1].isascii() and row[1].isdecimal(),
+        require(len(row) == width and row[0].isascii() and row[0].isdecimal(),
                 "CSV_ROW_INVALID")
-        require(int(row[1]) > previous, "CSV_ROW_ORDER")
-        require(all(clean(s) == s for s in row), "CSV_CELL_NONCANONICAL")
-        if row[2]:
-            try:
-                provenance = json.loads(row[2])
-            except (ValueError, TypeError):
-                raise CaptureError("CSV_FORMULA_PROVENANCE_INVALID") from None
-            require(isinstance(provenance, dict) and
-                    all(isinstance(v, dict) and "formula" in v and
-                        isinstance(v.get("attributes"), dict) for v in provenance.values()),
-                    "CSV_FORMULA_PROVENANCE_INVALID")
-        previous = int(row[1])
+        require(1 <= int(row[0]) <= 30000 and int(row[0]) > previous, "CSV_ROW_ORDER")
+        require(all(clean(value) == value for value in row), "CSV_CELL_NONCANONICAL")
+        previous = int(row[0])
     require(serialize(rows) == blob, "CSV_NON_CANONICAL")
     return len(rows)-1
 
@@ -436,12 +427,13 @@ def collect(mode, start, end, output_dir):
         raw = download(links[d], LIMIT_XLSX, {
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             "application/octet-stream", "application/zip"})
-        data = convert_xlsx(raw)
+        data, formula_lineage = convert_xlsx(raw, return_formula_lineage=True)
         validate_csv(data)
         target.write_bytes(data)
         manifest.append({"file": target.name, "source_url": links[d],
                          "xlsx_sha256": hashlib.sha256(raw).hexdigest(),
-                         "csv_sha256": hashlib.sha256(data).hexdigest()})
+                         "csv_sha256": hashlib.sha256(data).hexdigest(),
+                         "formula_cells": formula_lineage})
     return manifest
 
 
@@ -480,7 +472,19 @@ def publish(root, input_dir, manifest_path, code_sha):
         data = (input_dir / name).read_bytes()
         validate_csv(data)
         require(hashlib.sha256(data).hexdigest() == item["csv_sha256"], "MANIFEST_HASH_MISMATCH")
-        relative = f"{CORPUS}/{name[:4]}/{name}"
+        lineage = item.get("formula_cells")
+        require(isinstance(lineage, dict), "MANIFEST_FORMULAS_INVALID")
+        parsed = list(csv.reader(io.StringIO(data.decode("utf-8"), newline="")))
+        included_rows = {row[0] for row in parsed[1:]}
+        for source_row, columns in lineage.items():
+            require(source_row in included_rows and isinstance(columns, dict) and columns,
+                    "MANIFEST_FORMULAS_INVALID")
+            for column, formula in columns.items():
+                require(column.isdecimal() and 1 <= int(column) <= MAX_WIDTH
+                        and isinstance(formula, dict) and isinstance(formula.get("formula"), str)
+                        and isinstance(formula.get("attributes"), dict),
+                        "MANIFEST_FORMULAS_INVALID")
+        relative = f"{CORPUS}/{name[:4]}/{name}
         additions[relative] = (data, item)
     require(all(not (root / f).is_symlink() for f in additions), "TARGET_SYMLINK")
     for attempt in range(3):
@@ -512,10 +516,13 @@ def publish(root, input_dir, manifest_path, code_sha):
         git("config", "user.name", "github-actions[bot]")
         git("config", "user.email", "41898282+github-actions[bot]@users.noreply.github.com")
         tree = gitstr("write-tree")
-        details = "\n".join(f"{f} source={item['source_url']} xlsx_sha256={item['xlsx_sha256']}"
-                            for f, (_, item) in missing.items())
-        commit = gitstr("commit-tree", tree, "-p", head, "-m",
-                        f"data(cbr): archive {len(missing)} regional offices releases\n\n{details}")
+        details = "\n".join(
+            f"{f} source={item['source_url']} xlsx_sha256={item['xlsx_sha256']}\n"
+            f"formula_cells={json.dumps(item['formula_cells'], ensure_ascii=False, sort_keys=True, separators=(',', ':'))}"
+            for f, (_, item) in missing.items())
+        message = f"data(cbr): archive {len(missing)} regional offices releases\n\n{details}"
+        require(len(message.encode("utf-8")) <= 95000, "COMMIT_PROVENANCE_TOO_LARGE")
+        commit = gitstr("commit-tree", tree, "-p", head, "-m", message)
         pushed = git("push", "origin", f"{commit}:refs/heads/main", check=False)
         if pushed.returncode == 0:
             print(f"PUBLISHED {len(missing)} files commit={commit}")
