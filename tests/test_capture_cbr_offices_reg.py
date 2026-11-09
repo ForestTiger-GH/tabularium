@@ -77,6 +77,38 @@ class Parsing(unittest.TestCase):
         with self.assertRaises((m.CaptureError, zipfile.BadZipFile)):
             m.convert_xlsx(b'PK\x03\x04not-a-valid-file')
 
+    def test_territorial_data_after_footer_is_rejected(self):
+        base = sample_xlsx()
+        with zipfile.ZipFile(io.BytesIO(base)) as source:
+            data = {name: source.read(name) for name in source.namelist()}
+        sheet = data['xl/worksheets/sheet1.xml'].decode('utf-8')
+        extra = ('<row r="49"><c r="A49" t="inlineStr"><is><t>Notes</t></is></c></row>'
+                 '<row r="50"><c r="A50" t="inlineStr"><is><t>Тюменская область</t></is></c>'
+                 '<c r="B50"><v>2</v></c><c r="C50"><v>7</v></c></row>')
+        data['xl/worksheets/sheet1.xml'] = sheet.replace('</sheetData>', extra+'</sheetData>').encode()
+        out = io.BytesIO()
+        with zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED) as target:
+            for name, value in data.items():
+                target.writestr(name, value)
+        with self.assertRaisesRegex(m.CaptureError, 'XLSX_DATA_AFTER_FOOTER'):
+            m.convert_xlsx(out.getvalue())
+
+    def test_daily_catches_up_missed_months(self):
+        sample = sample_page().replace('</body>',
+            '<a href="/vfs/statistics/bank_system/DivisionsPerRegion_010926.xlsx">2026 г.: на 01.09</a></body>')
+        with tempfile.TemporaryDirectory() as t:
+            root = Path(t)
+            published = root / 'published' / '2026'
+            published.mkdir(parents=True)
+            (published / '2026-08-01_OFFICES-REG.csv').write_bytes(m.convert_xlsx(sample_xlsx()))
+            output = root / 'output'
+            output.mkdir()
+            with patch.object(m, 'CORPUS', str(root / 'published')), patch.object(
+                    m, 'download', side_effect=lambda url, *_: sample.encode() if url == m.SOURCE_PAGE else sample_xlsx()):
+                items = m.collect('daily', None, None, output)
+            self.assertEqual([x['file'] for x in items],
+                             ['2026-09-01_OFFICES-REG.csv', '2026-10-01_OFFICES-REG.csv'])
+
     def test_csv_values_not_inferred(self):
         original = m.convert_xlsx(sample_xlsx())
         altered = original.replace(b',2,3,5,10\n', b',2,3,,10\n', 1)

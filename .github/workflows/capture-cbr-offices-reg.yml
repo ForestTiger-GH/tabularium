@@ -2,12 +2,12 @@ name: Capture CBR monthly regional offices
 
 on:
   schedule:
-    # Discover one latest published monthly release daily, 05:17 fixed UTC+03.
+    # Discover new releases and catch up missed months daily, 05:17 fixed UTC+03.
     - cron: '17 2 * * *'
   workflow_dispatch:
     inputs:
       mode:
-        description: 'daily: latest release; backfill: all missing releases in interval; verify: offline CSV checks'
+        description: 'daily: new releases since last capture; backfill: missing historical; verify: offline CSV checks'
         type: choice
         options:
           - daily

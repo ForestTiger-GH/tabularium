@@ -281,6 +281,11 @@ def convert_xlsx(blob):
                 raise CaptureError("XLSX_UNRECOGNIZED_TERRITORY")
             break
         end_index = j + 1
+    # A non-data footer may terminate the table, but cannot hide later regional data.
+    for _, later in rows[end_index:]:
+        if (is_territory(later.get(territory_col, "")) and
+                sum(bool(re.fullmatch(r"[+-]?\d+(?:[.,]\d+)?", v)) for v in later.values()) >= 2):
+            raise CaptureError("XLSX_DATA_AFTER_FOOTER")
     data = rows[idx:end_index]
     require(len(data) >= 30 and len({r for r, _ in data}) == len(data),
             "XLSX_TOO_FEW_REGIONS")
@@ -343,7 +348,13 @@ def collect(mode, start, end, output_dir):
     except UnicodeDecodeError:
         raise CaptureError("PAGE_ENCODING_INVALID") from None
     if mode == "daily":
-        days = [max(links)]
+        existing = []
+        root = Path(CORPUS)
+        for csv_file in root.glob("20??/*_OFFICES-REG.csv"):
+            match = CSV_NAME.fullmatch(csv_file.name)
+            if match:
+                existing.append(date.fromisoformat(match[1]))
+        days = ([d for d in links if d > max(existing)] if existing else [max(links)])
     else:
         days = [d for d in links if (start is None or start <= d) and (end is None or d <= end)]
     manifest = []
