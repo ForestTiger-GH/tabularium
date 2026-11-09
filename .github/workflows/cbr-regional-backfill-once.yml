@@ -25,6 +25,9 @@ jobs:
     timeout-minutes: 110
     permissions:
       contents: write
+    env:
+      # Tests import the collector; do not leave Python bytecode in the Git worktree.
+      PYTHONDONTWRITEBYTECODE: '1'
     steps:
       - name: Check out the exact source and collector revision
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -107,6 +110,11 @@ jobs:
               print(f"CHECKED_CBR_REGION {item['file']} observations={count} columns={len(header)} territory_header={header[2]!r}",flush=True)
           print(f"HISTORICAL_BACKFILL_AUDITED archived={len(archive)} prepared={len(staged_names)} by_year={dict(sorted(counts.items()))}",flush=True)
           PY
+      - name: Confirm no unrelated working-tree files were generated
+        shell: bash
+        run: |
+          git status --porcelain --untracked-files=all
+          test -z "$(git status --porcelain --untracked-files=all)"
       - name: Commit only verified missing CSVs with XLSX source and formula provenance
         shell: bash
         env:
