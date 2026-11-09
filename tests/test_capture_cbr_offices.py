@@ -196,13 +196,17 @@ class CsvAndBoundaryTests(unittest.TestCase):
     def test_utc3_new_year_uses_capture_instant(self):
         self.assertEqual(m.TZ.utcoffset(None), timedelta(hours=3))
         self.assertEqual(m.filename_for(datetime(2026, 12, 31, 20, 59, tzinfo=timezone.utc)),
-                         "OFFICES_2026-12-31.csv")
+                         "2026-12-31_OFFICES.csv")
         self.assertEqual(m.filename_for(datetime(2026, 12, 31, 21, 0, tzinfo=timezone.utc)),
-                         "OFFICES_2027-01-01.csv")
+                         "2027-01-01_OFFICES.csv")
         with self.assertRaises(m.CaptureError):
-            m.file_date("OFFICES_2027-02-30.csv")
+            m.file_date("2027-02-30_OFFICES.csv")
         with self.assertRaises(m.CaptureError):
             m.file_date("../../bad.csv")
+        with self.assertRaisesRegex(m.CaptureError, "ARTIFACT_FILENAME_INVALID"):
+            m.file_date("OFFICES_2026-11-09.csv")
+        self.assertEqual(m.file_date("2026-11-09_OFFICES.csv").isoformat(),
+                         "2026-11-09")
 
     def test_capture_outputs_only_csv_and_hash(self):
         _, _, data = sample()
@@ -212,7 +216,7 @@ class CsvAndBoundaryTests(unittest.TestCase):
             output.mkdir()
             with patch.object(m, "fetch_source_html", return_value=(BASIC, datetime(2027, 1, 1, tzinfo=m.TZ))):
                 target = m.capture(output, directory / "gh-output")
-            self.assertEqual(target.name, "OFFICES_2027-01-01.csv")
+            self.assertEqual(target.name, "2027-01-01_OFFICES.csv")
             self.assertEqual(target.read_bytes(), data)
             self.assertEqual((directory / "gh-output").read_text(),
                              "csv_sha256=" + hashlib.sha256(data).hexdigest() + "\n")
@@ -223,7 +227,7 @@ class CsvAndBoundaryTests(unittest.TestCase):
         h = hashlib.sha256(data).hexdigest()
         with tempfile.TemporaryDirectory() as d:
             directory = Path(d)
-            file = directory / "OFFICES_2026-11-09.csv"
+            file = directory / "2026-11-09_OFFICES.csv"
             file.write_bytes(data)
             self.assertEqual(m.validate_artifact(directory, h)[1], data)
             with self.assertRaisesRegex(m.CaptureError, "ARTIFACT_HASH_MISMATCH"):
@@ -288,6 +292,33 @@ class WorkflowContractTests(unittest.TestCase):
         self.assertNotIn("contents: write", workflow)
 
 
+    def test_archive_uses_date_first_with_correct_year_and_no_legacy_names(self):
+        directory = Path(__file__).resolve().parents[1] / m.CORPUS_ROOT
+        for folder in directory.iterdir():
+            if not folder.is_dir():
+                continue
+            with self.subTest(year=folder.name):
+                self.assertRegex(folder.name, r"^[0-9]{4}$")
+            for file in folder.iterdir():
+                with self.subTest(file=file.name):
+                    self.assertTrue(file.is_file())
+                    self.assertEqual(m.file_date(file.name).year, int(folder.name))
+
+    def test_all_workflows_follow_date_first_artifact_naming(self):
+        repo = Path(__file__).resolve().parents[1]
+        capture = (repo / ".github/workflows/capture-cbr-offices.yml").read_text(
+            encoding="utf-8")
+        monitor = (repo / ".github/workflows/check-cbr-offices.yml").read_text(
+            encoding="utf-8")
+        ci = (repo / ".github/workflows/validate-cbr-offices.yml").read_text(
+            encoding="utf-8")
+        self.assertIn("????-??-??_OFFICES.csv", capture)
+        self.assertIn("????-??-??_OFFICES.csv", ci)
+        self.assertIn("${expected}_OFFICES.csv", monitor)
+        self.assertNotIn("OFFICES_*.csv", capture + ci)
+        self.assertNotIn("/OFFICES_${expected}.csv", monitor)
+
+
 class GitEffectTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
@@ -309,14 +340,14 @@ class GitEffectTests(unittest.TestCase):
 
     def publish(self, iso="2026-11-09", data=None, sha=None):
         with cwd(self.work):
-            return m.publish_immutably("OFFICES_" + iso + ".csv",
+            return m.publish_immutably(iso + "_OFFICES.csv",
                                          self.data if data is None else data,
                                          self.initial if sha is None else sha,
                                          self.work, strict_remote=False)
 
     def test_only_one_added_file_and_new_year(self):
         self.assertEqual(self.publish("2027-01-01"), "CREATED")
-        relative = m.CORPUS_ROOT + "/2027/OFFICES_2027-01-01.csv"
+        relative = m.CORPUS_ROOT + "/2027/2027-01-01_OFFICES.csv"
         head = cmd(self.bare, "rev-parse", "refs/heads/main")
         self.assertEqual(cmd(self.bare, "diff-tree", "--no-commit-id", "--name-status", "-r", head),
                          "A\t" + relative)
@@ -345,10 +376,10 @@ class GitEffectTests(unittest.TestCase):
                          "unrelated historical upload")
         self.assertEqual(cmd(self.bare, "diff-tree", "--no-commit-id",
                              "--name-status", "-r", latest),
-                         "A\t" + m.CORPUS_ROOT + "/2026/OFFICES_2026-11-09.csv")
+                         "A\t" + m.CORPUS_ROOT + "/2026/2026-11-09_OFFICES.csv")
 
     def test_historical_archive_added_while_capture_runs_is_untouched(self):
-        relative = m.CORPUS_ROOT + "/2024/OFFICES_2024-08-13.csv"
+        relative = m.CORPUS_ROOT + "/2024/2024-08-13_OFFICES.csv"
         target = self.work / relative
         target.parent.mkdir(parents=True)
         target.write_bytes(self.data)
@@ -407,7 +438,7 @@ class GitEffectTests(unittest.TestCase):
         cmd(racing, "config", "user.email", "other@example.com")
         real_git = m.git
         raced = False
-        relative = m.CORPUS_ROOT + "/2026/OFFICES_2026-11-09.csv"
+        relative = m.CORPUS_ROOT + "/2026/2026-11-09_OFFICES.csv"
         different = self.data.replace(b"3349", b"1234")
 
         def git_with_race(*args, **kwargs):
@@ -439,7 +470,7 @@ class GitEffectTests(unittest.TestCase):
         (self.work / "untracked").unlink()
         with cwd(self.work):
             with self.assertRaisesRegex(m.CaptureError, "PUBLISH_ROOT_INVALID"):
-                m.publish_immutably("OFFICES_2026-11-09.csv", self.data,
+                m.publish_immutably("2026-11-09_OFFICES.csv", self.data,
                                     self.initial, self.work, "../../x", strict_remote=False)
 
 

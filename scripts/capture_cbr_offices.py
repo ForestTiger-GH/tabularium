@@ -32,7 +32,7 @@ PUSH_ATTEMPTS = 3
 TZ = timezone(timedelta(hours=3))
 CSV_PREFIX = ("source_row", "section_label")
 SOURCE_IDENTITIES = ("регион", "наименованиеко", "рег№ко")
-DATE_NAME = re.compile(r"OFFICES_(\d{4}-\d{2}-\d{2})\.csv\Z", re.ASCII)
+DATE_NAME = re.compile(r"(\d{4}-\d{2}-\d{2})_OFFICES\.csv\Z", re.ASCII)
 HASH = re.compile(r"[0-9a-f]{64}\Z", re.ASCII)
 COMMIT_HASH = re.compile(r"[0-9a-f]{40}\Z", re.ASCII)
 MAX_HTML = 10 * 1024 * 1024
@@ -419,7 +419,7 @@ def validate_csv_bytes(data: bytes) -> tuple[int, int]:
 
 
 def filename_for(observed_at: datetime) -> str:
-    return "OFFICES_" + observed_at.astimezone(TZ).date().isoformat() + ".csv"
+    return observed_at.astimezone(TZ).date().isoformat() + "_OFFICES.csv"
 
 
 def file_date(name: str) -> date:

@@ -1,6 +1,6 @@
 # Credit institution structural units
 
-Dated, source-faithful **wide CSV** extractions of the Bank of Russia's [regional table of credit-institution structural units](https://www.cbr.ru/banking_sector/credit/cstat/). Each `YYYY/OFFICES_YYYY-MM-DD.csv` carries a dated observation label, **not** the source's statistical reference period. For new automated captures this label is the actual retrieval date in fixed UTC+03:00; historical files uploaded retrospectively retain the dates supplied with those files. Every observed source data row appears once, with its published indicators in separate columns.
+Dated, source-faithful **wide CSV** extractions of the Bank of Russia's [regional table of credit-institution structural units](https://www.cbr.ru/banking_sector/credit/cstat/). Each `YYYY/YYYY-MM-DD_OFFICES.csv` carries a dated observation label, **not** the source's statistical reference period. For new automated captures this label is the actual retrieval date in fixed UTC+03:00; historical files uploaded retrospectively retain the dates supplied with those files. Every observed source data row appears once, with its published indicators in separate columns.
 
 Historical snapshot filenames alone do not independently establish when the source was retrieved. Some older CSV representations contain an empty `section_label` for certain regions. Do not infer or silently replace it with the later `-` label: unknown in that representation is not the same as an explicit source label.
 

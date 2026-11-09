@@ -62,7 +62,7 @@ jobs:
           python scripts/capture_cbr_offices.py capture \
             --output-dir "$RUNNER_TEMP/cbr-offices-acceptance"
           shopt -s nullglob
-          files=("$RUNNER_TEMP"/cbr-offices-acceptance/OFFICES_*.csv)
+          files=("$RUNNER_TEMP"/cbr-offices-acceptance/????-??-??_OFFICES.csv)
           if [ "${#files[@]}" -ne 1 ]; then
             echo "::error::Capture must create exactly one CSV"
             exit 1

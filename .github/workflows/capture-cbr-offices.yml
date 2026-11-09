@@ -48,7 +48,7 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: cbr-offices-csv
-          path: ${{ runner.temp }}/cbr-offices/OFFICES_*.csv
+          path: ${{ runner.temp }}/cbr-offices/????-??-??_OFFICES.csv
           retention-days: 1
           if-no-files-found: error
 
