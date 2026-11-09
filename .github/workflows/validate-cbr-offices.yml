@@ -54,3 +54,17 @@ jobs:
       - name: Run offline extractor and publishing tests
         shell: bash
         run: python -m unittest discover -s tests -p 'test_capture_cbr_offices.py' -q
+      - name: Live read-only CBR HTML extraction smoke test
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/cbr-offices-acceptance"
+          python scripts/capture_cbr_offices.py capture \
+            --output-dir "$RUNNER_TEMP/cbr-offices-acceptance"
+          shopt -s nullglob
+          files=("$RUNNER_TEMP"/cbr-offices-acceptance/OFFICES_*.csv)
+          if [ "${#files[@]}" -ne 1 ]; then
+            echo "::error::Capture must create exactly one CSV"
+            exit 1
+          fi
+          python scripts/capture_cbr_offices.py validate --file "${files[0]}"

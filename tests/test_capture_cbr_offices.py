@@ -269,6 +269,25 @@ class CsvAndBoundaryTests(unittest.TestCase):
                     m.fetch_source_html()
 
 
+class WorkflowContractTests(unittest.TestCase):
+    def test_daily_capture_event_schema_does_not_regress(self):
+        workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" /
+                    "capture-cbr-offices.yml").read_text(encoding="utf-8")
+        self.assertIn("on:\n  workflow_dispatch:\n  schedule:\n", workflow)
+        self.assertIn("- cron: '17 1 * * *'", workflow)
+        self.assertNotIn("\n  push:", workflow)
+        self.assertIn("permissions:\n  contents: read", workflow)
+        self.assertIn("    permissions:\n      contents: write", workflow)
+
+    def test_daily_monitor_has_independent_schedule(self):
+        workflow = (Path(__file__).resolve().parents[1] / ".github" / "workflows" /
+                    "check-cbr-offices.yml").read_text(encoding="utf-8")
+        self.assertIn("on:\n  workflow_dispatch:\n  schedule:", workflow)
+        self.assertIn("- cron: '17 9 * * *'", workflow)
+        self.assertIn("permissions:\n  contents: read", workflow)
+        self.assertNotIn("contents: write", workflow)
+
+
 class GitEffectTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
