@@ -5,7 +5,6 @@ import hashlib
 import io
 import importlib.util
 import json
-import re
 from pathlib import Path
 import tempfile
 import unittest
@@ -261,7 +260,11 @@ class Parsing(unittest.TestCase):
             with self.subTest(date=d):
                 with path.open('r', encoding='utf-8', newline='') as handle:
                     header = next(csv.reader(handle))
-                self.assertTrue(all(not re.search(r' / [0-9]+
+                self.assertFalse(any(' / ' in col and col.rsplit(' / ', 1)[-1].isdigit()
+                                     for col in header[2:]))
+                self.assertEqual(header[:2], ['source_row', 'section_label'])
+
+    def test_daily_only_latest_and_backfill_skips_present(self):
         xlsx = sample_xlsx()
         with tempfile.TemporaryDirectory() as t:
             directory = Path(t)
