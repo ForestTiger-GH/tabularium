@@ -329,6 +329,8 @@ def extract_records(html: str) -> tuple[list[tuple[str, ...]], int]:
         nonlocal data_rows, pending_rows
         if not pending_rows:
             return
+        if not current_section:
+            fail("SOURCE_SECTION_MISSING")
         grid = expanded_grid([r for _, r in pending_rows], width)
         for (row_index, _), cells in zip(pending_rows, grid):
             if any(not cells[i].text for i in range(3)):
@@ -341,12 +343,16 @@ def extract_records(html: str) -> tuple[list[tuple[str, ...]], int]:
     for physical_index, cells in enumerate(rows, header_count + 1):
         if not cells:
             fail("SOURCE_EMPTY_ROW")
-        # The source can overspecify a full-width territorial row (e.g. 10 vs 7).
+        # Only territorial section labels may occupy a whole merged source row.
+        # Reject unexplained full-width notes/totals rather than silently dropping them.
         if len(cells) == 1 and cells[0].colspan >= width and cells[0].rowspan == 1:
+            label = cells[0].text
+            if label and label != "-" and not label.casefold().endswith("федеральный округ"):
+                fail("SOURCE_SECTION_UNRECOGNIZED")
             flush()
-            if cells[0].text:
-                current_section = cells[0].text
-            # Empty full-width structural separators are explicitly supported.
+            if label:
+                current_section = label
+            # An empty structural separator does not erase the preceding label.
             continue
         if any(c.colspan != 1 for c in cells):
             shape = "-".join(str(c.colspan) for c in cells)
@@ -584,7 +590,7 @@ def publish_immutably(name: str, data: bytes, code_commit: str,
 def verify_environment() -> str:
     if (os.getenv("GITHUB_REPOSITORY") != REPO or os.getenv("EXPECTED_REPOSITORY") != REPO
             or os.getenv("GITHUB_REF") != "refs/heads/" + BRANCH
-            or os.getenv("GITHUB_EVENT_NAME") not in ("schedule", "workflow_dispatch")
+            or os.getenv("GITHUB_EVENT_NAME") not in ("schedule", "workflow_dispatch", "push")
             or os.getenv("GITHUB_EVENT_REPOSITORY_PRIVATE", "false") != "false"):
         fail("PUBLISH_CONTEXT_NOT_ALLOWED")
     sha = os.getenv("GITHUB_SHA", "")

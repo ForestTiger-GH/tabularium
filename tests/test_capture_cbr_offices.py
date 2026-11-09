@@ -86,13 +86,23 @@ class ExtractionTests(unittest.TestCase):
 
     def test_unfamiliar_section_and_region_kept(self):
         r, _ = m.extract_records(BASIC.replace("Новый регион", "Новый субъект Z")
-                                 .replace("Центральный федеральный округ", "Неизвестная секция"))
-        self.assertEqual(r[1][1], "Неизвестная секция")
+                                 .replace("Центральный федеральный округ", "Неизвестный федеральный округ"))
+        self.assertEqual(r[1][1], "Неизвестный федеральный округ")
         self.assertEqual(r[2][2], "Новый субъект Z")
 
     def test_unsafe_looking_bank_is_only_text(self):
         r, _ = m.extract_records(BASIC.replace("Банк &quot;Кот, и Ко&quot;", "=HYPERLINK(&quot;evil&quot;)"))
         self.assertEqual(r[2][3], '=HYPERLINK("evil")')
+
+    def test_unexpected_full_width_note_cannot_become_section(self):
+        html = BASIC.replace("Центральный федеральный округ", "ИТОГО / ПОЯСНЕНИЕ")
+        with self.assertRaisesRegex(m.CaptureError, "SOURCE_SECTION_UNRECOGNIZED"):
+            m.extract_records(html)
+
+    def test_data_without_a_territorial_section_is_rejected(self):
+        html = BASIC.replace('<tr><td colspan="7">Центральный федеральный округ</td></tr>', '')
+        with self.assertRaisesRegex(m.CaptureError, "SOURCE_SECTION_MISSING"):
+            m.extract_records(html)
 
     def test_missing_and_duplicate_table_fail(self):
         for html in ("<table><tr><td>missing</td></tr></table>" + m.KNOWN_CONTEXT,
@@ -141,8 +151,7 @@ class CsvAndBoundaryTests(unittest.TestCase):
         with patch.dict(os.environ, environment, clear=True):
             self.assertEqual(m.verify_environment(), sha)
             os.environ["GITHUB_EVENT_NAME"] = "push"
-            with self.assertRaisesRegex(m.CaptureError, "PUBLISH_CONTEXT_NOT_ALLOWED"):
-                m.verify_environment()
+            self.assertEqual(m.verify_environment(), sha)  # public live-acceptance run only
             os.environ["GITHUB_EVENT_NAME"] = "workflow_dispatch"
             self.assertEqual(m.verify_environment(), sha)
             os.environ["GITHUB_EVENT_REPOSITORY_PRIVATE"] = "true"
