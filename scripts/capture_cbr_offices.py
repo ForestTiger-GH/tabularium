@@ -584,7 +584,7 @@ def publish_immutably(name: str, data: bytes, code_commit: str,
 def verify_environment() -> str:
     if (os.getenv("GITHUB_REPOSITORY") != REPO or os.getenv("EXPECTED_REPOSITORY") != REPO
             or os.getenv("GITHUB_REF") != "refs/heads/" + BRANCH
-            or os.getenv("GITHUB_EVENT_NAME") not in ("schedule", "workflow_dispatch", "push")
+            or os.getenv("GITHUB_EVENT_NAME") not in ("schedule", "workflow_dispatch")
             or os.getenv("GITHUB_EVENT_REPOSITORY_PRIVATE", "false") != "false"):
         fail("PUBLISH_CONTEXT_NOT_ALLOWED")
     sha = os.getenv("GITHUB_SHA", "")

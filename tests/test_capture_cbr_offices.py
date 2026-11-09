@@ -141,7 +141,8 @@ class CsvAndBoundaryTests(unittest.TestCase):
         with patch.dict(os.environ, environment, clear=True):
             self.assertEqual(m.verify_environment(), sha)
             os.environ["GITHUB_EVENT_NAME"] = "push"
-            self.assertEqual(m.verify_environment(), sha)  # temporary push acceptance
+            with self.assertRaisesRegex(m.CaptureError, "PUBLISH_CONTEXT_NOT_ALLOWED"):
+                m.verify_environment()
             os.environ["GITHUB_EVENT_NAME"] = "workflow_dispatch"
             self.assertEqual(m.verify_environment(), sha)
             os.environ["GITHUB_EVENT_REPOSITORY_PRIVATE"] = "true"

@@ -2,12 +2,6 @@ name: Capture CBR credit institution offices
 
 on:
   workflow_dispatch:
-  # Temporary public-repository live acceptance trigger, removed after verification.
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/capture-cbr-offices.yml'
-      - 'tests/test_capture_cbr_offices.py'
   schedule:
     # 01:17 UTC = 04:17 in fixed UTC+03:00, without daylight-saving changes.
     - cron: '17 1 * * *'
