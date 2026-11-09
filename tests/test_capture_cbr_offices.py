@@ -347,6 +347,22 @@ class GitEffectTests(unittest.TestCase):
                              "--name-status", "-r", latest),
                          "A\t" + m.CORPUS_ROOT + "/2026/OFFICES_2026-11-09.csv")
 
+    def test_historical_archive_added_while_capture_runs_is_untouched(self):
+        relative = m.CORPUS_ROOT + "/2024/OFFICES_2024-08-13.csv"
+        target = self.work / relative
+        target.parent.mkdir(parents=True)
+        target.write_bytes(self.data)
+        cmd(self.work, "add", relative)
+        cmd(self.work, "commit", "-m", "manual historical snapshot import")
+        cmd(self.work, "push", "origin", "HEAD:refs/heads/main")
+        cmd(self.work, "reset", "--hard", self.initial)
+        self.assertEqual(self.publish(), "CREATED")
+        latest = cmd(self.bare, "rev-parse", "refs/heads/main")
+        preserved = subprocess.run(["git", "-C", str(self.bare),
+                                    "show", latest + ":" + relative],
+                                   check=True, capture_output=True).stdout
+        self.assertEqual(preserved, self.data)
+
     def test_executable_policy_change_blocks_old_capture(self):
         f = self.work / "scripts" / "capture_cbr_offices.py"
         f.parent.mkdir(parents=True)
