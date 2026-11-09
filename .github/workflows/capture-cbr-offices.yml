@@ -2,7 +2,6 @@ name: Capture CBR credit institution offices
 
 on:
   workflow_dispatch:
-      - 'tests/fixtures/cbr-offices/grouped-header.html'
   schedule:
     # 01:17 UTC = 04:17 in fixed UTC+03:00, without daylight-saving changes.
     - cron: '17 1 * * *'
