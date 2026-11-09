@@ -116,6 +116,28 @@ class ExtractionTests(unittest.TestCase):
 
 
 class CsvAndBoundaryTests(unittest.TestCase):
+    def test_schedule_context_allowed_and_temporary_push_revoked(self):
+        sha = "a" * 40
+        environment = {
+            "GITHUB_REPOSITORY": m.REPO,
+            "EXPECTED_REPOSITORY": m.REPO,
+            "GITHUB_REF": "refs/heads/main",
+            "GITHUB_EVENT_NAME": "schedule",
+            "GITHUB_EVENT_REPOSITORY_PRIVATE": "false",
+            "GITHUB_SHA": sha,
+            "EXPECTED_CODE_COMMIT": sha,
+        }
+        with patch.dict(os.environ, environment, clear=True):
+            self.assertEqual(m.verify_environment(), sha)
+            os.environ["GITHUB_EVENT_NAME"] = "push"
+            with self.assertRaisesRegex(m.CaptureError, "PUBLISH_CONTEXT_NOT_ALLOWED"):
+                m.verify_environment()
+            os.environ["GITHUB_EVENT_NAME"] = "workflow_dispatch"
+            self.assertEqual(m.verify_environment(), sha)
+            os.environ["GITHUB_EVENT_REPOSITORY_PRIVATE"] = "true"
+            with self.assertRaisesRegex(m.CaptureError, "PUBLISH_CONTEXT_NOT_ALLOWED"):
+                m.verify_environment()
+
     def test_malformed_csv_rejected(self):
         _, _, valid = sample()
         invalid = [valid.replace(b"\n", b"\r\n"),
