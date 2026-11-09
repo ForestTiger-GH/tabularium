@@ -350,7 +350,8 @@ def extract_records(html: str) -> tuple[list[tuple[str, ...]], int]:
             # Empty full-width structural separators are explicitly supported.
             continue
         if any(c.colspan != 1 for c in cells):
-            fail("SOURCE_DATA_COLSPAN_AMBIGUOUS")
+            shape = "-".join(str(c.colspan) for c in cells)
+            fail(f"SOURCE_DATA_COLSPAN_AMBIGUOUS_ROW_{physical_index}_SHAPE_{shape}")
         pending_rows.append((physical_index, cells))
     flush()
     if data_rows == 0 or len(extracted) != data_rows * (width - 3):
