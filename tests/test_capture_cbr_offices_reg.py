@@ -176,13 +176,14 @@ class Parsing(unittest.TestCase):
                 target.writestr(name, value)
         records = list(csv.reader(io.StringIO(m.convert_xlsx(buf.getvalue()).decode())))
         indexed = {int(row[1]): row for row in records[1:]}
-        self.assertEqual(len(indexed), 46)
-        self.assertEqual(indexed[4][3], '')
-        self.assertEqual(indexed[4][4], 'ПРИМЕР ФЕДЕРАЛЬНЫЙ ОКРУГ')
+        self.assertEqual(len(indexed), 45)
+        self.assertNotIn(4, indexed)  # The district's subtotal is a section label.
         for i in range(5, 45):
             self.assertEqual(indexed[i][3], 'ПРИМЕР ФЕДЕРАЛЬНЫЙ ОКРУГ')
         for i in range(45, 49):
             self.assertEqual(indexed[i][3], '')
+        self.assertFalse(any(row[4] == 'ПРИМЕР ФЕДЕРАЛЬНЫЙ ОКРУГ'
+                             for row in records[1:]))
 
     def test_bad_final_district_balance_fails_closed(self):
         data = [(1, {1: 'ПРИМЕР ФЕДЕРАЛЬНЫЙ ОКРУГ', 2: '10', 3: '20'}),

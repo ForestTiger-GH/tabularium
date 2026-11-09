@@ -353,10 +353,12 @@ def convert_xlsx(blob):
     for i, (rid, cells) in enumerate(data):
         name = cells[territory_col]
         if i in districts:
+            # The source's district subtotal row supplies a structural section
+            # label; do not duplicate its aggregate numeric values in the CSV.
             last_section = name
-            section = ""  # An aggregate row is not a child of itself.
-        elif final_boundary is not None and i > final_boundary:
-            section = ""  # Trailing source rows lie outside the final district.
+            continue
+        if final_boundary is not None and i > final_boundary:
+            section = ""  # These territories have no published district heading.
         else:
             section = last_section
         source_formulas = {str(col): formula for (r, col), formula in formulas.items()
