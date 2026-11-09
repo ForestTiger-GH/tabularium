@@ -23,9 +23,8 @@ REPO = "ForestTiger-GH/tabularium"
 BRANCH = "main"
 CORPUS_ROOT = "scrolls/russia/authorities/bank-of-russia/credit-institution-structural-units"
 TZ = timezone(timedelta(hours=3))
-CSV_COLUMNS = ("source_row", "section_label", "region", "organization_name",
-               "registration_number", "indicator_column", "indicator_name",
-               "raw_value", "value_state")
+CSV_PREFIX = ("source_row", "section_label")
+SOURCE_IDENTITIES = ("регион", "наименованиеко", "рег№ко")
 DATE_NAME = re.compile(r"OFFICES_(\d{4}-\d{2}-\d{2})\.csv\Z", re.ASCII)
 HASH = re.compile(r"[0-9a-f]{64}\Z", re.ASCII)
 COMMIT_HASH = re.compile(r"[0-9a-f]{40}\Z", re.ASCII)
@@ -320,7 +319,9 @@ def extract_records(html: str) -> tuple[list[tuple[str, ...]], int]:
     # Data may have rowspan, so expand all data physical rows as a single grid.
     # Section rows are a separate structural type and never inherit rowspan.
     current_section = ""
-    extracted: list[tuple[str, ...]] = []
+    # Source column headings are retained, including any multi-level hierarchy.
+    # Only two traceability fields are prepended to the original wide table.
+    extracted: list[tuple[str, ...]] = [CSV_PREFIX + tuple(header)]
     data_rows = 0
     pending_rows: list[tuple[int, list[Cell]]] = []
 
@@ -333,11 +334,8 @@ def extract_records(html: str) -> tuple[list[tuple[str, ...]], int]:
             if any(not cells[i].text for i in range(3)):
                 fail("SOURCE_IDENTIFIER_MISSING")
             data_rows += 1
-            for col in range(3, width):
-                value = cells[col].text
-                extracted.append((str(row_index), current_section, cells[0].text,
-                                  cells[1].text, cells[2].text, str(col + 1),
-                                  header[col], value, "present" if value else "blank"))
+            extracted.append((str(row_index), current_section,
+                              *(cell.text for cell in cells)))
         pending_rows = []
 
     for physical_index, cells in enumerate(rows, header_count + 1):
@@ -355,20 +353,21 @@ def extract_records(html: str) -> tuple[list[tuple[str, ...]], int]:
             fail(f"SOURCE_DATA_COLSPAN_AMBIGUOUS_ROW_{physical_index}_SHAPE_{shape}")
         pending_rows.append((physical_index, cells))
     flush()
-    if data_rows == 0 or len(extracted) != data_rows * (width - 3):
+    if data_rows == 0 or len(extracted) != data_rows + 1:
         fail("SOURCE_INCOMPLETE")
     return extracted, data_rows
 
 
 def serialize_csv(records: list[tuple[str, ...]]) -> bytes:
+    """Serialize a complete wide table: first record is its source-faithful header."""
     buffer = io.StringIO(newline="")
     writer = csv.writer(buffer, lineterminator="\n")
-    writer.writerow(CSV_COLUMNS)
     writer.writerows(records)
     return buffer.getvalue().encode("utf-8", "strict")
 
 
 def validate_csv_bytes(data: bytes) -> tuple[int, int]:
+    """Validate one row per source observation; never reinterpret blank or zero."""
     if not data or len(data) > MAX_CSV or data.startswith(b"\xef\xbb\xbf"):
         fail("CSV_SIZE_OR_BOM")
     try:
@@ -376,46 +375,34 @@ def validate_csv_bytes(data: bytes) -> tuple[int, int]:
         rows = list(csv.reader(io.StringIO(content, newline=""), strict=True))
     except (UnicodeError, csv.Error):
         fail("CSV_INVALID_ENCODING")
-    if not rows or tuple(rows[0]) != CSV_COLUMNS or len(rows) < 2:
+    if len(rows) < 2:
         fail("CSV_HEADER_OR_EMPTY")
+    header = rows[0]
+    width = len(header)
+    if (not 6 <= width <= 42 or tuple(header[:2]) != CSV_PREFIX
+            or tuple(header_identity(value) for value in header[2:5]) != SOURCE_IDENTITIES
+            or any(not name or clean_text(name) != name for name in header)
+            or len({header_identity(name) for name in header}) != width):
+        fail("CSV_HEADER_INVALID")
     previous_row = 0
-    previous_col = 0
-    indicator_map: dict[int, str] = {}
-    grouped: dict[int, set[int]] = {}
-    last_id: tuple[str, ...] | None = None
-    for row in rows[1:]:
-        if len(row) != 9:
+    for record in rows[1:]:
+        if len(record) != width:
             fail("CSV_COLUMN_COUNT")
-        for value in row:
-            clean_text(value)  # reject controls, but preserve accepted CSV text unchanged
-        src, section, region, org, reg, col, indicator, value, state = row
-        if not src.isascii() or not src.isdecimal() or not col.isascii() or not col.isdecimal():
+        if any(clean_text(value) != value for value in record):
+            fail("CSV_CELL_NOT_CANONICAL")
+        source = record[0]
+        if not source.isascii() or not source.isdecimal():
             fail("CSV_INDEX_INVALID")
-        source_row, column = int(src), int(col)
-        if not 1 <= source_row <= MAX_ROWS or not 4 <= column <= 40:
-            fail("CSV_INDEX_INVALID")
-        if source_row < previous_row or (source_row == previous_row and column <= previous_col):
+        source_row = int(source)
+        if not 1 <= source_row <= MAX_ROWS or source_row <= previous_row:
             fail("CSV_ORDER_INVALID")
-        if not region or not org or not reg or not indicator:
+        if any(not record[index] for index in (2, 3, 4)):
             fail("CSV_IDENTIFIERS_INVALID")
-        if (state != ("present" if value else "blank")):
-            fail("CSV_VALUE_STATE_INVALID")
-        identity = (section, region, org, reg)
-        if source_row == previous_row and last_id != identity:
-            fail("CSV_ROW_IDENTITY_INVALID")
-        if column in indicator_map and indicator_map[column] != indicator:
-            fail("CSV_INDICATOR_MISMATCH")
-        indicator_map[column] = indicator
-        if column in grouped.setdefault(source_row, set()):
-            fail("CSV_DUPLICATE_CELL")
-        grouped[source_row].add(column)
-        previous_row, previous_col, last_id = source_row, column, identity
-    expected = set(range(4, max(indicator_map) + 1))
-    if any(set(cols) != expected for cols in grouped.values()):
-        fail("CSV_MISSING_INDICATOR")
-    if serialize_csv([tuple(x) for x in rows[1:]]) != data:
+        previous_row = source_row
+    if serialize_csv([tuple(record) for record in rows]) != data:
         fail("CSV_NON_CANONICAL")
-    return len(grouped), len(rows) - 1
+    count = len(rows) - 1
+    return count, count * (width - len(CSV_PREFIX) - 3)
 
 
 def filename_for(observed_at: datetime) -> str:
@@ -439,7 +426,9 @@ def capture(output_dir: Path, github_output: Path | None = None) -> Path:
     html, observed_at = fetch_source_html()
     records, source_rows = extract_records(html)
     data = serialize_csv(records)
-    _, count = validate_csv_bytes(data)
+    validated_rows, count = validate_csv_bytes(data)
+    if validated_rows != source_rows:
+        fail("CSV_SOURCE_ROW_MISMATCH")
     if not output_dir.is_dir() or any(output_dir.iterdir()):
         fail("CAPTURE_OUTPUT_DIR_NOT_EMPTY")
     target = output_dir / filename_for(observed_at)
@@ -595,7 +584,7 @@ def publish_immutably(name: str, data: bytes, code_commit: str,
 def verify_environment() -> str:
     if (os.getenv("GITHUB_REPOSITORY") != REPO or os.getenv("EXPECTED_REPOSITORY") != REPO
             or os.getenv("GITHUB_REF") != "refs/heads/" + BRANCH
-            or os.getenv("GITHUB_EVENT_NAME") not in ("schedule", "workflow_dispatch")
+            or os.getenv("GITHUB_EVENT_NAME") not in ("schedule", "workflow_dispatch", "push")
             or os.getenv("GITHUB_EVENT_REPOSITORY_PRIVATE", "false") != "false"):
         fail("PUBLISH_CONTEXT_NOT_ALLOWED")
     sha = os.getenv("GITHUB_SHA", "")

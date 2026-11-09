@@ -41,66 +41,76 @@ def cwd(path):
 
 
 class ExtractionTests(unittest.TestCase):
-    def test_overspanning_section_cbr_live_layout(self):
-        # A source section can use colspan=10 even with seven data columns.
+    def test_overspanning_full_width_section(self):
         html = BASIC.replace('colspan="7"', 'colspan="10"')
         records, n = m.extract_records(html)
-        self.assertEqual((n, len(records)), (2, 8))
-        self.assertEqual(records[0][1], "Центральный федеральный округ")
-        self.assertEqual(records[4][1], "-")
+        self.assertEqual((n, len(records)), (2, 3))
+        self.assertEqual(records[1][1], "Центральный федеральный округ")
+        self.assertEqual(records[2][1], "-")
         self.assertEqual(m.validate_csv_bytes(m.serialize_csv(records)), (2, 8))
 
-    def test_seven_columns_and_nine_output_fields(self):
-        records, physical, csv_bytes = sample()
-        self.assertEqual((physical, len(records)), (2, 8))
-        self.assertEqual(m.validate_csv_bytes(csv_bytes), (2, 8))
-        self.assertEqual(records[0], ("3", "Центральный федеральный округ",
-                                      "Белгородская область", 'АО "Россельхозбанк"',
-                                      "3349", "4", "Головные офисы", "", "blank"))
-        self.assertEqual(records[4][1], "-")
-        self.assertEqual(records[4][4], "0007")
-        self.assertEqual([x[-2] for x in records[4:8]], ["0", "—", "", "1"])
-        self.assertIn(b'"', csv_bytes)
-        self.assertEqual(csv_bytes, m.serialize_csv(m.extract_records(BASIC)[0]))
+    def test_seven_source_columns_and_blank_zero_dash(self):
+        records, n, data = sample()
+        self.assertEqual((n, len(records)), (2, 3))
+        self.assertEqual(len(records[0]), 9)
+        self.assertEqual(records[0], (
+            "source_row", "section_label", "Регион", "Наименование КО", "Рег. № КО",
+            "Головные офисы", "Филиалы", "Допофисы", "Всего подразделений"))
+        self.assertEqual(records[1], (
+            "3", "Центральный федеральный округ", "Белгородская область",
+            'АО "Россельхозбанк"', "3349", "", "1", "18", "19"))
+        self.assertEqual(records[2], (
+            "5", "-", "Новый регион", 'Банк "Кот, и Ко"', "0007", "0", "—", "", "1"))
+        self.assertEqual(m.validate_csv_bytes(data), (2, 8))
+        self.assertEqual(data, m.serialize_csv(m.extract_records(BASIC)[0]))
 
-    def test_rowspan_hierarchical_header(self):
-        records, physical = m.extract_records(GROUPED)
-        self.assertEqual((physical, len(records)), (2, 4))
-        self.assertEqual(records[0][6], "Подразделения / Филиалы")
+    def test_grouped_header_and_rowspan(self):
+        records, n = m.extract_records(GROUPED)
+        self.assertEqual((n, len(records)), (2, 3))
+        self.assertEqual(records[0][5], "Подразделения / Филиалы")
         self.assertEqual(records[2][2], "Тестовый регион")
         self.assertEqual(m.validate_csv_bytes(m.serialize_csv(records)), (2, 4))
 
-    def test_new_column_and_unknown_region(self):
-        text = BASIC.replace("<th>Допофисы</th>", "<th>Иные подразделения</th><th>Допофисы</th>")
-        text = text.replace('colspan="7"', 'colspan="8"')
-        text = text.replace('<td>3349</td><td></td><td>1</td><td>18</td><td>19</td>',
+    def test_new_indicator_without_schema_reconfiguration(self):
+        html = BASIC.replace("<th>Допофисы</th>", "<th>Иные подразделения</th><th>Допофисы</th>")
+        html = html.replace('colspan="7"', 'colspan="8"')
+        html = html.replace('<td>3349</td><td></td><td>1</td><td>18</td><td>19</td>',
                             '<td>3349</td><td></td><td>1</td><td>5</td><td>18</td><td>19</td>')
-        text = text.replace('<td>0007</td><td>0</td><td>—</td><td></td><td>1</td>',
+        html = html.replace('<td>0007</td><td>0</td><td>—</td><td></td><td>1</td>',
                             '<td>0007</td><td>0</td><td>—</td><td>6</td><td></td><td>1</td>')
-        records, n = m.extract_records(text.replace("Новый регион", "Другой субъект"))
-        self.assertEqual((n, len(records)), (2, 10))
-        self.assertEqual(records[2][6], "Иные подразделения")
-        self.assertEqual(records[5][2], "Другой субъект")
+        r, n = m.extract_records(html)
+        self.assertEqual((n, len(r)), (2, 3))
+        self.assertEqual(r[0][7], "Иные подразделения")
+        self.assertEqual(r[1][7], "5")
+        self.assertEqual(m.validate_csv_bytes(m.serialize_csv(r)), (2, 10))
 
-    def test_untrusted_formula_text_is_not_executed_or_modified(self):
-        text = BASIC.replace("Банк &quot;Кот, и Ко&quot;", "=HYPERLINK(&quot;evil&quot;)")
-        records, _ = m.extract_records(text)
-        self.assertEqual(records[4][3], '=HYPERLINK("evil")')
+    def test_unfamiliar_section_and_region_kept(self):
+        r, _ = m.extract_records(BASIC.replace("Новый регион", "Новый субъект Z")
+                                 .replace("Центральный федеральный округ", "Неизвестная секция"))
+        self.assertEqual(r[1][1], "Неизвестная секция")
+        self.assertEqual(r[2][2], "Новый субъект Z")
 
-    def test_invalid_html_fails_closed(self):
-        variants = [
-            BASIC.replace("Рег. № КО", "Иной идентификатор"),
-            BASIC.replace('colspan="7"', 'colspan="6"'),
-            BASIC.replace('colspan="7"', 'colspan="0"'),
-            BASIC.replace("</tbody>", "<tr><td>Неизвестный итог</td></tr></tbody>"),
-            BASIC.replace("(ОКЭР).", "(OTHER)."),
-            BASIC.replace('Россельхозбанк', 'Bad\x1b[31m'),
-            "<p>Not a source table</p>" + m.KNOWN_CONTEXT,
-        ]
-        for html in variants:
-            with self.subTest(variant=html[:80]):
-                with self.assertRaises(m.CaptureError):
-                    m.extract_records(html)
+    def test_unsafe_looking_bank_is_only_text(self):
+        r, _ = m.extract_records(BASIC.replace("Банк &quot;Кот, и Ко&quot;", "=HYPERLINK(&quot;evil&quot;)"))
+        self.assertEqual(r[2][3], '=HYPERLINK("evil")')
+
+    def test_missing_and_duplicate_table_fail(self):
+        for html in ("<table><tr><td>missing</td></tr></table>" + m.KNOWN_CONTEXT,
+                     BASIC.replace('</body>', '<table id="cstat">' +
+                                   BASIC.split('<table id="cstat">', 1)[1].split('</table>', 1)[0] +
+                                   '</table></body>')):
+            with self.assertRaises(m.CaptureError):
+                m.extract_records(html)
+
+    def test_unknown_significant_row_fail(self):
+        html = BASIC.replace("</tbody>", "<tr><td>ИТОГО</td><td>10</td></tr></tbody>")
+        with self.assertRaises(m.CaptureError):
+            m.extract_records(html)
+
+    def test_bad_span_fail(self):
+        for token in ('colspan="6"', 'colspan="0"', 'colspan="xyz"'):
+            with self.assertRaises(m.CaptureError):
+                m.extract_records(BASIC.replace('colspan="7"', token))
 
     def test_script_cannot_supply_context_note(self):
         disguised = BASIC.replace("<p>" + m.KNOWN_CONTEXT + "</p>",
@@ -108,12 +118,13 @@ class ExtractionTests(unittest.TestCase):
         with self.assertRaisesRegex(m.CaptureError, "SOURCE_CONTEXT_CHANGED"):
             m.extract_records(disguised)
 
-    def test_duplicate_source_table_fails(self):
-        first = BASIC.split('<table id="cstat">', 1)[1].split("</table>", 1)[0]
-        duplicate = BASIC.replace("</body>", '<table id="cstat">' + first + "</table></body>")
-        with self.assertRaisesRegex(m.CaptureError, "SOURCE_TABLE_AMBIGUOUS"):
-            m.extract_records(duplicate)
+    def test_ambiguous_context_fail(self):
+        with self.assertRaisesRegex(m.CaptureError, "SOURCE_CONTEXT_CHANGED"):
+            m.extract_records(BASIC.replace("(ОКЭР).", "(UNKNOWN)."))
 
+    def test_control_char_fail(self):
+        with self.assertRaisesRegex(m.CaptureError, "SOURCE_CONTROL_CHARACTER"):
+            m.extract_records(BASIC.replace("Россельхозбанк", "Bad\x1b[31m"))
 
 class CsvAndBoundaryTests(unittest.TestCase):
     def test_schedule_context_allowed_and_temporary_push_revoked(self):
@@ -138,16 +149,38 @@ class CsvAndBoundaryTests(unittest.TestCase):
             with self.assertRaisesRegex(m.CaptureError, "PUBLISH_CONTEXT_NOT_ALLOWED"):
                 m.verify_environment()
 
-    def test_malformed_csv_rejected(self):
+    def test_malformed_wide_csv_rejected(self):
         _, _, valid = sample()
         invalid = [valid.replace(b"\n", b"\r\n"),
-                   valid.replace(b",blank\n", b",present\n", 1),
+                   valid.replace("Регион".encode(), b"wrong", 1),
                    valid.replace(b"3349", b"", 1),
-                   valid.replace(b",4,", b",5,", 1),
+                   valid.replace(b"\n3,", b"\n0,", 1),
+                   valid.replace(b"\n5,", b"\n3,", 1),
                    valid + b"junk\n"]
         for value in invalid:
-            with self.assertRaises(m.CaptureError):
-                m.validate_csv_bytes(value)
+            with self.subTest(value=value[:90]):
+                with self.assertRaises(m.CaptureError):
+                    m.validate_csv_bytes(value)
+
+    def test_old_long_format_rejected(self):
+        old = b"source_row,section_label,region,organization_name,registration_number,indicator_column,indicator_name,raw_value,value_state\n3,one,two,three,3349,4,indicator,1,present\n"
+        with self.assertRaisesRegex(m.CaptureError, "CSV_HEADER_INVALID"):
+            m.validate_csv_bytes(old)
+
+    def test_wide_duplicate_and_extra_cell_rejected(self):
+        records, _, _ = sample()
+        duplicate = list(records)
+        duplicate[2] = ("3",) + duplicate[2][1:]
+        with self.assertRaisesRegex(m.CaptureError, "CSV_ORDER_INVALID"):
+            m.validate_csv_bytes(m.serialize_csv(duplicate))
+        duplicate_header = list(records)
+        duplicate_header[0] = duplicate_header[0][:-1] + ("Допофисы",)
+        with self.assertRaisesRegex(m.CaptureError, "CSV_HEADER_INVALID"):
+            m.validate_csv_bytes(m.serialize_csv(duplicate_header))
+        malformed = list(records)
+        malformed[1] = malformed[1] + ("extra",)
+        with self.assertRaisesRegex(m.CaptureError, "CSV_COLUMN_COUNT"):
+            m.validate_csv_bytes(m.serialize_csv(malformed))
 
     def test_utc3_new_year_uses_capture_instant(self):
         self.assertEqual(m.TZ.utcoffset(None), timedelta(hours=3))
