@@ -4,6 +4,7 @@ from datetime import date
 import hashlib
 import io
 import importlib.util
+import json
 from pathlib import Path
 import tempfile
 import unittest
@@ -64,14 +65,31 @@ class Parsing(unittest.TestCase):
         blob = m.convert_xlsx(sample_xlsx())
         self.assertEqual(m.validate_csv(blob), 46)
         rs = list(csv.reader(io.StringIO(blob.decode('utf-8'))))
-        self.assertEqual(rs[0], ['source_sheet','source_row','Территория','Кредитные организации','Филиалы','Мобильные офисы','Всего'])
-        self.assertEqual(rs[1], ['Региональный разрез','3','Российская Федерация','2','3','5','10'])
-        self.assertEqual(rs[-1][2], 'Республика Алтай')
-        self.assertEqual(rs[-1][5], '5')
+        self.assertEqual(rs[0], ['source_sheet','source_row','source_formulas','Территория','Кредитные организации','Филиалы','Мобильные офисы','Всего'])
+        self.assertEqual(rs[1], ['Региональный разрез','3','','Российская Федерация','2','3','5','10'])
+        self.assertEqual(rs[-1][3], 'Республика Алтай')
+        self.assertEqual(rs[-1][6], '5')
 
-    def test_formulas_rejected(self):
-        with self.assertRaisesRegex(m.CaptureError, 'XLSX_FORMULA_NOT_SUPPORTED'):
-            m.convert_xlsx(sample_xlsx(formula=True))
+    def test_formula_cached_value_and_source_formula_preserved(self):
+        rows = list(csv.reader(io.StringIO(m.convert_xlsx(sample_xlsx(formula=True)).decode('utf-8'))))
+        self.assertEqual(rows[1][7], '10')
+        self.assertEqual(rows[1][6], '5')
+        lineage = json.loads(rows[1][2])
+        self.assertEqual(lineage['4']['formula'], '2+3')
+        self.assertEqual(lineage['4']['attributes'], {})
+
+    def test_formula_without_cached_value_rejected(self):
+        original = sample_xlsx(formula=True)
+        with zipfile.ZipFile(io.BytesIO(original)) as z:
+            files = {n: z.read(n) for n in z.namelist()}
+        files['xl/worksheets/sheet1.xml'] = files['xl/worksheets/sheet1.xml'].replace(
+            b'<f>2+3</f><v>5</v>', b'<f>2+3</f>')
+        out = io.BytesIO()
+        with zipfile.ZipFile(out, 'w') as z:
+            for name, data in files.items():
+                z.writestr(name, data)
+        with self.assertRaisesRegex(m.CaptureError, 'XLSX_FORMULA_CACHE_MISSING'):
+            m.convert_xlsx(out.getvalue())
 
     def test_lookalike_zip_rejected(self):
         with self.assertRaises((m.CaptureError, zipfile.BadZipFile)):

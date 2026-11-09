@@ -203,6 +203,7 @@ def xlsx_rows(blob):
         if sheetdata is None:
             continue
         data = []
+        formulas = {}
         for r in sheetdata.findall(XML + "row"):
             rid = int(r.get("r", "0"))
             require(1 <= rid <= 30000, "XLSX_ROW_LIMIT")
@@ -210,11 +211,19 @@ def xlsx_rows(blob):
             for c in r.findall(XML + "c"):
                 count += 1
                 require(count <= LIMIT_CELLS, "XLSX_CELL_LIMIT")
-                require(c.find(XML + "f") is None, "XLSX_FORMULA_NOT_SUPPORTED")
                 ref = c.get("r", "")
                 column = colnum(ref)
                 kind = c.get("t", "n")
                 v = c.find(XML + "v")
+                formula = c.find(XML + "f")
+                if formula is not None:
+                    # Preserve the publisher's cached value, NEVER evaluate the formula.
+                    require(v is not None and v.text is not None,
+                            "XLSX_FORMULA_CACHE_MISSING")
+                    formulas[(rid, column)] = {
+                        "formula": formula.text or "",
+                        "attributes": dict(sorted(formula.attrib.items())),
+                    }
                 if kind == "inlineStr":
                     x = c.find(XML + "is")
                     value = "" if x is None else "".join(t.text or "" for t in x.iter(XML + "t"))
@@ -239,7 +248,7 @@ def xlsx_rows(blob):
             if cells:
                 data.append((rid, cells))
         if data:
-            out.append((name, data))
+            out.append((name, data, formulas))
     require(len(out) == 1, "XLSX_EXPECTED_SINGLE_DATA_SHEET")
     return out[0]
 
@@ -253,7 +262,7 @@ def is_territory(value):
 
 def convert_xlsx(blob):
     """Convert one identifiable region table; ambiguous layout is a hard failure."""
-    sheet, rows = xlsx_rows(blob)
+    sheet, rows, formulas = xlsx_rows(blob)
     # The table starts at the national total; earlier title and header are not observations.
     starts = [(i, k) for i, (r, c) in enumerate(rows) for k, t in c.items()
               if "российская федерация" in t.casefold() and
@@ -268,6 +277,8 @@ def convert_xlsx(blob):
     # Prefer the closest consecutive rows with meaningful multi-column headings.
     header_candidates = [cells for _, cells in previous if any(k > territory_col for k in cells)]
     require(header_candidates, "XLSX_HEADER_ABSENT")
+    require(not any(rid in {r for r, _ in previous} for rid, col in formulas),
+            "XLSX_FORMULA_IN_HEADER")
     end_index = idx
     for j in range(idx, len(rows)):
         rid, cells = rows[j]
@@ -305,10 +316,14 @@ def convert_xlsx(blob):
         require(parts, "XLSX_UNNAMED_INDICATOR")
         header.append(" / ".join(parts))
     require(len(set(header)) == len(header), "XLSX_DUPLICATE_HEADER")
-    records = [["source_sheet", "source_row", *header]]
+    records = [["source_sheet", "source_row", "source_formulas", *header]]
     for rid, cells in data:
         require(cells.get(territory_col, ""), "XLSX_MISSING_TERRITORY")
-        records.append([sheet, str(rid), *(cells.get(k, "") for k in cols)])
+        source_formulas = {str(col): formula for (r, col), formula in formulas.items()
+                           if r == rid}
+        provenance = json.dumps(source_formulas, ensure_ascii=False, sort_keys=True,
+                                separators=(",", ":")) if source_formulas else ""
+        records.append([sheet, str(rid), provenance, *(cells.get(k, "") for k in cols)])
     return serialize(records)
 
 
@@ -327,7 +342,7 @@ def validate_csv(blob):
         raise CaptureError("CSV_READ_FAILED") from None
     require(len(rows) >= 31, "CSV_TOO_FEW_ROWS")
     width = len(rows[0])
-    require(6 <= width <= MAX_WIDTH + 2 and rows[0][:2] == ["source_sheet", "source_row"]
+    require(7 <= width <= MAX_WIDTH + 3 and rows[0][:3] == ["source_sheet", "source_row", "source_formulas"]
             and all(rows[0][2:]) and len(set(rows[0])) == width, "CSV_HEADER_INVALID")
     previous = 0
     for row in rows[1:]:
@@ -335,6 +350,15 @@ def validate_csv(blob):
                 "CSV_ROW_INVALID")
         require(int(row[1]) > previous, "CSV_ROW_ORDER")
         require(all(clean(s) == s for s in row), "CSV_CELL_NONCANONICAL")
+        if row[2]:
+            try:
+                provenance = json.loads(row[2])
+            except (ValueError, TypeError):
+                raise CaptureError("CSV_FORMULA_PROVENANCE_INVALID") from None
+            require(isinstance(provenance, dict) and
+                    all(isinstance(v, dict) and "formula" in v and
+                        isinstance(v.get("attributes"), dict) for v in provenance.values()),
+                    "CSV_FORMULA_PROVENANCE_INVALID")
         previous = int(row[1])
     require(serialize(rows) == blob, "CSV_NON_CANONICAL")
     return len(rows)-1
