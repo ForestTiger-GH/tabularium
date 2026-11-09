@@ -7,6 +7,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/capture-cbr-offices.yml'
+      - 'tests/fixtures/cbr-offices/grouped-header.html'
   schedule:
     # 01:17 UTC = 04:17 in fixed UTC+03:00, without daylight-saving changes.
     - cron: '17 1 * * *'

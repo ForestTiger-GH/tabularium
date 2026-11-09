@@ -68,6 +68,7 @@ class ExtractionTests(unittest.TestCase):
         records, n = m.extract_records(GROUPED)
         self.assertEqual((n, len(records)), (2, 3))
         self.assertEqual(records[0][5], "Подразделения / Филиалы")
+        self.assertEqual(records[1][1], "Тестовый федеральный округ")
         self.assertEqual(records[2][2], "Тестовый регион")
         self.assertEqual(m.validate_csv_bytes(m.serialize_csv(records)), (2, 4))
 
