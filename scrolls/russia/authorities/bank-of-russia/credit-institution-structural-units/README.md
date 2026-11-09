@@ -1,0 +1,15 @@
+# Credit institution structural units
+
+Daily observed, source-faithful CSV extractions of the Bank of Russia's [regional table of credit-institution structural units](https://www.cbr.ru/banking_sector/credit/cstat/). Each YYYY/OFFICES_YYYY-MM-DD.csv records the table fetched on that calendar date in fixed UTC+04:00, **not** an official statistical reference date. One successful observation is retained per day, including unchanged table contents. Existing observations are never silently replaced.
+
+The fixed CSV columns, in order, are:
+
+source_row,section_label,region,organization_name,registration_number,indicator_column,indicator_name,raw_value,value_state
+
+source_row is the one-based physical HTML table row index, including header and section rows. section_label holds the last preceding territorial section as published (including "-"); the next three fields are the source's region, institution name and registration number (text, not an integer). indicator_column is the one-based physical source column; indicator_name and raw_value preserve the published indicator label and cell text. value_state reports **text presence only**: present for nonblank cells and blank for empty cells. Blank is not zero; "0", "—" and empty cells remain distinct. No totals are recalculated or harmonized.
+
+This is a **table extraction from an HTML publication**, not an official CSV file, a complete archived HTML issue, or a derived economic series. Source layout and entity text undergo only HTML entity decoding and whitespace folding; source-row provenance is retained. The original HTML, page formatting, and off-table explanatory notes are not archived. At setup, the source stated that federal-district ordering follows the All-Russian Classification of Economic Regions (OKER); the capture checks for that known note and stops if it disappears, but it cannot prove that no other contextual statement or the underlying economic methodology changed. Retrieval can also miss upstream revisions between daily observations. Verify critical interpretations against the official publication.
+
+Treat all text fields as untrusted strings. When opening in spreadsheets, **import text fields explicitly as text**, rather than allowing spreadsheet software to evaluate a name beginning with "=", "+", "-" or "@" as a formula. The CSV intentionally does not modify source strings to make direct opening formula-safe.
+
+Operational logic is in [the collector](../../../../../scripts/capture_cbr_offices.py) and [the manual-only workflow](../../../../../.github/workflows/capture-cbr-offices.yml). Capture and publication use separate jobs; the publisher verifies the artifact hash and the remote Git result before reporting success. The workflow is intentionally **not scheduled until live public-run acceptance**; no missed dates are backfilled by substituting later data. GitHub repository-level contents:write is not independently restricted to this CSV path, so reviewed code and branch controls remain necessary.
