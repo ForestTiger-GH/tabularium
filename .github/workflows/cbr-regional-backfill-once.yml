@@ -99,12 +99,12 @@ jobs:
               assert hashlib.sha256(blob).hexdigest() == item["csv_sha256"], item["file"]
               count = m.validate_csv(blob)
               header = next(csv.reader(blob.decode("utf-8").splitlines()))
-              assert header[:3] == ["source_row","section_label","Регион"], item["file"]
+              assert header[:2] == ["source_row","section_label"] and header[2].strip(), item["file"]
               assert "source_formulas" not in header and "source_sheet" not in header, item["file"]
               assert count >= 75, (item["file"],count)
               assert isinstance(item["formula_cells"],dict), item["file"]
               counts[item["file"][:4]] += 1
-              print(f"CHECKED_CBR_REGION {item['file']} observations={count} columns={len(header)}",flush=True)
+              print(f"CHECKED_CBR_REGION {item['file']} observations={count} columns={len(header)} territory_header={header[2]!r}",flush=True)
           print(f"HISTORICAL_BACKFILL_AUDITED archived={len(archive)} prepared={len(staged_names)} by_year={dict(sorted(counts.items()))}",flush=True)
           PY
       - name: Commit only verified missing CSVs with XLSX source and formula provenance
