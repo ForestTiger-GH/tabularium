@@ -1,0 +1,119 @@
+name: One-time CBR regional historical backfill
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cbr-regional-backfill-once.yml'
+
+permissions:
+  contents: read
+
+# Share the lock with the recurring regional collector: only one writer at a time.
+concurrency:
+  group: cbr-offices-reg-monthly
+  cancel-in-progress: false
+
+jobs:
+  archive-history:
+    if: >-
+      github.repository == 'ForestTiger-GH/tabularium' &&
+      github.ref == 'refs/heads/main' &&
+      github.event.repository.private == false &&
+      contains(github.event.head_commit.message, 'chore(cbr): trigger controlled historical backfill 2019-2026')
+    runs-on: ubuntu-24.04
+    timeout-minutes: 110
+    permissions:
+      contents: write
+    steps:
+      - name: Check out the exact source and collector revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Set up Python 3.12
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
+      - name: Run offline regional collector regression tests
+        run: python -m unittest discover -s tests -p 'test_capture_cbr_offices_reg.py' -q
+      - name: Check official publication index for gaps before downloading
+        shell: bash
+        run: |
+          python - <<'PY'
+          from datetime import date
+          from scripts import capture_cbr_offices_reg as m
+          html = m.download(m.SOURCE_PAGE, m.LIMIT_HTML,
+                            {"text/html", "application/xhtml+xml"})
+          links = m.discover(html.decode("utf-8-sig"))
+          assert min(links) == date(2019,7,1), f"Unexpected first release: {min(links)}"
+          assert max(links) >= date(2026,10,1), f"Unexpected latest release: {max(links)}"
+          months = {(d.year,d.month) for d in links
+                    if date(2019,7,1) <= d <= date(2026,10,1)}
+          expected = {(year,month) for year in range(2019,2027)
+                      for month in range(1,13)
+                      if date(2019,7,1) <= date(year,month,1) <= date(2026,10,1)}
+          assert months == expected, f"Missing/unexpected monthly releases: {sorted(expected ^ months)}"
+          print(f"OFFICIAL_MONTHLY_INDEX_OK complete={len(expected)} earliest={min(links)} latest={max(links)}", flush=True)
+          PY
+      - name: Download and validate all missing monthly releases, without modifying the corpus
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/cbr-regional-backfill"
+          python scripts/capture_cbr_offices_reg.py capture \
+            --mode backfill \
+            --from-date 2019-07-01 \
+            --to-date 2026-10-01 \
+            --output-dir "$RUNNER_TEMP/cbr-regional-backfill" \
+            --manifest "$RUNNER_TEMP/cbr-regional-backfill/manifest.json"
+      - name: Audit completeness, schema, and hashes before any publication
+        shell: bash
+        run: |
+          python - <<'PY'
+          import csv
+          from collections import Counter
+          from datetime import date
+          from pathlib import Path
+          import hashlib
+          import json
+          import os
+          from scripts import capture_cbr_offices_reg as m
+
+          root = Path(m.CORPUS)
+          staged = Path(os.environ["RUNNER_TEMP"]) / "cbr-regional-backfill"
+          manifest = json.loads((staged/"manifest.json").read_text(encoding="utf-8"))
+          staged_names = {item["file"] for item in manifest}
+          assert len(staged_names) == len(manifest), "Duplicate staged month"
+          archive = {p.name for p in root.glob("20??/*_OFFICES-REG.csv")}
+          target = {m.output_name(date(y,month,1))
+                    for y in range(2019,2027) for month in range(1,13)
+                    if date(2019,7,1) <= date(y,month,1) <= date(2026,10,1)}
+          assert archive | staged_names == target, f"Archive coverage missing: {sorted(target - archive - staged_names)}"
+          assert not (archive & staged_names), "Staged files overlap existing archive"
+          assert len(archive) + len(staged_names) == 88, "Unexpected publication count"
+          counts = Counter()
+          for item in manifest:
+              p = staged/item["file"]
+              blob = p.read_bytes()
+              assert hashlib.sha256(blob).hexdigest() == item["csv_sha256"], item["file"]
+              count = m.validate_csv(blob)
+              header = next(csv.reader(blob.decode("utf-8").splitlines()))
+              assert header[:3] == ["source_row","section_label","Регион"], item["file"]
+              assert "source_formulas" not in header and "source_sheet" not in header, item["file"]
+              assert count >= 75, (item["file"],count)
+              assert isinstance(item["formula_cells"],dict), item["file"]
+              counts[item["file"][:4]] += 1
+              print(f"CHECKED_CBR_REGION {item['file']} observations={count} columns={len(header)}",flush=True)
+          print(f"HISTORICAL_BACKFILL_AUDITED archived={len(archive)} prepared={len(staged_names)} by_year={dict(sorted(counts.items()))}",flush=True)
+          PY
+      - name: Commit only verified missing CSVs with XLSX source and formula provenance
+        shell: bash
+        env:
+          GITHUB_EVENT_REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
+        run: |
+          set -euo pipefail
+          python scripts/capture_cbr_offices_reg.py publish \
+            --input-dir "$RUNNER_TEMP/cbr-regional-backfill" \
+            --manifest "$RUNNER_TEMP/cbr-regional-backfill/manifest.json" \
+            --code-sha "$GITHUB_SHA"
