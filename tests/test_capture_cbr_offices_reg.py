@@ -65,15 +65,15 @@ class Parsing(unittest.TestCase):
         blob = m.convert_xlsx(sample_xlsx())
         self.assertEqual(m.validate_csv(blob), 46)
         rs = list(csv.reader(io.StringIO(blob.decode('utf-8'))))
-        self.assertEqual(rs[0], ['source_sheet','source_row','source_formulas','Территория','Кредитные организации','Филиалы','Мобильные офисы','Всего'])
-        self.assertEqual(rs[1], ['Региональный разрез','3','','Российская Федерация','2','3','5','10'])
-        self.assertEqual(rs[-1][3], 'Республика Алтай')
-        self.assertEqual(rs[-1][6], '5')
+        self.assertEqual(rs[0], ['source_sheet','source_row','source_formulas','section_label','Территория','Кредитные организации','Филиалы','Мобильные офисы','Всего'])
+        self.assertEqual(rs[1], ['Региональный разрез','3','','','Российская Федерация','2','3','5','10'])
+        self.assertEqual(rs[-1][4], 'Республика Алтай')
+        self.assertEqual(rs[-1][7], '5')
 
     def test_formula_cached_value_and_source_formula_preserved(self):
         rows = list(csv.reader(io.StringIO(m.convert_xlsx(sample_xlsx(formula=True)).decode('utf-8'))))
-        self.assertEqual(rows[1][7], '10')
-        self.assertEqual(rows[1][6], '5')
+        self.assertEqual(rows[1][8], '10')
+        self.assertEqual(rows[1][7], '5')
         lineage = json.loads(rows[1][2])
         self.assertEqual(lineage['4']['formula'], '2+3')
         self.assertEqual(lineage['4']['attributes'], {})
@@ -132,6 +132,64 @@ class Parsing(unittest.TestCase):
         altered = original.replace(b',2,3,5,10\n', b',2,3,,10\n', 1)
         self.assertEqual(m.validate_csv(altered), 46)
         self.assertNotEqual(original, altered)
+
+    def test_only_table_and_source_headers_are_in_csv(self):
+        from xml.etree import ElementTree as ET
+        original = sample_xlsx()
+        with zipfile.ZipFile(io.BytesIO(original)) as source:
+            parts = {name: source.read(name) for name in source.namelist()}
+        sheet = parts['xl/worksheets/sheet1.xml'].decode('utf-8')
+        # The third physical row is the Excel column-number guide, not headings.
+        guide = '<row r="2"><c r="A2"><v>1</v></c><c r="B2"><v>2</v></c></row>'
+        sheet = sheet.replace('</sheetData>', '<row r="49"><c r="A49" t="inlineStr">'
+                              '<is><t>Explanatory notes</t></is></c></row></sheetData>')
+        parts['xl/worksheets/sheet1.xml'] = sheet.encode()
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, 'w', zipfile.ZIP_DEFLATED) as target:
+            for name, value in parts.items():
+                target.writestr(name, value)
+        rows = list(csv.reader(io.StringIO(m.convert_xlsx(buf.getvalue()).decode())))
+        self.assertEqual(rows[0][4], 'Территория')
+        self.assertEqual(len(rows), 47)
+        self.assertFalse(any('Статистика территориального присутствия' in str(row)
+                             or 'Explanatory notes' in str(row) for row in rows))
+
+    def test_dynamic_district_label_and_four_ungrouped_tail_rows(self):
+        original = sample_xlsx()
+        with zipfile.ZipFile(io.BytesIO(original)) as source:
+            parts = {name: source.read(name) for name in source.namelist()}
+        ns = '{http://schemas.openxmlformats.org/spreadsheetml/2006/main}'
+        sheet = ET.fromstring(parts['xl/worksheets/sheet1.xml'])
+        district_row = next(row for row in sheet.find(ns+'sheetData')
+                            if row.get('r') == '4')
+        for cell in district_row.findall(ns+'c'):
+            cell_ref = cell.get('r')
+            if cell_ref == 'A4':
+                cell.find(ns+'is').find(ns+'t').text = 'ПРИМЕР ФЕДЕРАЛЬНЫЙ ОКРУГ'
+            elif cell_ref in ('B4', 'C4', 'D4', 'E4'):
+                cell.find(ns+'v').text = {'B4':'80', 'C4':'120',
+                                           'D4':'200', 'E4':'400'}[cell_ref]
+        parts['xl/worksheets/sheet1.xml'] = ET.tostring(sheet, encoding='utf-8')
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, 'w', zipfile.ZIP_DEFLATED) as target:
+            for name, value in parts.items():
+                target.writestr(name, value)
+        records = list(csv.reader(io.StringIO(m.convert_xlsx(buf.getvalue()).decode())))
+        indexed = {int(row[1]): row for row in records[1:]}
+        self.assertEqual(len(indexed), 46)
+        self.assertEqual(indexed[4][3], '')
+        self.assertEqual(indexed[4][4], 'ПРИМЕР ФЕДЕРАЛЬНЫЙ ОКРУГ')
+        for i in range(5, 45):
+            self.assertEqual(indexed[i][3], 'ПРИМЕР ФЕДЕРАЛЬНЫЙ ОКРУГ')
+        for i in range(45, 49):
+            self.assertEqual(indexed[i][3], '')
+
+    def test_bad_final_district_balance_fails_closed(self):
+        data = [(1, {1: 'ПРИМЕР ФЕДЕРАЛЬНЫЙ ОКРУГ', 2: '10', 3: '20'}),
+                (2, {1: 'Территория', 2: '3', 3: '4'}),
+                (3, {1: 'Территория', 2: '5', 3: '6'})]
+        with self.assertRaisesRegex(m.CaptureError, 'XLSX_FINAL_DISTRICT_BALANCE_AMBIGUOUS'):
+            m.last_district_boundary(data, 0, 1, [2, 3])
 
     def test_daily_only_latest_and_backfill_skips_present(self):
         xlsx = sample_xlsx()
