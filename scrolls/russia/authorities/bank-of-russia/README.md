@@ -4,7 +4,7 @@ Primary machine-readable publications issued by the Bank of Russia.
 
 ## Route
 
-- [`credit-institution-structural-units/`](credit-institution-structural-units/) — dated CSV observations of regional credit-institution structural units extracted from the Bank of Russia HTML table.
+- [`credit-institution-structural-units/`](credit-institution-structural-units/) — dated CSV representations of the Bank of Russia's bank-by-region HTML table and monthly territorial-presence XLSX releases.
 
 - [`medium-term-forecast/`](medium-term-forecast/) — Medium-Term Forecast of the Bank of Russia.
 - [`banking-sector-dynamics/`](banking-sector-dynamics/) — monthly information-analytical publication “О развитии банковского сектора Российской Федерации”.

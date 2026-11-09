@@ -1,0 +1,99 @@
+"""Offline acceptance tests for the CBR territorial monthly collector."""
+import csv
+from datetime import date
+import hashlib
+import io
+import importlib.util
+from pathlib import Path
+import tempfile
+import unittest
+from unittest.mock import patch
+import xml.etree.ElementTree as ET
+import zipfile
+
+SCRIPT = Path(__file__).resolve().parents[1] / 'scripts' / 'capture_cbr_offices_reg.py'
+if not SCRIPT.exists():
+    SCRIPT = Path(__file__).parent / 'capture_cbr_offices_reg.py'
+spec = importlib.util.spec_from_file_location('cbr_reg', SCRIPT)
+m = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(m)
+
+
+def sample_xlsx(formula=False, extra_sheet=False, two_level=True):
+    ns = 'http://schemas.openxmlformats.org/spreadsheetml/2006/main'
+    workbook = f'<workbook xmlns="{ns}" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Региональный разрез" sheetId="1" r:id="rId1"/></sheets></workbook>'
+    relations = '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>'
+    def string(col, rid, val):
+        return f'<c r="{col}{rid}" t="inlineStr"><is><t>{val}</t></is></c>'
+    def num(col, rid, val):
+        return f'<c r="{col}{rid}"><v>{val}</v></c>'
+    rows = [f'<row r="1">{string("A",1,"Статистика территориального присутствия")}</row>']
+    rows.append(f'<row r="2">{string("A",2,"Территория")}{string("B",2,"Кредитные организации")}{string("C",2,"Филиалы")}{string("D",2,"Мобильные офисы")}{string("E",2,"Всего")}</row>')
+    regions = ['Российская Федерация'] + ['Белгородская область', 'Брянская область', 'Республика Алтай'] * 15
+    for i, reg in enumerate(regions, 3):
+        form = '<f>2+3</f>' if formula and i == 3 else ''
+        rows.append(f'<row r="{i}">{string("A",i,reg)}{num("B",i,2)}{num("C",i,3)}<c r="D{i}">{form}<v>5</v></c>{num("E",i,10)}</row>')
+    sheet = f'<worksheet xmlns="{ns}"><sheetData>{"".join(rows)}</sheetData></worksheet>'
+    buff = io.BytesIO()
+    with zipfile.ZipFile(buff, 'w', zipfile.ZIP_DEFLATED) as z:
+        z.writestr('xl/workbook.xml', workbook)
+        z.writestr('xl/_rels/workbook.xml.rels', relations)
+        z.writestr('xl/worksheets/sheet1.xml', sheet)
+    return buff.getvalue()
+
+
+def sample_page():
+    links = ''.join(f'<a href="/vfs/statistics/bank_system/DivisionsPerRegion_01{mo:02d}20.xlsx">2020 г.: на 01.{mo:02d}</a>' for mo in range(1, 13))
+    links += '<a href="/vfs/statistics/bank_system/DivisionsPerRegion_010719.xlsx">2019 г.: на 01.07</a>'
+    links += '<a href="/vfs/statistics/bank_system/DivisionsPerRegion_011026.xlsx">2026 г.: на 01.10</a>'
+    return '<html><body>' + links + '</body></html>'
+
+
+class Parsing(unittest.TestCase):
+    def test_source_link_dates_immutable(self):
+        x = m.discover(sample_page())
+        self.assertEqual(len(x), 14)
+        self.assertEqual(max(x), date(2026, 10, 1))
+        self.assertEqual(m.output_name(max(x)), '2026-10-01_OFFICES-REG.csv')
+        with self.assertRaisesRegex(m.CaptureError, 'INVALID_SOURCE_URL'):
+            m.url_date('https://evil.example/DivisionsPerRegion_011026.xlsx')
+        with self.assertRaisesRegex(m.CaptureError, 'SOURCE_LINK_DATE_MISMATCH'):
+            m.discover(sample_page().replace('2026 г.: на 01.10', '2026 г.: на 01.09'))
+
+    def test_full_wide_csv_preserves_cells(self):
+        blob = m.convert_xlsx(sample_xlsx())
+        self.assertEqual(m.validate_csv(blob), 46)
+        rs = list(csv.reader(io.StringIO(blob.decode('utf-8'))))
+        self.assertEqual(rs[0], ['source_sheet','source_row','Территория','Кредитные организации','Филиалы','Мобильные офисы','Всего'])
+        self.assertEqual(rs[1], ['Региональный разрез','3','Российская Федерация','2','3','5','10'])
+        self.assertEqual(rs[-1][2], 'Республика Алтай')
+        self.assertEqual(rs[-1][5], '5')
+
+    def test_formulas_rejected(self):
+        with self.assertRaisesRegex(m.CaptureError, 'XLSX_FORMULA_NOT_SUPPORTED'):
+            m.convert_xlsx(sample_xlsx(formula=True))
+
+    def test_lookalike_zip_rejected(self):
+        with self.assertRaises((m.CaptureError, zipfile.BadZipFile)):
+            m.convert_xlsx(b'PK\x03\x04not-a-valid-file')
+
+    def test_csv_values_not_inferred(self):
+        original = m.convert_xlsx(sample_xlsx())
+        altered = original.replace(b',2,3,5,10\n', b',2,3,,10\n', 1)
+        self.assertEqual(m.validate_csv(altered), 46)
+        self.assertNotEqual(original, altered)
+
+    def test_daily_only_latest_and_backfill_skips_present(self):
+        xlsx = sample_xlsx()
+        with tempfile.TemporaryDirectory() as t:
+            directory = Path(t)
+            with patch.object(m, 'download', side_effect=lambda url, *_: sample_page().encode() if url == m.SOURCE_PAGE else xlsx):
+                manifest = m.collect('daily', None, None, directory)
+            self.assertEqual(len(manifest), 1)
+            self.assertEqual(manifest[0]['file'], '2026-10-01_OFFICES-REG.csv')
+            self.assertEqual(manifest[0]['xlsx_sha256'], hashlib.sha256(xlsx).hexdigest())
+            self.assertEqual(m.validate_csv((directory / '2026-10-01_OFFICES-REG.csv').read_bytes()), 46)
+
+
+if __name__ == '__main__':
+    unittest.main()

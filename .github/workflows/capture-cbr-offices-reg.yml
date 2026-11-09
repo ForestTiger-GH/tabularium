@@ -1,0 +1,135 @@
+name: Capture CBR monthly regional offices
+
+on:
+  schedule:
+    # Discover one latest published monthly release daily, 05:17 fixed UTC+03.
+    - cron: '17 2 * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'daily: latest release; backfill: all missing releases in interval; verify: offline CSV checks'
+        type: choice
+        options:
+          - daily
+          - backfill
+          - verify
+        default: daily
+      from_date:
+        description: 'Backfill starting reference date (YYYY-MM-01; optional)'
+        required: false
+        type: string
+      to_date:
+        description: 'Backfill ending reference date (YYYY-MM-01; optional)'
+        required: false
+        type: string
+      dry_run:
+        description: 'Do not commit or push. Uncheck to publish a manual run.'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cbr-offices-reg-monthly
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    if: >-
+      github.repository == 'ForestTiger-GH/tabularium' &&
+      github.ref == 'refs/heads/main' &&
+      github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 110
+    outputs:
+      has_changes: ${{ steps.capture_csv.outputs.has_changes }}
+    steps:
+      - name: Checkout immutable event commit (read-only)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Set up Python 3.12
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
+      - name: Offline converter and publication tests
+        shell: bash
+        run: python -m unittest discover -s tests -p 'test_capture_cbr_offices_reg.py' -q
+      - name: Verify archived regional CSVs (read-only)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.mode == 'verify' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          find scrolls/russia/authorities/bank-of-russia/credit-institution-structural-units \
+            -name '*_OFFICES-REG.csv' -type f -print0 | \
+            while IFS= read -r -d '' file; do
+              python scripts/capture_cbr_offices_reg.py validate --file "$file"
+            done
+      - name: Find, convert and validate missing monthly reports
+        id: capture_csv
+        if: ${{ github.event_name == 'schedule' || inputs.mode != 'verify' }}
+        shell: bash
+        env:
+          RUN_MODE: ${{ github.event_name == 'schedule' && 'daily' || inputs.mode }}
+          FROM_DATE: ${{ inputs.from_date || '' }}
+          TO_DATE: ${{ inputs.to_date || '' }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/cbr-offices-reg"
+          args=(capture --mode "$RUN_MODE" --output-dir "$RUNNER_TEMP/cbr-offices-reg" \
+                --manifest "$RUNNER_TEMP/cbr-offices-reg/manifest.json")
+          if [ -n "$FROM_DATE" ]; then args+=(--from-date "$FROM_DATE"); fi
+          if [ -n "$TO_DATE" ]; then args+=(--to-date "$TO_DATE"); fi
+          python scripts/capture_cbr_offices_reg.py "${args[@]}"
+          count="$(python -c 'import json,sys; print(len(json.load(open(sys.argv[1]))))' \
+            "$RUNNER_TEMP/cbr-offices-reg/manifest.json")"
+          if [ "$count" -gt 0 ]; then echo 'has_changes=true' >> "$GITHUB_OUTPUT"; \
+          else echo 'has_changes=false' >> "$GITHUB_OUTPUT"; fi
+          echo "Captured $count new regional releases"
+      - name: Transfer short-lived CSVs and provenance manifest
+        if: ${{ steps.capture_csv.outputs.has_changes == 'true' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: cbr-regional-csv
+          path: ${{ runner.temp }}/cbr-offices-reg/
+          retention-days: 1
+          if-no-files-found: error
+
+  publish:
+    needs: capture
+    if: >-
+      needs.capture.outputs.has_changes == 'true' &&
+      github.repository == 'ForestTiger-GH/tabularium' &&
+      github.ref == 'refs/heads/main' &&
+      github.event.repository.private == false &&
+      (github.event_name == 'schedule' || inputs.dry_run == false)
+    permissions:
+      contents: write
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout same immutable event commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - name: Set up Python 3.12
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
+      - name: Download verified CSV candidates
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          name: cbr-regional-csv
+          path: ${{ runner.temp }}/cbr-offices-reg-input
+      - name: Publish only new monthly CSV files, with source hashes
+        shell: bash
+        env:
+          GITHUB_EVENT_REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
+        run: |
+          python scripts/capture_cbr_offices_reg.py publish \
+            --input-dir "$RUNNER_TEMP/cbr-offices-reg-input" \
+            --manifest "$RUNNER_TEMP/cbr-offices-reg-input/manifest.json" \
+            --code-sha "$GITHUB_SHA"

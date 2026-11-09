@@ -302,7 +302,11 @@ class WorkflowContractTests(unittest.TestCase):
             for file in folder.iterdir():
                 with self.subTest(file=file.name):
                     self.assertTrue(file.is_file())
-                    self.assertEqual(m.file_date(file.name).year, int(folder.name))
+                    if file.name.endswith("_OFFICES-REG.csv"):
+                        self.assertRegex(file.name, r"^20\d\d-\d\d-01_OFFICES-REG\.csv$")
+                        self.assertEqual(int(file.name[:4]), int(folder.name))
+                    else:
+                        self.assertEqual(m.file_date(file.name).year, int(folder.name))
 
     def test_all_workflows_follow_date_first_artifact_naming(self):
         repo = Path(__file__).resolve().parents[1]

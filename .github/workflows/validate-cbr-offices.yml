@@ -8,6 +8,9 @@ on:
       - '.github/workflows/validate-cbr-offices.yml'
       - '.github/workflows/check-cbr-offices.yml'
       - 'scripts/capture_cbr_offices.py'
+      - 'scripts/capture_cbr_offices_reg.py'
+      - 'tests/test_capture_cbr_offices_reg.py'
+      - '.github/workflows/capture-cbr-offices-reg.yml'
       - 'tests/test_capture_cbr_offices.py'
       - 'tests/fixtures/cbr-offices/**'
   pull_request:
@@ -16,6 +19,9 @@ on:
       - '.github/workflows/validate-cbr-offices.yml'
       - '.github/workflows/check-cbr-offices.yml'
       - 'scripts/capture_cbr_offices.py'
+      - 'scripts/capture_cbr_offices_reg.py'
+      - 'tests/test_capture_cbr_offices_reg.py'
+      - '.github/workflows/capture-cbr-offices-reg.yml'
       - 'tests/test_capture_cbr_offices.py'
       - 'tests/fixtures/cbr-offices/**'
   workflow_dispatch:
@@ -50,10 +56,11 @@ jobs:
           go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 \
             .github/workflows/capture-cbr-offices.yml \
             .github/workflows/validate-cbr-offices.yml \
-            .github/workflows/check-cbr-offices.yml
+            .github/workflows/check-cbr-offices.yml \
+            .github/workflows/capture-cbr-offices-reg.yml
       - name: Run offline extractor and publishing tests
         shell: bash
-        run: python -m unittest discover -s tests -p 'test_capture_cbr_offices.py' -q
+        run: python -m unittest discover -s tests -p 'test_capture_cbr_offices*.py' -q
       - name: Live read-only CBR HTML extraction smoke test
         if: github.event_name == 'push'
         shell: bash
