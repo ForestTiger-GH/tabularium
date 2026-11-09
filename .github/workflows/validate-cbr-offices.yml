@@ -1,0 +1,53 @@
+name: Validate CBR offices automation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/capture-cbr-offices.yml'
+      - '.github/workflows/validate-cbr-offices.yml'
+      - 'scripts/capture_cbr_offices.py'
+      - 'tests/test_capture_cbr_offices.py'
+      - 'tests/fixtures/cbr-offices/**'
+  pull_request:
+    paths:
+      - '.github/workflows/capture-cbr-offices.yml'
+      - '.github/workflows/validate-cbr-offices.yml'
+      - 'scripts/capture_cbr_offices.py'
+      - 'tests/test_capture_cbr_offices.py'
+      - 'tests/fixtures/cbr-offices/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: >-
+      github.repository == 'ForestTiger-GH/tabularium' &&
+      github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Checkout proposed commit (read-only)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Set up Python 3.12
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
+      - name: Set up Go 1.25 for pinned actionlint
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e
+        with:
+          go-version: '1.25'
+          cache: false
+      - name: Validate GitHub Actions syntax and expressions
+        shell: bash
+        run: |
+          go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 \
+            .github/workflows/capture-cbr-offices.yml \
+            .github/workflows/validate-cbr-offices.yml
+      - name: Run offline extractor and publishing tests
+        shell: bash
+        run: python -m unittest discover -s tests -p 'test_capture_cbr_offices.py' -q

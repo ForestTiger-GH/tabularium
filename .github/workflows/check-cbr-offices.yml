@@ -1,0 +1,41 @@
+name: Check daily CBR offices snapshot
+
+on:
+  workflow_dispatch:
+  schedule:
+    # After the 01:17 UTC collector; use fixed UTC+03 for the expected date.
+    - cron: '17 9 * * *'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    if: >-
+      github.repository == 'ForestTiger-GH/tabularium' &&
+      github.ref == 'refs/heads/main' &&
+      github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Checkout current public archive (read-only)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Set up Python 3.12
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
+      - name: Verify today's immutable CSV exists and validates
+        shell: bash
+        run: |
+          set -euo pipefail
+          expected="$(python -c 'from datetime import datetime, timedelta, timezone; print(datetime.now(timezone(timedelta(hours=3))).date().isoformat())')"
+          year="${expected:0:4}"
+          file="scrolls/russia/authorities/bank-of-russia/credit-institution-structural-units/${year}/OFFICES_${expected}.csv"
+          if [ ! -s "$file" ]; then
+            echo "::error::Missing CBR offices snapshot for UTC+03 date ${expected}: ${file}"
+            exit 1
+          fi
+          python scripts/capture_cbr_offices.py validate --file "$file"
+          echo "PRESENT_AND_VALID ${file}"
