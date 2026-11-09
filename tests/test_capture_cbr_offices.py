@@ -41,6 +41,15 @@ def cwd(path):
 
 
 class ExtractionTests(unittest.TestCase):
+    def test_overspanning_section_cbr_live_layout(self):
+        # A source section can use colspan=10 even with seven data columns.
+        html = BASIC.replace('colspan="7"', 'colspan="10"')
+        records, n = m.extract_records(html)
+        self.assertEqual((n, len(records)), (2, 8))
+        self.assertEqual(records[0][1], "Центральный федеральный округ")
+        self.assertEqual(records[4][1], "-")
+        self.assertEqual(m.validate_csv_bytes(m.serialize_csv(records)), (2, 8))
+
     def test_seven_columns_and_nine_output_fields(self):
         records, physical, csv_bytes = sample()
         self.assertEqual((physical, len(records)), (2, 8))
