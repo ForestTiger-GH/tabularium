@@ -343,7 +343,7 @@ def extract_records(html: str) -> tuple[list[tuple[str, ...]], int]:
     for physical_index, cells in enumerate(rows, header_count + 1):
         if not cells:
             fail("SOURCE_EMPTY_ROW")
-        # The source can overspecify a full-width territorial row (e.g. 10 vs 7). 
+        # The source can overspecify a full-width territorial row (e.g. 10 vs 7).
         if len(cells) == 1 and cells[0].colspan >= width and cells[0].rowspan == 1:
             flush()
             if cells[0].text:
@@ -595,7 +595,7 @@ def publish_immutably(name: str, data: bytes, code_commit: str,
 def verify_environment() -> str:
     if (os.getenv("GITHUB_REPOSITORY") != REPO or os.getenv("EXPECTED_REPOSITORY") != REPO
             or os.getenv("GITHUB_REF") != "refs/heads/" + BRANCH
-            or os.getenv("GITHUB_EVENT_NAME") not in ("schedule", "workflow_dispatch", "push")
+            or os.getenv("GITHUB_EVENT_NAME") not in ("schedule", "workflow_dispatch")
             or os.getenv("GITHUB_EVENT_REPOSITORY_PRIVATE", "false") != "false"):
         fail("PUBLISH_CONTEXT_NOT_ALLOWED")
     sha = os.getenv("GITHUB_SHA", "")
