@@ -81,45 +81,35 @@ jobs:
         shell: bash
         run: |
           python - <<'PY'
+          from datetime import date
+          from pathlib import Path
           from scripts import capture_cbr_offices_reg as m
+
           html = m.download(m.SOURCE_PAGE, m.LIMIT_HTML, {"text/html", "application/xhtml+xml"})
           links = m.discover(html.decode("utf-8-sig"))
-          period = max(links)
-          xlsx = m.download(links[period], m.LIMIT_XLSX, {
-              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-              "application/octet-stream", "application/zip"
-          })
-          from pathlib import Path
-          Path("/tmp/cbr-reg-acceptance-sample.xlsx").write_bytes(xlsx)
-          try:
-              result = m.convert_xlsx(xlsx)
-          except m.CaptureError as exc:
-              if str(exc) == "XLSX_UNRECOGNIZED_TERRITORY":
+          requested = {min(links), max(links), date(2021, 1, 1),
+                       date(2022, 6, 1), date(2023, 10, 1)}
+          periods = sorted(requested & links.keys())
+          print(f"REGIONAL_LIVE_PERIODS {periods}", flush=True)
+          for period in periods:
+              xlsx = m.download(links[period], m.LIMIT_XLSX, {
+                  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                  "application/octet-stream", "application/zip"
+              })
+              Path("/tmp/cbr-reg-acceptance-sample.xlsx").write_bytes(xlsx)
+              try:
+                  result = m.convert_xlsx(xlsx)
+              except m.CaptureError as exc:
                   sheet, items, _ = m.xlsx_rows(xlsx)
-                  starts = [(i, k) for i, (_, cells) in enumerate(items)
-                            for k, value in cells.items()
-                            if "российская федерация" in value.casefold()
-                            and sum(bool(m.re.fullmatch(r"[+-]?\d+(?:[.,]\d+)?", v))
-                                    for v in cells.values()) >= 2]
-                  if len(starts) == 1:
-                      start, territory_col = starts[0]
-                      for i in range(start, len(items)):
-                          rid, cells = items[i]
-                          label = cells.get(territory_col, "")
-                          others = [v for col, v in cells.items() if col > territory_col]
-                          if (label and not m.is_territory(label)
-                              and not m.re.search(r"(?:^|\s)в\s+том\s+числе", label, m.re.I)
-                              and any(m.re.fullmatch(r"[+-]?\d+(?:[.,]\d+)?", v)
-                                      for v in others)):
-                              print(f"REGIONAL_SOURCE_DIAGNOSTIC worksheet={sheet!r} row={rid}"
-                                    f" name={label[:180]!r} samples={others[:8]!r}", flush=True)
-                              for near_row, near_cells in items[max(start, i - 3):i + 4]:
-                                  print(f"REGIONAL_CONTEXT row={near_row}"
-                                        f" fields={str(near_cells)[:380]}", flush=True)
-                              break
-              raise
-          rows = m.validate_csv(result)
-          print(f"REGIONAL_LIVE_CONVERSION_OK reference_date={period} rows={rows}")
+                  print(f"REGIONAL_CONVERSION_FAILED date={period} code={exc}"
+                        f" sheet={sheet!r} rows={len(items)}", flush=True)
+                  for rid, cells in items[:8] + items[-12:]:
+                      print(f"REGIONAL_SOURCE_CONTEXT row={rid}"
+                            f" cells={str(cells)[:360]}", flush=True)
+                  raise
+              rows = m.validate_csv(result)
+              print(f"REGIONAL_LIVE_CONVERSION_OK reference_date={period} rows={rows}",
+                    flush=True)
           PY
       - name: Short-lived official XLSX acceptance sample
         if: always()
