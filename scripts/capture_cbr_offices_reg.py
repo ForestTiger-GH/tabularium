@@ -253,56 +253,84 @@ def xlsx_rows(blob):
     return out[0]
 
 
-def is_territory(value):
-    s = value.casefold()
-    return ("российская федерация" in s or "федеральный округ" in s or
-            "область" in s or "республика" in s or "край" in s or "автономный" in s or
-            "москва" in s or "санкт-петербург" in s or "севастополь" in s)
+def is_quantitative(value):
+    return re.fullmatch(r"[+-]?\d+(?:[.,]\d+)?", value) is not None
+
+
+def is_district_label(value):
+    # The source's generic grouping label, not a hardcoded district name list.
+    return "федеральный округ" in value.casefold()
+
+
+def last_district_boundary(data, district_index, territory_col, indicator_cols):
+    """Resolve the end of the last district without assigning trailing regions to it.
+
+    The publication may append territories outside the preceding federal district.
+    Reconcile the published district subtotal against its following rows. This
+    only determines extraction grouping; it does not alter any published value.
+    """
+    district = data[district_index][1]
+    following = data[district_index + 1:]
+    require(following, "XLSX_FINAL_DISTRICT_EMPTY")
+    comparable = [c for c in indicator_cols
+                  if district.get(c, "").isascii() and district.get(c, "").isdecimal()
+                  and all(cells.get(c, "").isascii() and cells.get(c, "").isdecimal()
+                          for _, cells in following)]
+    require(len(comparable) >= 2, "XLSX_FINAL_DISTRICT_BALANCE_UNKNOWN")
+    targets = {c: int(district[c]) for c in comparable}
+    totals = {c: 0 for c in comparable}
+    matches = []
+    for offset, (_, cells) in enumerate(following, start=1):
+        for c in comparable:
+            totals[c] += int(cells[c])
+        if totals == targets:
+            matches.append(district_index + offset)
+    require(len(matches) == 1, "XLSX_FINAL_DISTRICT_BALANCE_AMBIGUOUS")
+    return matches[0]
 
 
 def convert_xlsx(blob):
-    """Convert one identifiable region table; ambiguous layout is a hard failure."""
+    """Keep only the published table and attach source-derived district context."""
     sheet, rows, formulas = xlsx_rows(blob)
-    # The table starts at the national total; earlier title and header are not observations.
-    starts = [(i, k) for i, (r, c) in enumerate(rows) for k, t in c.items()
-              if "российская федерация" in t.casefold() and
-              sum(bool(re.fullmatch(r"[+-]?\d+(?:[.,]\d+)?", v)) for v in c.values()) >= 2]
+    starts = [(i, k) for i, (_, cells) in enumerate(rows) for k, value in cells.items()
+              if "российская федерация" in value.casefold()
+              and sum(is_quantitative(v) for v in cells.values()) >= 2]
     require(len(starts) == 1, "XLSX_NATIONAL_TOTAL_AMBIGUOUS")
     idx, territory_col = starts[0]
-    first = rows[idx][1]
-    require("российская федерация" in first.get(territory_col, "").casefold(),
+    require("российская федерация" in rows[idx][1].get(territory_col, "").casefold(),
             "XLSX_NATIONAL_TOTAL_POSITION")
-    previous = rows[max(0, idx-5):idx]
-    require(len(previous) >= 1, "XLSX_HEADER_ABSENT")
-    # Prefer the closest consecutive rows with meaningful multi-column headings.
-    header_candidates = [cells for _, cells in previous if any(k > territory_col for k in cells)]
+
+    previous = rows[max(0, idx - 6):idx]
+    # The title is not a table heading. Numbered column guides (1, 2, 3...)
+    # are not source indicator names, even when adjacent to the heading row.
+    header_candidates = [cells for _, cells in previous
+                         if any(k > territory_col for k in cells)
+                         and not (len(cells) >= 3 and
+                                  all(value.isdecimal() and int(value) == k
+                                      for k, value in cells.items()))]
     require(header_candidates, "XLSX_HEADER_ABSENT")
-    require(not any(rid in {r for r, _ in previous} for rid, col in formulas),
+    require(not any(rid in {r for r, _ in previous} for rid, _ in formulas),
             "XLSX_FORMULA_IN_HEADER")
-    end_index = idx
-    for j in range(idx, len(rows)):
-        rid, cells = rows[j]
+
+    data = []
+    footer_started = False
+    for rid, cells in rows[idx:]:
         name = cells.get(territory_col, "")
-        other = [v for k, v in cells.items() if k > territory_col and v]
-        if not name and other:
-            raise CaptureError("XLSX_UNLABELLED_DATA_ROW")
-        # Skip non-data notes after territorial table, but reject numeric content there.
-        if name and not is_territory(name) and not re.search(r"(?:^|\s)в\s+том\s+числе", name, re.I):
-            if any(re.fullmatch(r"[+-]?\d+(?:[.,]\d+)?", v) for v in other):
-                raise CaptureError("XLSX_UNRECOGNIZED_TERRITORY")
-            break
-        end_index = j + 1
-    # A non-data footer may terminate the table, but cannot hide later regional data.
-    for _, later in rows[end_index:]:
-        if (is_territory(later.get(territory_col, "")) and
-                sum(bool(re.fullmatch(r"[+-]?\d+(?:[.,]\d+)?", v)) for v in later.values()) >= 2):
-            raise CaptureError("XLSX_DATA_AFTER_FOOTER")
-    data = rows[idx:end_index]
+        number_count = sum(is_quantitative(v) for k, v in cells.items()
+                           if k > territory_col)
+        if number_count >= 2:
+            require(not footer_started, "XLSX_DATA_AFTER_FOOTER")
+            require(name, "XLSX_UNLABELLED_DATA_ROW")
+            data.append((rid, cells))
+        else:
+            require(not number_count, "XLSX_AMBIGUOUS_NON_DATA_ROW")
+            footer_started = True
     require(len(data) >= 30 and len({r for r, _ in data}) == len(data),
             "XLSX_TOO_FEW_REGIONS")
     cols = sorted({k for _, cells in data for k in cells})
     require(territory_col in cols and len(cols) >= 4, "XLSX_FEW_INDICATORS")
-    # Do not infer headings from modern series; compose only observed source words.
+    indicator_cols = [k for k in cols if k > territory_col]
+
     header = []
     for k in cols:
         parts = []
@@ -311,19 +339,32 @@ def convert_xlsx(blob):
             if value and (not parts or parts[-1] != value):
                 parts.append(value)
         if not parts:
-            # A source column may be completely unlabelled; do not invent its meaning.
             parts = [f"source_column_{k}"]
-        require(parts, "XLSX_UNNAMED_INDICATOR")
         header.append(" / ".join(parts))
     require(len(set(header)) == len(header), "XLSX_DUPLICATE_HEADER")
-    records = [["source_sheet", "source_row", "source_formulas", *header]]
-    for rid, cells in data:
-        require(cells.get(territory_col, ""), "XLSX_MISSING_TERRITORY")
+
+    districts = [i for i, (_, cells) in enumerate(data)
+                 if is_district_label(cells[territory_col])]
+    final_boundary = (last_district_boundary(data, districts[-1], territory_col,
+                                             indicator_cols) if districts else None)
+    last_section = ""
+    records = [["source_sheet", "source_row", "source_formulas",
+                "section_label", *header]]
+    for i, (rid, cells) in enumerate(data):
+        name = cells[territory_col]
+        if i in districts:
+            last_section = name
+            section = ""  # An aggregate row is not a child of itself.
+        elif final_boundary is not None and i > final_boundary:
+            section = ""  # Trailing source rows lie outside the final district.
+        else:
+            section = last_section
         source_formulas = {str(col): formula for (r, col), formula in formulas.items()
                            if r == rid}
-        provenance = json.dumps(source_formulas, ensure_ascii=False, sort_keys=True,
-                                separators=(",", ":")) if source_formulas else ""
-        records.append([sheet, str(rid), provenance, *(cells.get(k, "") for k in cols)])
+        provenance = (json.dumps(source_formulas, ensure_ascii=False, sort_keys=True,
+                                 separators=(",", ":")) if source_formulas else "")
+        records.append([sheet, str(rid), provenance, section,
+                        *(cells.get(k, "") for k in cols)])
     return serialize(records)
 
 
@@ -342,8 +383,8 @@ def validate_csv(blob):
         raise CaptureError("CSV_READ_FAILED") from None
     require(len(rows) >= 31, "CSV_TOO_FEW_ROWS")
     width = len(rows[0])
-    require(7 <= width <= MAX_WIDTH + 3 and rows[0][:3] == ["source_sheet", "source_row", "source_formulas"]
-            and all(rows[0][2:]) and len(set(rows[0])) == width, "CSV_HEADER_INVALID")
+    require(8 <= width <= MAX_WIDTH + 4 and rows[0][:4] == ["source_sheet", "source_row", "source_formulas", "section_label"]
+            and all(rows[0][3:]) and len(set(rows[0])) == width, "CSV_HEADER_INVALID")
     previous = 0
     for row in rows[1:]:
         require(len(row) == width and row[0] and row[1].isascii() and row[1].isdecimal(),
