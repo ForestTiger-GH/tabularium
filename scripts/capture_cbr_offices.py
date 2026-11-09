@@ -155,6 +155,7 @@ class SourceScanner(HTMLParser):
         self.tables: list[Table] = []
         self.table: Table | None = None
         self.outside_text: list[str] = []
+        self.ignored_depth = 0
         self.nodes = 0
         self.cells = 0
 
@@ -162,6 +163,8 @@ class SourceScanner(HTMLParser):
         self.nodes += 1
         if self.nodes > MAX_NODES:
             fail("SOURCE_DOM_LIMIT")
+        if tag in ("script", "style", "template", "noscript") and self.table is None:
+            self.ignored_depth += 1
         if tag == "table":
             if self.table is not None:
                 fail("SOURCE_NESTED_TABLE")
@@ -189,11 +192,13 @@ class SourceScanner(HTMLParser):
         if self.table is not None:
             if self.table.cell is not None:
                 self.table.cell.fragments.append(data)
-        elif data.strip():
+        elif data.strip() and self.ignored_depth == 0:
             self.outside_text.append(data)
 
     def handle_endtag(self, tag: str):
         if self.table is None:
+            if tag in ("script", "style", "template", "noscript") and self.ignored_depth:
+                self.ignored_depth -= 1
             return
         if tag in ("td", "th"):
             if self.table.cell is None or self.table.cell.tag != tag:

@@ -93,6 +93,12 @@ class ExtractionTests(unittest.TestCase):
                 with self.assertRaises(m.CaptureError):
                     m.extract_records(html)
 
+    def test_script_cannot_supply_context_note(self):
+        disguised = BASIC.replace("<p>" + m.KNOWN_CONTEXT + "</p>",
+                                  "<script>" + m.KNOWN_CONTEXT + "</script>")
+        with self.assertRaisesRegex(m.CaptureError, "SOURCE_CONTEXT_CHANGED"):
+            m.extract_records(disguised)
+
     def test_duplicate_source_table_fails(self):
         first = BASIC.split('<table id="cstat">', 1)[1].split("</table>", 1)[0]
         duplicate = BASIC.replace("</body>", '<table id="cstat">' + first + "</table></body>")
