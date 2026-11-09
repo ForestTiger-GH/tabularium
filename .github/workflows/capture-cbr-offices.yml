@@ -2,15 +2,9 @@ name: Capture CBR credit institution offices
 
 on:
   workflow_dispatch:
-  # Temporary public main-only acceptance trigger; verify same-day idempotency.
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/capture-cbr-offices.yml'
-      - 'scripts/capture_cbr_offices.py'
-  # Enable ONLY after successful acceptance runs in this public repository.
-  # schedule:
-  #   - cron: '17 0 * * *'  # 00:17 UTC = 04:17 fixed UTC+04
+  schedule:
+    # 00:17 UTC = 04:17 in fixed UTC+04:00, without daylight-saving changes.
+    - cron: '17 0 * * *'
 
 permissions:
   contents: read
