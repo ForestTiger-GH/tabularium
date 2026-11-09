@@ -75,3 +75,21 @@ jobs:
             exit 1
           fi
           python scripts/capture_cbr_offices.py validate --file "${files[0]}"
+
+      - name: Live read-only CBR monthly XLSX conversion smoke test
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          python - <<'PY'
+          from scripts import capture_cbr_offices_reg as m
+          html = m.download(m.SOURCE_PAGE, m.LIMIT_HTML, {"text/html", "application/xhtml+xml"})
+          links = m.discover(html.decode("utf-8-sig"))
+          period = max(links)
+          xlsx = m.download(links[period], m.LIMIT_XLSX, {
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+              "application/octet-stream", "application/zip"
+          })
+          result = m.convert_xlsx(xlsx)
+          rows = m.validate_csv(result)
+          print(f"REGIONAL_LIVE_CONVERSION_OK reference_date={period} rows={rows}")
+          PY
