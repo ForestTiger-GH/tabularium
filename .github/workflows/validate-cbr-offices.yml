@@ -99,7 +99,7 @@ jobs:
                   starts = [(i, k) for i, (_, cells) in enumerate(items)
                             for k, value in cells.items()
                             if "российская федерация" in value.casefold()
-                            and sum(bool(m.re.fullmatch(r"[+-]?\\d+(?:[.,]\\d+)?", v))
+                            and sum(bool(m.re.fullmatch(r"[+-]?\d+(?:[.,]\d+)?", v))
                                     for v in cells.values()) >= 2]
                   if len(starts) == 1:
                       start, territory_col = starts[0]
@@ -108,8 +108,8 @@ jobs:
                           label = cells.get(territory_col, "")
                           others = [v for col, v in cells.items() if col > territory_col]
                           if (label and not m.is_territory(label)
-                              and not m.re.search(r"(?:^|\\s)в\\s+том\\s+числе", label, m.re.I)
-                              and any(m.re.fullmatch(r"[+-]?\\d+(?:[.,]\\d+)?", v)
+                              and not m.re.search(r"(?:^|\s)в\s+том\s+числе", label, m.re.I)
+                              and any(m.re.fullmatch(r"[+-]?\d+(?:[.,]\d+)?", v)
                                       for v in others)):
                               print(f"REGIONAL_SOURCE_DIAGNOSTIC worksheet={sheet!r} row={rid}"
                                     f" name={label[:180]!r} samples={others[:8]!r}", flush=True)
