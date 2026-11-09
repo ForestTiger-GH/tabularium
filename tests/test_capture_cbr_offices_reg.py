@@ -278,21 +278,3 @@ class Parsing(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-, col)
-                                    for col in header[2:]))
-                self.assertEqual(header[:2], ['source_row', 'section_label'])
-
-    def test_daily_only_latest_and_backfill_skips_present(self):
-        xlsx = sample_xlsx()
-        with tempfile.TemporaryDirectory() as t:
-            directory = Path(t)
-            with patch.object(m, 'CORPUS', str(directory / 'empty-archive')), patch.object(m, 'download', side_effect=lambda url, *_: sample_page().encode() if url == m.SOURCE_PAGE else xlsx):
-                manifest = m.collect('daily', None, None, directory)
-            self.assertEqual(len(manifest), 1)
-            self.assertEqual(manifest[0]['file'], '2026-10-01_OFFICES-REG.csv')
-            self.assertEqual(manifest[0]['xlsx_sha256'], hashlib.sha256(xlsx).hexdigest())
-            self.assertEqual(m.validate_csv((directory / '2026-10-01_OFFICES-REG.csv').read_bytes()), 46)
-
-
-if __name__ == '__main__':
-    unittest.main()
