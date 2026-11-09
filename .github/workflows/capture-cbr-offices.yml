@@ -2,7 +2,7 @@ name: Capture CBR credit institution offices
 
 on:
   workflow_dispatch:
-  # Temporary public main-only acceptance trigger; removed after live verification.
+  # Temporary public main-only acceptance trigger; verify same-day idempotency.
   push:
     branches: [main]
     paths:
