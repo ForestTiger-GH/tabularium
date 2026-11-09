@@ -5,6 +5,7 @@ import hashlib
 import io
 import importlib.util
 import json
+import re
 from pathlib import Path
 import tempfile
 import unittest
@@ -216,6 +217,67 @@ class Parsing(unittest.TestCase):
         old += [['Лист1', row[0], ''] + row[1:] for row in rows[1:]]
         with self.assertRaisesRegex(m.CaptureError, 'CSV_HEADER_INVALID'):
             m.validate_csv(m.serialize(old))
+
+    def test_nonconsecutive_numeric_column_guide_is_not_a_header(self):
+        """Column guides 1,2,3,4,9 must not leak into the source headings."""
+        original = sample_xlsx()
+        ns = '{http://schemas.openxmlformats.org/spreadsheetml/2006/main}'
+        with zipfile.ZipFile(io.BytesIO(original)) as archive:
+            files = {name: archive.read(name) for name in archive.namelist()}
+        sheet = ET.fromstring(files['xl/worksheets/sheet1.xml'])
+        sheet_data = sheet.find(ns + 'sheetData')
+        for row in sheet_data.findall(ns + 'row'):
+            number = int(row.get('r'))
+            if number >= 3:
+                row.set('r', str(number + 1))
+                for cell in row.findall(ns + 'c'):
+                    old_ref = cell.get('r')
+                    cell.set('r', old_ref.rstrip('0123456789') + str(number + 1))
+        ordinal = ET.Element(ns + 'row', {'r': '3'})
+        for letter, value in [('A', '1'), ('B', '2'), ('C', '3'), ('D', '4'), ('E', '9')]:
+            cell = ET.SubElement(ordinal, ns + 'c', {'r': letter + '3'})
+            ET.SubElement(cell, ns + 'v').text = value
+        sheet_data.insert(2, ordinal)
+        files['xl/worksheets/sheet1.xml'] = ET.tostring(sheet, encoding='utf-8')
+        buffer = io.BytesIO()
+        with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_DEFLATED) as archive:
+            for name, content in files.items():
+                archive.writestr(name, content)
+        converted = m.convert_xlsx(buffer.getvalue())
+        table = list(csv.reader(io.StringIO(converted.decode('utf-8'))))
+        self.assertEqual(table[0], [
+            'source_row', 'section_label', 'Территория', 'Кредитные организации',
+            'Филиалы', 'Мобильные офисы', 'Всего'])
+        self.assertEqual(len(table) - 1, 46)
+        self.assertEqual(table[1][0], '4')
+        self.assertEqual(m.validate_csv(converted), 46)
+
+    def test_corrected_historical_headers_contain_no_excel_ordinal_suffixes(self):
+        root = Path(__file__).resolve().parents[1] / m.CORPUS
+        affected = ['2022-04-01', '2022-05-01', '2023-01-01',
+                    '2023-02-01', '2023-08-01', '2023-10-01', '2023-12-01']
+        for d in affected:
+            path = root / d[:4] / (d + '_OFFICES-REG.csv')
+            with self.subTest(date=d):
+                with path.open('r', encoding='utf-8', newline='') as handle:
+                    header = next(csv.reader(handle))
+                self.assertTrue(all(not re.search(r' / [0-9]+
+        xlsx = sample_xlsx()
+        with tempfile.TemporaryDirectory() as t:
+            directory = Path(t)
+            with patch.object(m, 'CORPUS', str(directory / 'empty-archive')), patch.object(m, 'download', side_effect=lambda url, *_: sample_page().encode() if url == m.SOURCE_PAGE else xlsx):
+                manifest = m.collect('daily', None, None, directory)
+            self.assertEqual(len(manifest), 1)
+            self.assertEqual(manifest[0]['file'], '2026-10-01_OFFICES-REG.csv')
+            self.assertEqual(manifest[0]['xlsx_sha256'], hashlib.sha256(xlsx).hexdigest())
+            self.assertEqual(m.validate_csv((directory / '2026-10-01_OFFICES-REG.csv').read_bytes()), 46)
+
+
+if __name__ == '__main__':
+    unittest.main()
+, col)
+                                    for col in header[2:]))
+                self.assertEqual(header[:2], ['source_row', 'section_label'])
 
     def test_daily_only_latest_and_backfill_skips_present(self):
         xlsx = sample_xlsx()

@@ -289,6 +289,22 @@ def last_district_boundary(data, district_index, territory_col, indicator_cols):
     return matches[0]
 
 
+def is_column_number_guide(cells):
+    """Recognize Excel's technical column numbering, even when codes skip values.
+
+    Official publications sometimes number their final visible column as 9
+    after 1..5, because former office categories were consolidated. Those
+    technical ordinals must never be appended to published CSV headings.
+    """
+    if len(cells) < 3:
+        return False
+    numbered = [v for _, v in sorted(cells.items())]
+    if not all(v.isascii() and v.isdecimal() for v in numbered):
+        return False
+    codes = [int(v) for v in numbered]
+    return codes[0] == 1 and all(a < b for a, b in zip(codes, codes[1:]))
+
+
 def convert_xlsx(blob, *, return_formula_lineage=False):
     """Keep only the published table and attach source-derived district context."""
     sheet, rows, formulas = xlsx_rows(blob)
@@ -305,9 +321,7 @@ def convert_xlsx(blob, *, return_formula_lineage=False):
     # are not source indicator names, even when adjacent to the heading row.
     header_candidates = [cells for _, cells in previous
                          if any(k > territory_col for k in cells)
-                         and not (len(cells) >= 3 and
-                                  all(value.isdecimal() and int(value) == k
-                                      for k, value in cells.items()))]
+                         and not is_column_number_guide(cells)]
     require(header_candidates, "XLSX_HEADER_ABSENT")
     require(not any(rid in {r for r, _ in previous} for rid, _ in formulas),
             "XLSX_FORMULA_IN_HEADER")
