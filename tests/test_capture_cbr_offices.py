@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import contextlib
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import hashlib
 import os
 from pathlib import Path
@@ -149,10 +149,11 @@ class CsvAndBoundaryTests(unittest.TestCase):
             with self.assertRaises(m.CaptureError):
                 m.validate_csv_bytes(value)
 
-    def test_utc4_new_year_uses_capture_instant(self):
-        self.assertEqual(m.filename_for(datetime(2026, 12, 31, 19, 59, tzinfo=timezone.utc)),
+    def test_utc3_new_year_uses_capture_instant(self):
+        self.assertEqual(m.TZ.utcoffset(None), timedelta(hours=3))
+        self.assertEqual(m.filename_for(datetime(2026, 12, 31, 20, 59, tzinfo=timezone.utc)),
                          "OFFICES_2026-12-31.csv")
-        self.assertEqual(m.filename_for(datetime(2026, 12, 31, 20, 0, tzinfo=timezone.utc)),
+        self.assertEqual(m.filename_for(datetime(2026, 12, 31, 21, 0, tzinfo=timezone.utc)),
                          "OFFICES_2027-01-01.csv")
         with self.assertRaises(m.CaptureError):
             m.file_date("OFFICES_2027-02-30.csv")

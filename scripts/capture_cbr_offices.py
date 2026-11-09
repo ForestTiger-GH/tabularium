@@ -22,7 +22,7 @@ SOURCE_URL = "https://www.cbr.ru/banking_sector/credit/cstat/"
 REPO = "ForestTiger-GH/tabularium"
 BRANCH = "main"
 CORPUS_ROOT = "scrolls/russia/authorities/bank-of-russia/credit-institution-structural-units"
-TZ = timezone(timedelta(hours=4))
+TZ = timezone(timedelta(hours=3))
 CSV_COLUMNS = ("source_row", "section_label", "region", "organization_name",
                "registration_number", "indicator_column", "indicator_name",
                "raw_value", "value_state")

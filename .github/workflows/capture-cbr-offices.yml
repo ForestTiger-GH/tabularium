@@ -3,8 +3,8 @@ name: Capture CBR credit institution offices
 on:
   workflow_dispatch:
   schedule:
-    # 00:17 UTC = 04:17 in fixed UTC+04:00, without daylight-saving changes.
-    - cron: '17 0 * * *'
+    # 01:17 UTC = 04:17 in fixed UTC+03:00, without daylight-saving changes.
+    - cron: '17 1 * * *'
 
 permissions:
   contents: read

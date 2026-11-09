@@ -1,6 +1,6 @@
 # Credit institution structural units
 
-Daily observed, source-faithful CSV extractions of the Bank of Russia's [regional table of credit-institution structural units](https://www.cbr.ru/banking_sector/credit/cstat/). Each YYYY/OFFICES_YYYY-MM-DD.csv records the table fetched on that calendar date in fixed UTC+04:00, **not** an official statistical reference date. One successful observation is retained per day, including unchanged table contents. Existing observations are never silently replaced.
+Daily observed, source-faithful CSV extractions of the Bank of Russia's [regional table of credit-institution structural units](https://www.cbr.ru/banking_sector/credit/cstat/). Each YYYY/OFFICES_YYYY-MM-DD.csv records the table fetched on that calendar date in fixed UTC+03:00, **not** an official statistical reference date. One successful observation is retained per day, including unchanged table contents. Existing observations are never silently replaced.
 
 The fixed CSV columns, in order, are:
 
@@ -12,4 +12,4 @@ This is a **table extraction from an HTML publication**, not an official CSV fil
 
 Treat all text fields as untrusted strings. When opening in spreadsheets, **import text fields explicitly as text**, rather than allowing spreadsheet software to evaluate a name beginning with "=", "+", "-" or "@" as a formula. The CSV intentionally does not modify source strings to make direct opening formula-safe.
 
-Operational logic is in [the collector](../../../../../scripts/capture_cbr_offices.py) and [the daily workflow](../../../../../.github/workflows/capture-cbr-offices.yml). The workflow runs at 00:17 UTC (04:17 in fixed UTC+04:00) and also allows manual dispatch from main. Capture and publication use separate jobs; the publisher verifies the artifact hash and the remote Git result before reporting success. GitHub may delay or skip scheduled runs; no missed dates are backfilled by substituting later data. GitHub repository-level contents:write is not independently restricted to this CSV path, so reviewed code and branch controls remain necessary.
+Operational logic is in [the collector](../../../../../scripts/capture_cbr_offices.py) and [the daily workflow](../../../../../.github/workflows/capture-cbr-offices.yml). The workflow runs at 01:17 UTC (04:17 in fixed UTC+03:00) and also allows manual dispatch from main. Capture and publication use separate jobs; the publisher verifies the artifact hash and the remote Git result before reporting success. GitHub may delay or skip scheduled runs; no missed dates are backfilled by substituting later data. GitHub repository-level contents:write is not independently restricted to this CSV path, so reviewed code and branch controls remain necessary.
