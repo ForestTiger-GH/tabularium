@@ -7,6 +7,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/capture-cbr-offices.yml'
+      - 'scripts/capture_cbr_offices.py'
   # Enable ONLY after successful acceptance runs in this public repository.
   # schedule:
   #   - cron: '17 0 * * *'  # 00:17 UTC = 04:17 fixed UTC+04
