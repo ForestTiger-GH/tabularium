@@ -22,6 +22,13 @@ SOURCE_URL = "https://www.cbr.ru/banking_sector/credit/cstat/"
 REPO = "ForestTiger-GH/tabularium"
 BRANCH = "main"
 CORPUS_ROOT = "scrolls/russia/authorities/bank-of-russia/credit-institution-structural-units"
+# Executable policy inputs; never publish an old run across changes here.
+# Other files, including historical CSVs from different dates, may advance main.
+POLICY_PATHS = ("AGENTS.md", "scripts/capture_cbr_offices.py",
+                ".github/workflows/capture-cbr-offices.yml",
+                "tests/test_capture_cbr_offices.py", "tests/fixtures/cbr-offices",
+                CORPUS_ROOT + "/README.md")
+PUSH_ATTEMPTS = 3
 TZ = timezone(timedelta(hours=3))
 CSV_PREFIX = ("source_row", "section_label")
 SOURCE_IDENTITIES = ("регион", "наименованиеко", "рег№ко")
@@ -531,14 +538,15 @@ def safe_target(repo_root: Path, name: str, corpus_root: str) -> tuple[str, Path
     return relative, target
 
 
-def confirm_remote(expected_commit: str, relative: str, data: bytes) -> str:
-    head = remote_head()
-    content = remote_blob(head, relative)
-    if content != data:
-        fail("OUTCOME_UNKNOWN")
-    if not git("merge-base", "--is-ancestor", expected_commit, head, allow_failure=True).returncode:
-        return "CREATED"
-    return "NOOP_ALREADY_PUBLISHED"
+def ensure_policy_compatible(code_commit: str, remote_commit: str) -> None:
+    """Permit unrelated main changes, never a changed executable policy."""
+    if git("merge-base", "--is-ancestor", code_commit, remote_commit,
+           allow_failure=True).returncode:
+        fail("POLICY_GENERATION_CHANGED")
+    changed = git("diff", "--name-only", "--no-renames", code_commit, remote_commit,
+                  "--", *POLICY_PATHS).stdout
+    if changed:
+        fail("POLICY_GENERATION_CHANGED")
 
 
 def publish_immutably(name: str, data: bytes, code_commit: str,
@@ -547,44 +555,60 @@ def publish_immutably(name: str, data: bytes, code_commit: str,
     assert_git_context(repo_root, code_commit, strict_remote)
     validate_csv_bytes(data)
     relative, target = safe_target(repo_root, name, corpus_root)
-    head = remote_head()
-    already = remote_blob(head, relative)
-    if already is not None:
-        if already == data:
-            print(f"NOOP_ALREADY_PUBLISHED path={relative}")
-            return "NOOP_ALREADY_PUBLISHED"
-        fail("SAME_DAY_CONFLICT")
-    if head != code_commit:
-        fail("POLICY_GENERATION_CHANGED")
-    target.parent.mkdir(parents=True, exist_ok=True)
-    with target.open("xb") as f:
-        f.write(data)
-    git("add", "--", relative)
-    changed = git("diff", "--cached", "--name-status", "--no-renames").stdout.decode("utf-8")
-    if changed != f"A\t{relative}\n":
-        fail("PUBLISH_UNEXPECTED_STAGED_PATH")
-    if git("show", f":{relative}").stdout != data:
-        fail("PUBLISH_STAGED_BYTES_MISMATCH")
-    git("config", "user.name", "github-actions[bot]")
-    git("config", "user.email", "41898282+github-actions[bot]@users.noreply.github.com")
-    git("commit", "-m", f"data(cbr): capture offices {file_date(name).isoformat()}")
-    our_commit = git_text("rev-parse", "HEAD")
-    diff = git("diff-tree", "--no-commit-id", "--name-status", "-r", our_commit).stdout.decode("utf-8")
-    if diff != f"A\t{relative}\n":
-        fail("PUBLISH_COMMIT_PATH_INVALID")
-    pushed = git("push", "origin", "HEAD:refs/heads/" + BRANCH, allow_failure=True)
-    try:
-        outcome = confirm_remote(our_commit, relative, data)
-    except CaptureError:
-        fail("OUTCOME_UNKNOWN")
-    if outcome == "CREATED":
-        print(f"CREATED path={relative} commit={our_commit}")
-        return outcome
-    if pushed.returncode:
-        # Another writer won the race; any same-byte remote result is a NOOP.
-        print(f"NOOP_ALREADY_PUBLISHED path={relative}")
-        return outcome
-    fail("OUTCOME_UNKNOWN")
+    # A single validated payload, reused on bounded non-fast-forward retries.
+    created_local = False
+    for _ in range(PUSH_ATTEMPTS):
+        head = remote_head()
+        already = remote_blob(head, relative)
+        if already is not None:
+            if already == data:
+                print(f"NOOP_ALREADY_PUBLISHED path={relative}")
+                return "NOOP_ALREADY_PUBLISHED"
+            fail("SAME_DAY_CONFLICT")
+        ensure_policy_compatible(code_commit, head)
+        if not created_local:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            with target.open("xb") as stream:
+                stream.write(data)
+            created_local = True
+        # Do not checkout or execute newer code. Only reset the INDEX to the
+        # verified latest main tree, and add the one immutable CSV to that tree.
+        git("read-tree", head)
+        git("add", "--", relative)
+        staged = git("diff", "--cached", "--name-status", "--no-renames",
+                     head).stdout.decode("utf-8")
+        if staged != f"A\t{relative}\n":
+            fail("PUBLISH_UNEXPECTED_STAGED_PATH")
+        if git("show", f":{relative}").stdout != data:
+            fail("PUBLISH_STAGED_BYTES_MISMATCH")
+        git("config", "user.name", "github-actions[bot]")
+        git("config", "user.email", "41898282+github-actions[bot]@users.noreply.github.com")
+        tree = git_text("write-tree")
+        candidate = git_text("commit-tree", tree, "-p", head,
+                             "-m", f"data(cbr): capture offices {file_date(name).isoformat()}")
+        changed = git("diff-tree", "--no-commit-id", "--name-status",
+                      "-r", candidate).stdout.decode("utf-8")
+        if changed != f"A\t{relative}\n":
+            fail("PUBLISH_COMMIT_PATH_INVALID")
+        pushed = git("push", "origin", f"{candidate}:refs/heads/{BRANCH}",
+                     allow_failure=True)
+        actual_head = remote_head()
+        actual_blob = remote_blob(actual_head, relative)
+        if actual_blob is not None:
+            if actual_blob != data:
+                fail("SAME_DAY_CONFLICT")
+            if not git("merge-base", "--is-ancestor", candidate, actual_head,
+                       allow_failure=True).returncode:
+                print(f"CREATED path={relative} commit={candidate}")
+                return "CREATED"
+            if pushed.returncode:
+                print(f"NOOP_ALREADY_PUBLISHED path={relative}")
+                return "NOOP_ALREADY_PUBLISHED"
+            fail("OUTCOME_UNKNOWN")
+        if not pushed.returncode:
+            fail("OUTCOME_UNKNOWN")
+        # Another writer advanced main: recheck policy and target on next try.
+    fail("PUBLISH_RETRY_EXHAUSTED")
 
 
 def verify_environment() -> str:

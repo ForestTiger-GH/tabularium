@@ -312,14 +312,88 @@ class GitEffectTests(unittest.TestCase):
             self.publish(data=self.data.replace(b"3349", b"1234"))
         self.assertEqual(cmd(self.bare, "rev-parse", "refs/heads/main"), published)
 
-    def test_remote_policy_generation_change_blocks_stale_publisher(self):
-        (self.work / "another.txt").write_text("concurrent")
+    def test_unrelated_commit_allowed_and_retained(self):
+        (self.work / "another.txt").write_text("unrelated historical upload")
         cmd(self.work, "add", "another.txt")
-        cmd(self.work, "commit", "-m", "concurrent")
+        cmd(self.work, "commit", "-m", "unrelated")
+        cmd(self.work, "push", "origin", "HEAD:refs/heads/main")
+        previous = cmd(self.bare, "rev-parse", "refs/heads/main")
+        cmd(self.work, "reset", "--hard", self.initial)
+        self.assertEqual(self.publish(), "CREATED")
+        latest = cmd(self.bare, "rev-parse", "refs/heads/main")
+        self.assertEqual(cmd(self.bare, "rev-parse", latest + "^"), previous)
+        self.assertEqual(cmd(self.bare, "show", latest + ":another.txt"),
+                         "unrelated historical upload")
+        self.assertEqual(cmd(self.bare, "diff-tree", "--no-commit-id",
+                             "--name-status", "-r", latest),
+                         "A\t" + m.CORPUS_ROOT + "/2026/OFFICES_2026-11-09.csv")
+
+    def test_executable_policy_change_blocks_old_capture(self):
+        f = self.work / "scripts" / "capture_cbr_offices.py"
+        f.parent.mkdir(parents=True)
+        f.write_text("changed policy")
+        cmd(self.work, "add", "scripts/capture_cbr_offices.py")
+        cmd(self.work, "commit", "-m", "change policy")
         cmd(self.work, "push", "origin", "HEAD:refs/heads/main")
         cmd(self.work, "reset", "--hard", self.initial)
         with self.assertRaisesRegex(m.CaptureError, "POLICY_GENERATION_CHANGED"):
             self.publish()
+
+    def test_race_unrelated_commit_retries_and_preserves_parent(self):
+        racing = Path(self.temp.name) / "concurrent"
+        subprocess.run(["git", "clone", str(self.bare), str(racing)],
+                       check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        cmd(racing, "config", "user.name", "other")
+        cmd(racing, "config", "user.email", "other@example.com")
+        real_git = m.git
+        raced = False
+
+        def git_with_race(*args, **kwargs):
+            nonlocal raced
+            if args and args[0] == "push" and not raced:
+                raced = True
+                (racing / "other.txt").write_text("other data")
+                cmd(racing, "add", "other.txt")
+                cmd(racing, "commit", "-m", "unrelated race")
+                cmd(racing, "push", "origin", "HEAD:refs/heads/main")
+            return real_git(*args, **kwargs)
+
+        with patch.object(m, "git", side_effect=git_with_race):
+            self.assertEqual(self.publish(), "CREATED")
+        self.assertTrue(raced)
+        latest = cmd(self.bare, "rev-parse", "refs/heads/main")
+        self.assertEqual(cmd(self.bare, "show", latest + ":other.txt"), "other data")
+
+    def test_race_same_date_conflict_fails_closed(self):
+        racing = Path(self.temp.name) / "concurrent"
+        subprocess.run(["git", "clone", str(self.bare), str(racing)],
+                       check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        cmd(racing, "config", "user.name", "other")
+        cmd(racing, "config", "user.email", "other@example.com")
+        real_git = m.git
+        raced = False
+        relative = m.CORPUS_ROOT + "/2026/OFFICES_2026-11-09.csv"
+        different = self.data.replace(b"3349", b"1234")
+
+        def git_with_race(*args, **kwargs):
+            nonlocal raced
+            if args and args[0] == "push" and not raced:
+                raced = True
+                target = racing / relative
+                target.parent.mkdir(parents=True)
+                target.write_bytes(different)
+                cmd(racing, "add", relative)
+                cmd(racing, "commit", "-m", "same-date race")
+                cmd(racing, "push", "origin", "HEAD:refs/heads/main")
+            return real_git(*args, **kwargs)
+
+        with patch.object(m, "git", side_effect=git_with_race):
+            with self.assertRaisesRegex(m.CaptureError, "SAME_DAY_CONFLICT"):
+                self.publish()
+        latest = cmd(self.bare, "rev-parse", "refs/heads/main")
+        self.assertEqual(subprocess.run(["git", "-C", str(self.bare),
+                                         "show", latest + ":" + relative],
+                                        capture_output=True, check=True).stdout, different)
 
     def test_checkout_sha_dirty_tree_and_wrong_root_rejected(self):
         with self.assertRaisesRegex(m.CaptureError, "PUBLISH_CODE_COMMIT_MISMATCH"):

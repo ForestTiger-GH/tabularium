@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/capture-cbr-offices.yml'
       - '.github/workflows/validate-cbr-offices.yml'
+      - '.github/workflows/check-cbr-offices.yml'
       - 'scripts/capture_cbr_offices.py'
       - 'tests/test_capture_cbr_offices.py'
       - 'tests/fixtures/cbr-offices/**'
@@ -13,6 +14,7 @@ on:
     paths:
       - '.github/workflows/capture-cbr-offices.yml'
       - '.github/workflows/validate-cbr-offices.yml'
+      - '.github/workflows/check-cbr-offices.yml'
       - 'scripts/capture_cbr_offices.py'
       - 'tests/test_capture_cbr_offices.py'
       - 'tests/fixtures/cbr-offices/**'
@@ -47,7 +49,8 @@ jobs:
         run: |
           go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 \
             .github/workflows/capture-cbr-offices.yml \
-            .github/workflows/validate-cbr-offices.yml
+            .github/workflows/validate-cbr-offices.yml \
+            .github/workflows/check-cbr-offices.yml
       - name: Run offline extractor and publishing tests
         shell: bash
         run: python -m unittest discover -s tests -p 'test_capture_cbr_offices.py' -q
