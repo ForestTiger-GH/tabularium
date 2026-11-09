@@ -89,7 +89,17 @@ jobs:
               "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
               "application/octet-stream", "application/zip"
           })
+          from pathlib import Path
+          Path("/tmp/cbr-reg-acceptance-sample.xlsx").write_bytes(xlsx)
           result = m.convert_xlsx(xlsx)
           rows = m.validate_csv(result)
           print(f"REGIONAL_LIVE_CONVERSION_OK reference_date={period} rows={rows}")
           PY
+      - name: Short-lived official XLSX acceptance sample
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: cbr-reg-acceptance-sample
+          path: /tmp/cbr-reg-acceptance-sample.xlsx
+          retention-days: 1
+          if-no-files-found: warn
