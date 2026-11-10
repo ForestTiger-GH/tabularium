@@ -15,7 +15,7 @@ on:
           - check
           - test-telegram
 
-# One-time initialization after validated Telegram + publisher smoke test.
+# One-time completion of the 4 pending CBR hashes after verified official-host fallback.
 # Push events only when this workflow file itself changes, never state commits.
 # This trigger will be replaced with schedule after baseline acceptance.
 
