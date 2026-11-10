@@ -1,4 +1,4 @@
-name: Publication monitor one-time integration test
+name: Publication monitor official-host fallback probe
 
 on:
   push:
@@ -10,13 +10,13 @@ permissions:
   contents: read
 
 jobs:
-  smoke:
+  probe:
     if: >-
       github.repository == 'ForestTiger-GH/tabularium' &&
       github.ref == 'refs/heads/main' &&
       github.event.repository.private == false
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -26,43 +26,30 @@ jobs:
         uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
         with:
           python-version: '3.12'
-      - name: Validate registry and run offline tests
-        shell: bash
-        run: |
-          python _mw/work/publication-monitor/monitor.py validate
-          python -m unittest discover -s _mw/work/publication-monitor/tests -p 'test_*.py' -q
-      - name: Send one safe Telegram connectivity test
-        shell: bash
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          TELEGRAM_THREAD_ID: ${{ vars.TELEGRAM_THREAD_ID }}
-        run: python _mw/work/publication-monitor/monitor.py test-telegram
-      - name: Live read-only checks of CBR and Minfin sample
+      - name: Probe alternate official CBR host for four HTTP 403 sources
         shell: bash
         run: |
           python - <<'PY'
           import importlib.util
-          import json
           from pathlib import Path
-          import tempfile
+          from urllib.parse import urlsplit, urlunsplit
 
-          path = Path("_mw/work/publication-monitor/monitor.py")
-          spec = importlib.util.spec_from_file_location("publication_monitor_smoke", path)
-          module = importlib.util.module_from_spec(spec)
-          spec.loader.exec_module(module)
-          selected = {"mortgage_debt_ind", "dep_ind", "minfin-fedbud-monthly",
-                      "minfin-fedbud-quarterly", "minfin-fedbud-annual"}
-          registry = module.read_json(module.REGISTRY)
-          registry["sources"] = [item for item in registry["sources"]
-                                 if item["id"] in selected]
-          if len(registry["sources"]) != len(selected):
-              raise SystemExit("Missing configured source in smoke selection")
-          with tempfile.TemporaryDirectory() as scratch:
-              folder = Path(scratch)
-              rfile, sfile = folder / "registry.json", folder / "state.json"
-              rfile.write_text(json.dumps(registry), encoding="utf-8")
-              sfile.write_text(json.dumps({"version": 1, "items": {}}), encoding="utf-8")
-              raise SystemExit(module.run_scan("check", registry=rfile,
-                                              state_path=sfile, dry_run=True))
+          p = Path('_mw/work/publication-monitor/monitor.py')
+          spec = importlib.util.spec_from_file_location('publication_probe', p)
+          m = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(m)
+          targets = {
+              'debt_structure_benchmark_rate', 'households_bm',
+              'households_om', 'exchange_rate'
+          }
+          for source in m.load_registry():
+              if source['id'] not in targets:
+                  continue
+              old = urlsplit(source['url'])
+              alt = urlunsplit((old.scheme, 'www.cbr.ru', old.path, old.query, old.fragment))
+              try:
+                  digest, final_url, count = m.download_hash(alt, source['publisher'])
+                  print('OFFICIAL_HOST_FALLBACK_OK', source['id'], count, digest[:12])
+              except m.MonitorError as exc:
+                  print('OFFICIAL_HOST_FALLBACK_FAILED', source['id'], str(exc))
           PY
