@@ -15,7 +15,7 @@ on:
           - check
           - test-telegram
 
-# One-time completion of the 4 pending CBR hashes after verified official-host fallback.
+# One-time end-to-end unchanged-state verification before enabling schedule.
 # Push events only when this workflow file itself changes, never state commits.
 # This trigger will be replaced with schedule after baseline acceptance.
 
@@ -59,7 +59,7 @@ jobs:
         id: scan
         shell: bash
         env:
-          MONITOR_MODE: ${{ github.event_name == 'push' && 'bootstrap' || inputs.mode }}
+          MONITOR_MODE: ${{ github.event_name == 'push' && 'check' || inputs.mode }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TELEGRAM_THREAD_ID: ${{ vars.TELEGRAM_THREAD_ID }}
