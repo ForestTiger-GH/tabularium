@@ -15,6 +15,11 @@ on:
           - check
           - test-telegram
 
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publication-monitor.yml'
+
   schedule:
     # Fixed UTC slots. At UTC+03: 04:00, 08:48, 13:36, 18:24, 23:12.
     # No daylight saving changes. GitHub scheduled dispatch is best-effort.
@@ -61,7 +66,7 @@ jobs:
         id: scan
         shell: bash
         env:
-          MONITOR_MODE: ${{ github.event_name == 'schedule' && 'check' || inputs.mode }}
+          MONITOR_MODE: ${{ github.event_name == 'push' && 'validate' || github.event_name == 'schedule' && 'check' || inputs.mode }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TELEGRAM_THREAD_ID: ${{ vars.TELEGRAM_THREAD_ID }}
