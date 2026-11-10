@@ -1,4 +1,4 @@
-name: Monitor official source files (manual pilot)
+name: Monitor official XLSX sources
 
 on:
   workflow_dispatch:
@@ -15,14 +15,10 @@ on:
           - check
           - test-telegram
 
-# One-time end-to-end unchanged-state verification before enabling schedule.
-# Push events only when this workflow file itself changes, never state commits.
-# This trigger will be replaced with schedule after baseline acceptance.
-
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/publication-monitor.yml'
+  schedule:
+    # UTC. 08:43 and 20:43 Moscow (fixed UTC+03:00).
+    # GitHub scheduled runs are best effort and may be delayed.
+    - cron: '43 5,17 * * *'
 
 permissions:
   contents: write
@@ -59,7 +55,7 @@ jobs:
         id: scan
         shell: bash
         env:
-          MONITOR_MODE: ${{ github.event_name == 'push' && 'check' || inputs.mode }}
+          MONITOR_MODE: ${{ github.event_name == 'schedule' && 'check' || inputs.mode }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TELEGRAM_THREAD_ID: ${{ vars.TELEGRAM_THREAD_ID }}
@@ -73,7 +69,7 @@ jobs:
       - name: Publish only successful checkpoints
         if: >-
           ${{ always() && !cancelled() && steps.scan.outcome != 'skipped' &&
-              (github.event_name == 'push' || inputs.mode == 'bootstrap' || inputs.mode == 'check') }}
+              (github.event_name == 'schedule' || inputs.mode == 'bootstrap' || inputs.mode == 'check') }}
         shell: bash
         run: |
           set -euo pipefail
