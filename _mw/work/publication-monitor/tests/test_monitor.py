@@ -161,6 +161,30 @@ class SourceTests(unittest.TestCase):
             with self.assertRaisesRegex(monitor.MonitorError, "SOURCE_NOT_XLSX"):
                 monitor.download_hash(url, "Bank of Russia")
 
+    def test_cbr_www_fallback_only_for_http_403(self):
+        original = "https://cbr.ru/vfs/statistics/households/households_bm.xlsx"
+        alternate = original.replace("https://cbr.ru/", "https://www.cbr.ru/")
+        result = ("a" * 64, alternate, 1234)
+        with patch.object(monitor, "_download_hash_single",
+                          side_effect=[monitor.MonitorError("SOURCE_HTTP_403"), result]) as fetch:
+            self.assertEqual(monitor.download_hash(original, "Bank of Russia"), result)
+            self.assertEqual([call.args[0] for call in fetch.call_args_list],
+                             [original, alternate])
+
+    def test_no_cbr_fallback_on_other_failure_or_host(self):
+        original = "https://cbr.ru/vfs/statistics/households/households_bm.xlsx"
+        with patch.object(monitor, "_download_hash_single",
+                          side_effect=monitor.MonitorError("SOURCE_HTTP_404")) as fetch:
+            with self.assertRaisesRegex(monitor.MonitorError, "SOURCE_HTTP_404"):
+                monitor.download_hash(original, "Bank of Russia")
+            fetch.assert_called_once()
+        with patch.object(monitor, "_download_hash_single",
+                          side_effect=monitor.MonitorError("SOURCE_HTTP_403")) as fetch:
+            with self.assertRaisesRegex(monitor.MonitorError, "SOURCE_HTTP_403"):
+                monitor.download_hash(original.replace("https://cbr.ru/", "https://www.cbr.ru/"),
+                                      "Bank of Russia")
+            fetch.assert_called_once()
+
     def test_hashes_exact_download_bytes(self):
         url = sample_registry()["sources"][0]["url"]
         data = make_xlsx()
