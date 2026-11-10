@@ -1,0 +1,68 @@
+name: Publication monitor one-time integration test
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publication-monitor-smoke.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    if: >-
+      github.repository == 'ForestTiger-GH/tabularium' &&
+      github.ref == 'refs/heads/main' &&
+      github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Python 3.12
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
+      - name: Validate registry and run offline tests
+        shell: bash
+        run: |
+          python _mw/work/publication-monitor/monitor.py validate
+          python -m unittest discover -s _mw/work/publication-monitor/tests -p 'test_*.py' -q
+      - name: Send one safe Telegram connectivity test
+        shell: bash
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_THREAD_ID: ${{ vars.TELEGRAM_THREAD_ID }}
+        run: python _mw/work/publication-monitor/monitor.py test-telegram
+      - name: Live read-only checks of CBR and Minfin sample
+        shell: bash
+        run: |
+          python - <<'PY'
+          import importlib.util
+          import json
+          from pathlib import Path
+          import tempfile
+
+          path = Path("_mw/work/publication-monitor/monitor.py")
+          spec = importlib.util.spec_from_file_location("publication_monitor_smoke", path)
+          module = importlib.util.module_from_spec(spec)
+          spec.loader.exec_module(module)
+          selected = {"mortgage_debt_ind", "dep_ind", "minfin-fedbud-monthly",
+                      "minfin-fedbud-quarterly", "minfin-fedbud-annual"}
+          registry = module.read_json(module.REGISTRY)
+          registry["sources"] = [item for item in registry["sources"]
+                                 if item["id"] in selected]
+          if len(registry["sources"]) != len(selected):
+              raise SystemExit("Missing configured source in smoke selection")
+          with tempfile.TemporaryDirectory() as scratch:
+              folder = Path(scratch)
+              rfile, sfile = folder / "registry.json", folder / "state.json"
+              rfile.write_text(json.dumps(registry), encoding="utf-8")
+              sfile.write_text(json.dumps({"version": 1, "items": {}}), encoding="utf-8")
+              raise SystemExit(module.run_scan("check", registry=rfile,
+                                              state_path=sfile, dry_run=True))
+          PY
