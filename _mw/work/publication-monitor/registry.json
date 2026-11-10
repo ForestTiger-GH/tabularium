@@ -1,0 +1,363 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "id": "mortgage_debt_ind",
+      "publisher": "Bank of Russia",
+      "title": "Household loans: outstanding debt",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/BankSector/Mortgage/02_05_Debt_ind.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "mortgage_debt",
+      "publisher": "Bank of Russia",
+      "title": "Mortgage loans: outstanding debt",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/BankSector/Mortgage/02_14_Debt_mortgage.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "mortgage_scpa_debt",
+      "publisher": "Bank of Russia",
+      "title": "Mortgage loans under shared construction agreements: outstanding debt",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/BankSector/Mortgage/02_18_Debt_scpa_mortgage.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "mortgage_ihc",
+      "publisher": "Bank of Russia",
+      "title": "Mortgage lending: housing under construction",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/banksector/mortgage/02_41_Mortgage_ihc.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "mortgage_full",
+      "publisher": "Bank of Russia",
+      "title": "Mortgage loans: complete historical series",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/BankSector/Mortgage/02_02_Mortgage.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "mortgage_scpa_full",
+      "publisher": "Bank of Russia",
+      "title": "Mortgage loans under shared construction agreements: complete series",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/BankSector/Mortgage/02_03_Scpa_mortgage.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "corp_new_loans_a",
+      "publisher": "Bank of Russia",
+      "title": "Corporate loans issued by activity: series A",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/BankSector/Loans_to_corporations/01_01_A_New_loans_corp_by_activity.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "corp_new_loans_c",
+      "publisher": "Bank of Russia",
+      "title": "Corporate loans issued by activity: series C",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/BankSector/Loans_to_corporations/01_01_C_New_loans_corp_by_activity.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "corp_debt_a",
+      "publisher": "Bank of Russia",
+      "title": "Corporate loans outstanding by activity: series A",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/BankSector/Loans_to_corporations/01_02_A_Debt_corp_by_activity.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "corp_debt_c",
+      "publisher": "Bank of Russia",
+      "title": "Corporate loans outstanding by activity: series C",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/BankSector/Loans_to_corporations/01_02_C_Debt_corp_by_activity.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "sme_debt",
+      "publisher": "Bank of Russia",
+      "title": "SME loans: outstanding debt",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/BankSector/Loans_to_corporations/01_11_Debt_sme.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "sme_debt_activity",
+      "publisher": "Bank of Russia",
+      "title": "SME loans: outstanding debt by activity",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/BankSector/Loans_to_corporations/01_11_F_Debt_sme_by_activity.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "sme_debt_subj_f",
+      "publisher": "Bank of Russia",
+      "title": "SME loans: outstanding debt by region, series F",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/BankSector/Loans_to_corporations/01_13_F_Debt_sme_subj.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "sme_debt_subj_i",
+      "publisher": "Bank of Russia",
+      "title": "SME loans: outstanding debt by region, series I",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/BankSector/Loans_to_corporations/01_13_I_Debt_sme_subj.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "corp_debt_subj",
+      "publisher": "Bank of Russia",
+      "title": "Corporate loans: outstanding debt by region",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/BankSector/Loans_to_corporations/01_05_D_Debt_subj.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "debt_structure_benchmark_rate",
+      "publisher": "Bank of Russia",
+      "title": "Debt structure by benchmark interest-rate type",
+      "kind": "direct",
+      "url": "https://cbr.ru/vfs/statistics/BankSector/Loans_to_corporations/02_03_Debt_structure_by_benchmark_interest_rate_type.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "sme_borrowers_info",
+      "publisher": "Bank of Russia",
+      "title": "SME borrowers: additional information",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/banksector/loans_to_corporations/02_02_SME_Borrowers_info.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "sme_by_activity",
+      "publisher": "Bank of Russia",
+      "title": "SME loans issued by economic activity",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/BankSector/Loans_to_corporations/01_10_F_New_loans_sme_by_activity.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "debt_securities",
+      "publisher": "Bank of Russia",
+      "title": "Debt securities",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/debt_securities/66-debt_securities.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "funds_all",
+      "publisher": "Bank of Russia",
+      "title": "Banking-sector funds: total",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/BankSector/Borrowings/02_01_Funds_all.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "funds_clients",
+      "publisher": "Bank of Russia",
+      "title": "Client funds",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/BankSector/Borrowings/02_02_Funds_clients.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "funds_org",
+      "publisher": "Bank of Russia",
+      "title": "Organization funds",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/BankSector/Borrowings/02_04_Funds_org.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "dep_corp",
+      "publisher": "Bank of Russia",
+      "title": "Corporate deposits",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/BankSector/Borrowings/02_05_Dep_corp.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "dep_ind",
+      "publisher": "Bank of Russia",
+      "title": "Household deposits",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/BankSector/Borrowings/02_06_Dep_ind.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "dep_ind_no_escrow",
+      "publisher": "Bank of Russia",
+      "title": "Household deposits excluding escrow",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/banksector/borrowings/02_27_Dep_ind_excluding_escrow.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "dep_entrepreneur",
+      "publisher": "Bank of Russia",
+      "title": "Individual entrepreneur deposits",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/BankSector/Borrowings/02_07_Dep_enterpreneur.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "escrow_accounts",
+      "publisher": "Bank of Russia",
+      "title": "Escrow accounts",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/banksector/borrowings/02_28_Escrow_accounts.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "budget_all",
+      "publisher": "Bank of Russia",
+      "title": "Budget funds",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/banksector/borrowings/02_29_Budget_all.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "households_bm",
+      "publisher": "Bank of Russia",
+      "title": "Household statistics: BM",
+      "kind": "direct",
+      "url": "https://cbr.ru/vfs/statistics/households/households_bm.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "households_om",
+      "publisher": "Bank of Russia",
+      "title": "Household statistics: OM",
+      "kind": "direct",
+      "url": "https://cbr.ru/vfs/statistics/households/households_om.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "monetary_agg",
+      "publisher": "Bank of Russia",
+      "title": "Monetary aggregates",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/credit_statistics/monetary_agg.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "survey_cb",
+      "publisher": "Bank of Russia",
+      "title": "Central bank survey",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/credit_statistics/survey/survey_cb.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "balance_odc",
+      "publisher": "Bank of Russia",
+      "title": "Other depository corporations: balance sheet",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/credit_statistics/survey/balance_odc.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "survey_odc",
+      "publisher": "Bank of Russia",
+      "title": "Other depository corporations survey",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/credit_statistics/survey/survey_odc.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "survey_dc_new",
+      "publisher": "Bank of Russia",
+      "title": "Banking system survey",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/credit_statistics/survey/survey_dc_new.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "annex_survey_dc",
+      "publisher": "Bank of Russia",
+      "title": "Banking system survey: annex",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/credit_statistics/survey/annex_survey_dc.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "debt_new",
+      "publisher": "Bank of Russia",
+      "title": "External debt of the Russian Federation",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/credit_statistics/debt/debt_new.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "debt_maturity",
+      "publisher": "Bank of Russia",
+      "title": "External debt by maturity and financial instrument",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/credit_statistics/debt/debt_maturity.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "debt_cur-mat_new",
+      "publisher": "Bank of Russia",
+      "title": "External debt by denomination currency",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/vfs/statistics/credit_statistics/debt/debt_cur-mat_new.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "obs_table_20s",
+      "publisher": "Bank of Russia",
+      "title": "CBR statistical table obs_tabl20s",
+      "kind": "direct",
+      "url": "https://www.cbr.ru/Content/Document/File/115862/obs_tabl20%D1%81.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "exchange_rate",
+      "publisher": "Bank of Russia",
+      "title": "Exchange rates",
+      "kind": "direct",
+      "url": "https://cbr.ru/vfs/statistics/credit_statistics/ex_rate_ind/exchange_rate.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "minfin-fedbud-monthly",
+      "publisher": "Ministry of Finance of Russia",
+      "title": "Monthly federal budget execution",
+      "kind": "page_attachment",
+      "page_url": "https://minfin.gov.ru/ru/statistics/fedbud/execute/",
+      "file_stem": "Prilozhenie_3_dannye_109-111_",
+      "file_suffix": "_mes.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "minfin-fedbud-quarterly",
+      "publisher": "Ministry of Finance of Russia",
+      "title": "Quarterly federal budget execution",
+      "kind": "page_attachment",
+      "page_url": "https://minfin.gov.ru/ru/statistics/fedbud/execute/",
+      "file_stem": "Prilozhenie_3_dannye_109-111_",
+      "file_suffix": "_kvartal.xlsx",
+      "enabled": true
+    },
+    {
+      "id": "minfin-fedbud-annual",
+      "publisher": "Ministry of Finance of Russia",
+      "title": "Annual federal budget execution",
+      "kind": "page_attachment",
+      "page_url": "https://minfin.gov.ru/ru/statistics/fedbud/execute/",
+      "file_stem": "Prilozhenie_3_dannye_109-111_",
+      "file_suffix": "_god.xlsx",
+      "enabled": true
+    }
+  ]
+}

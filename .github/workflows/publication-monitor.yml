@@ -1,0 +1,100 @@
+name: Monitor official source files (manual pilot)
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Offline validation, network dry-run, baseline, check, or Telegram test'
+        required: true
+        type: choice
+        default: 'dry-run'
+        options:
+          - validate
+          - dry-run
+          - bootstrap
+          - check
+          - test-telegram
+
+# Pilot intentionally has no scheduled trigger. Add one only after live acceptance.
+permissions:
+  contents: write
+
+concurrency:
+  group: tabularium-publication-monitor
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    if: >-
+      github.repository == 'ForestTiger-GH/tabularium' &&
+      github.ref == 'refs/heads/main' &&
+      github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Check out the default branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Set up Python 3.12
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
+      - name: Offline schema and behavior checks
+        shell: bash
+        run: |
+          python _mw/work/publication-monitor/monitor.py validate
+          python -m unittest discover -s _mw/work/publication-monitor/tests -p 'test_*.py' -q
+      - name: Check configured sources
+        id: scan
+        shell: bash
+        env:
+          MONITOR_MODE: ${{ inputs.mode }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_THREAD_ID: ${{ vars.TELEGRAM_THREAD_ID }}
+        run: |
+          case "$MONITOR_MODE" in
+            validate) python _mw/work/publication-monitor/monitor.py validate ;;
+            dry-run) python _mw/work/publication-monitor/monitor.py check --dry-run ;;
+            bootstrap|check|test-telegram) python _mw/work/publication-monitor/monitor.py "$MONITOR_MODE" ;;
+            *) echo 'Invalid monitor mode' >&2; exit 2 ;;
+          esac
+      - name: Publish only successful checkpoints
+        if: >-
+          ${{ always() && !cancelled() && steps.scan.outcome != 'skipped' &&
+              (inputs.mode == 'bootstrap' || inputs.mode == 'check') }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          STATE=_mw/work/publication-monitor/state.json
+          MONITOR=_mw/work/publication-monitor
+          BASE=$(git rev-parse HEAD)
+          git add -- "$STATE"
+          if git diff --cached --quiet; then
+            echo 'No checkpoint changes; no commit.'
+            exit 0
+          fi
+          git -c user.name='github-actions[bot]' \
+              -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              commit -m 'chore(monitor): advance observed source hashes'
+          for attempt in 1 2 3; do
+            git fetch origin main
+            # Abort if any monitor inputs or checkpoints have changed since scanning.
+            if ! git diff --quiet "$BASE" origin/main -- "$MONITOR" .github/workflows/publication-monitor.yml; then
+              echo 'Monitor inputs or state changed concurrently: refusing to overwrite.' >&2
+              exit 1
+            fi
+            git -c user.name='github-actions[bot]' \
+                -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+                rebase origin/main
+            if git push origin HEAD:main; then
+              echo 'Updated monitor checkpoints.'
+              exit 0
+            fi
+            echo "Non-fast-forward push attempt $attempt; checking repository again." >&2
+          done
+          echo 'Unable to publish checkpoints; a notification may repeat.' >&2
+          exit 1
