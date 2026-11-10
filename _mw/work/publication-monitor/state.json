@@ -72,6 +72,12 @@
       "resolved_url": "https://www.cbr.ru/vfs/statistics/debt_securities/66-debt_securities.xlsx",
       "sha256": "cf599f91c8a51fc2f10e2fc4d7ad4b2b75e969b3345059c658de0f6e96d0abb3"
     },
+    "debt_structure_benchmark_rate": {
+      "first_seen_at": "2026-11-10T16:23:23Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/BankSector/Loans_to_corporations/02_03_Debt_structure_by_benchmark_interest_rate_type.xlsx",
+      "sha256": "db82d749a5725959a61f744207a0e020fc73d0d0b8c79da1ca43f097549862cd"
+    },
     "dep_corp": {
       "first_seen_at": "2026-11-10T16:19:41Z",
       "last_change_at": null,
@@ -102,6 +108,12 @@
       "resolved_url": "https://www.cbr.ru/vfs/statistics/banksector/borrowings/02_28_Escrow_accounts.xlsx",
       "sha256": "142b27e406beec9954b37385b441d082e0a8891aa330186f93186a6ea037066e"
     },
+    "exchange_rate": {
+      "first_seen_at": "2026-11-10T16:23:30Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/credit_statistics/ex_rate_ind/exchange_rate.xlsx",
+      "sha256": "d8d10f7050e107c25379e8f36d345c2992493b4218a02a06d87f8e7f7e5b29f2"
+    },
     "funds_all": {
       "first_seen_at": "2026-11-10T16:19:37Z",
       "last_change_at": null,
@@ -119,6 +131,18 @@
       "last_change_at": null,
       "resolved_url": "https://www.cbr.ru/vfs/statistics/BankSector/Borrowings/02_04_Funds_org.xlsx",
       "sha256": "ea542abf995e0eccc524a582e8694ebe199c5721098a1e78f71dec7fcffd46f9"
+    },
+    "households_bm": {
+      "first_seen_at": "2026-11-10T16:23:26Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/households/households_bm.xlsx",
+      "sha256": "5a674ae4bd0acf836889e2aff216c5b3c75c2e522a63582da3b89c600291abb0"
+    },
+    "households_om": {
+      "first_seen_at": "2026-11-10T16:23:28Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/households/households_om.xlsx",
+      "sha256": "f48a0e4e74c4e61977353fe9caf6aaa362baa95aa8b9ae73dc1a69deea38e7f9"
     },
     "minfin-fedbud-annual": {
       "first_seen_at": "2026-11-10T16:20:08Z",
