@@ -303,7 +303,7 @@ def verify_xlsx(path):
         raise MonitorError("XLSX_CORRUPT") from exc
 
 
-def download_hash(url, publisher):
+def _download_hash_single(url, publisher):
     file_name = None
     count = 0
     sha = hashlib.sha256()
@@ -342,6 +342,26 @@ def download_hash(url, publisher):
     finally:
         if file_name:
             Path(file_name).unlink(missing_ok=True)
+
+
+def download_hash(url, publisher):
+    """Preserve the registered URL, retrying only a verified alternate official CBR host.
+
+    Four original CBR links return HTTP 403 via cbr.ru on GitHub runners, while
+    the same paths on www.cbr.ru return validated XLSX content. This is a
+    retrieval fallback, never a normalization of source file bytes.
+    """
+    try:
+        return _download_hash_single(url, publisher)
+    except MonitorError as exc:
+        parsed = urllib.parse.urlsplit(url)
+        if (str(exc) != "SOURCE_HTTP_403" or publisher != "Bank of Russia"
+                or parsed.hostname != "cbr.ru"):
+            raise
+        fallback = urllib.parse.urlunsplit((
+            parsed.scheme, "www.cbr.ru", parsed.path, parsed.query, parsed.fragment))
+        validate_url(fallback, publisher, purpose="file")
+        return _download_hash_single(fallback, publisher)
 
 
 def send_telegram(token, chat_id, text, thread_id=None):
