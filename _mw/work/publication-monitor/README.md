@@ -31,4 +31,6 @@ The Ministry of Finance HTML structure and download accessibility **remain unver
 
 Add a unique ID, human-readable title, official publisher, and approved HTTPS source URL to `registry.json`. `direct` retrieves the given XLSX URL; `page_attachment` resolves one filename pattern on an official HTML page. New publishers require an explicit review of the allowlisted hosts and paths in `monitor.py`. Changes to the monitored source list are deliberate and do not depend on another repository's runtime. Maintain the offline registry-snapshot test for the initial fixed CBR list.
 
+Four registered CBR URLs using `cbr.ru` returned HTTP 403 during the live GitHub-runner baseline on 2026-11-10; the exact same paths on official `www.cbr.ru` returned valid XLSX files. The downloader now retries that host **only** for CBR HTTP 403 on `cbr.ru`. The 41 copied source identities and registered URLs are not rewritten, and only the validated downloaded bytes determine SHA-256.
+
 Publisher endpoints are subject to availability and access controls. A monitoring failure means **unknown source state**, not “no change”. A changed SHA-256 means changed file bytes, not necessarily changed statistical observations.
