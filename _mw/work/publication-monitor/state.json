@@ -1,4 +1,245 @@
 {
-  "version": 1,
-  "items": {}
+  "items": {
+    "annex_survey_dc": {
+      "first_seen_at": "2026-11-10T16:19:57Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/credit_statistics/survey/annex_survey_dc.xlsx",
+      "sha256": "143e2cc0f17f46993fa88a75c83d6669d7e78cb1fd0fab034117edb09cc49fdf"
+    },
+    "balance_odc": {
+      "first_seen_at": "2026-11-10T16:19:53Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/credit_statistics/survey/balance_odc.xlsx",
+      "sha256": "fed261a5b380298e22e82f7f7b5035065bccd7ee21399ac2626908329bc884c5"
+    },
+    "budget_all": {
+      "first_seen_at": "2026-11-10T16:19:48Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/banksector/borrowings/02_29_Budget_all.xlsx",
+      "sha256": "6031546c293a5c0a5dbbd9e2b4aa539994d9a7ce9b00661c3cc03b876cefe4c9"
+    },
+    "corp_debt_a": {
+      "first_seen_at": "2026-11-10T16:19:20Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/BankSector/Loans_to_corporations/01_02_A_Debt_corp_by_activity.xlsx",
+      "sha256": "f4adcfcab352ceb22dd0a88fa73fb9689538111cc8a25dd92c29eecde11d55b0"
+    },
+    "corp_debt_c": {
+      "first_seen_at": "2026-11-10T16:19:22Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/BankSector/Loans_to_corporations/01_02_C_Debt_corp_by_activity.xlsx",
+      "sha256": "ab1f2530c85717ad7e8709e540d46a14399a74d2af1038ce7d468ccc780da820"
+    },
+    "corp_debt_subj": {
+      "first_seen_at": "2026-11-10T16:19:31Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/BankSector/Loans_to_corporations/01_05_D_Debt_subj.xlsx",
+      "sha256": "08b72276b597cc8151c8acafe11af281401f59aa065b3d6b506e08c2d5e48911"
+    },
+    "corp_new_loans_a": {
+      "first_seen_at": "2026-11-10T16:19:17Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/BankSector/Loans_to_corporations/01_01_A_New_loans_corp_by_activity.xlsx",
+      "sha256": "0af9d8add4a607d8bde48592bbaf5c7cccc1bc3f66cf9b83d1d5ab5db7207562"
+    },
+    "corp_new_loans_c": {
+      "first_seen_at": "2026-11-10T16:19:19Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/BankSector/Loans_to_corporations/01_01_C_New_loans_corp_by_activity.xlsx",
+      "sha256": "d0bc4f0a7e22afec3e4ede0590b3edbfcf6d35040e78aaf1a1c6a3743f7217b3"
+    },
+    "debt_cur-mat_new": {
+      "first_seen_at": "2026-11-10T16:19:59Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/credit_statistics/debt/debt_cur-mat_new.xlsx",
+      "sha256": "9c8dabdaba901ffd9b03f796a90cef5328ba07f608d41abd7fc305668623af64"
+    },
+    "debt_maturity": {
+      "first_seen_at": "2026-11-10T16:19:58Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/credit_statistics/debt/debt_maturity.xlsx",
+      "sha256": "5dd1b2b2760b58ef029db64f962deba9c91db1a7c67bff2ca9f78a792790e3af"
+    },
+    "debt_new": {
+      "first_seen_at": "2026-11-10T16:19:58Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/credit_statistics/debt/debt_new.xlsx",
+      "sha256": "7d016cad6c5a7143f1538f95cd09afe83dac61079f2d0afce8f84bb367c0a274"
+    },
+    "debt_securities": {
+      "first_seen_at": "2026-11-10T16:19:36Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/debt_securities/66-debt_securities.xlsx",
+      "sha256": "cf599f91c8a51fc2f10e2fc4d7ad4b2b75e969b3345059c658de0f6e96d0abb3"
+    },
+    "dep_corp": {
+      "first_seen_at": "2026-11-10T16:19:41Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/BankSector/Borrowings/02_05_Dep_corp.xlsx",
+      "sha256": "714ca872d9ff2d3ef2996e6311147fe13907fe83572e033a292ba310c15b33b5"
+    },
+    "dep_entrepreneur": {
+      "first_seen_at": "2026-11-10T16:19:46Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/BankSector/Borrowings/02_07_Dep_enterpreneur.xlsx",
+      "sha256": "3bf595e73ea44b894024461161d8ae424372e42ea7016ae6f414af9204194b52"
+    },
+    "dep_ind": {
+      "first_seen_at": "2026-11-10T16:19:42Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/BankSector/Borrowings/02_06_Dep_ind.xlsx",
+      "sha256": "213955aaded94ed6ab09a0ed669e625b93d1f0d93d2f86b2e909c7468eb65381"
+    },
+    "dep_ind_no_escrow": {
+      "first_seen_at": "2026-11-10T16:19:43Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/banksector/borrowings/02_27_Dep_ind_excluding_escrow.xlsx",
+      "sha256": "b35ad9f3e8d01372cbf07a60bbc8d278a7eff768dd4257a28d1f740ae79d3876"
+    },
+    "escrow_accounts": {
+      "first_seen_at": "2026-11-10T16:19:48Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/banksector/borrowings/02_28_Escrow_accounts.xlsx",
+      "sha256": "142b27e406beec9954b37385b441d082e0a8891aa330186f93186a6ea037066e"
+    },
+    "funds_all": {
+      "first_seen_at": "2026-11-10T16:19:37Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/BankSector/Borrowings/02_01_Funds_all.xlsx",
+      "sha256": "e76062dc62b42206d7a237e538c62c7d43d7097f9b062ad55a29ea6554380ff7"
+    },
+    "funds_clients": {
+      "first_seen_at": "2026-11-10T16:19:38Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/BankSector/Borrowings/02_02_Funds_clients.xlsx",
+      "sha256": "4297c76b5575ed9635ff202f9d9309cf820e63bd487dfcc81e268ebd747bcea3"
+    },
+    "funds_org": {
+      "first_seen_at": "2026-11-10T16:19:40Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/BankSector/Borrowings/02_04_Funds_org.xlsx",
+      "sha256": "ea542abf995e0eccc524a582e8694ebe199c5721098a1e78f71dec7fcffd46f9"
+    },
+    "minfin-fedbud-annual": {
+      "first_seen_at": "2026-11-10T16:20:08Z",
+      "last_change_at": null,
+      "resolved_url": "https://minfin.gov.ru/common/upload/library/2026/05/main/Prilozhenie_3_dannye_109-111_%E2%80%94_god.xlsx",
+      "sha256": "45c4e9e7941649cb2cb45f983de9e4496cb79b8e8f2a302db8521800d72ea6f7"
+    },
+    "minfin-fedbud-monthly": {
+      "first_seen_at": "2026-11-10T16:20:05Z",
+      "last_change_at": null,
+      "resolved_url": "https://minfin.gov.ru/common/upload/library/2026/10/main/Prilozhenie_3_dannye_109-111_%E2%80%94_mes.xlsx",
+      "sha256": "f88b5bc12a597af9f0e413f4a21b2aa60cc9862b51ff6a48210a505df8932dfb"
+    },
+    "minfin-fedbud-quarterly": {
+      "first_seen_at": "2026-11-10T16:20:06Z",
+      "last_change_at": null,
+      "resolved_url": "https://minfin.gov.ru/common/upload/library/2026/10/main/Prilozhenie_3_dannye_109-111_%E2%80%94_kvartal.xlsx",
+      "sha256": "36165a38c686031c40d6403794b2d48bcc3e22a451640db49b041c3eb8ef0fa9"
+    },
+    "monetary_agg": {
+      "first_seen_at": "2026-11-10T16:19:50Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/credit_statistics/monetary_agg.xlsx",
+      "sha256": "40d1395de5bca24a72a168a401c83821128152254e28cf4773da0e9fb81069ef"
+    },
+    "mortgage_debt": {
+      "first_seen_at": "2026-11-10T16:19:11Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/BankSector/Mortgage/02_14_Debt_mortgage.xlsx",
+      "sha256": "c9331e7c16d12730aaa9c70180669097760aeb7d5d1860f72d22f92ccc27005c"
+    },
+    "mortgage_debt_ind": {
+      "first_seen_at": "2026-11-10T16:19:10Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/BankSector/Mortgage/02_05_Debt_ind.xlsx",
+      "sha256": "4bc8e551dc82e1a3cf4e3fa9878aec8e3e52ca0d9a7b0a08c3105364bc675346"
+    },
+    "mortgage_full": {
+      "first_seen_at": "2026-11-10T16:19:15Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/BankSector/Mortgage/02_02_Mortgage.xlsx",
+      "sha256": "6bc0041be01a6f4d0cb862aef6f3f8967d0465450ed189e85b82fd2c24797842"
+    },
+    "mortgage_ihc": {
+      "first_seen_at": "2026-11-10T16:19:14Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/banksector/mortgage/02_41_Mortgage_ihc.xlsx",
+      "sha256": "89ffbc4822f7232e3775b37525e9d1009b1b613517786bb9397dbc1be6eb4b87"
+    },
+    "mortgage_scpa_debt": {
+      "first_seen_at": "2026-11-10T16:19:13Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/BankSector/Mortgage/02_18_Debt_scpa_mortgage.xlsx",
+      "sha256": "bad9f9094d66ccd4d5c5f598d8f46a0f5dc465d954921e429cc9a9fd42e06f01"
+    },
+    "mortgage_scpa_full": {
+      "first_seen_at": "2026-11-10T16:19:16Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/BankSector/Mortgage/02_03_Scpa_mortgage.xlsx",
+      "sha256": "7bfdbedb06f4a26c4d8b88963b609b7ca546ca9a48692df4cc4df5524ce597f4"
+    },
+    "obs_table_20s": {
+      "first_seen_at": "2026-11-10T16:20:01Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/Content/Document/File/115862/obs_tabl20%D1%81.xlsx",
+      "sha256": "a600e84b59fe9b0244ebbbd3b3aeefdcb8b88cb14179885083303c1d9011642a"
+    },
+    "sme_borrowers_info": {
+      "first_seen_at": "2026-11-10T16:19:33Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/banksector/loans_to_corporations/02_02_SME_Borrowers_info.xlsx",
+      "sha256": "5b68a536d8530f810dfab6f8ee440317e0b17905795bd6c6dc5946ee46be6474"
+    },
+    "sme_by_activity": {
+      "first_seen_at": "2026-11-10T16:19:34Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/BankSector/Loans_to_corporations/01_10_F_New_loans_sme_by_activity.xlsx",
+      "sha256": "0e9ae86129ee69ce332aac4fde337689e0478c6a13fae6aae7b18875a7155d31"
+    },
+    "sme_debt": {
+      "first_seen_at": "2026-11-10T16:19:23Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/BankSector/Loans_to_corporations/01_11_Debt_sme.xlsx",
+      "sha256": "18eecd1fc3182e0d9da36476f0dd9c303b58e1647091de63eca3962129799b54"
+    },
+    "sme_debt_activity": {
+      "first_seen_at": "2026-11-10T16:19:25Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/BankSector/Loans_to_corporations/01_11_F_Debt_sme_by_activity.xlsx",
+      "sha256": "282e3d7d1bcf5ec3ecd58606224e2a5d3af25ba8dbcd61c559e7d24348baf693"
+    },
+    "sme_debt_subj_f": {
+      "first_seen_at": "2026-11-10T16:19:28Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/BankSector/Loans_to_corporations/01_13_F_Debt_sme_subj.xlsx",
+      "sha256": "0daf38691254836fa1920ca703d04095a957eb5421e55fba6114eff8d6b8073b"
+    },
+    "sme_debt_subj_i": {
+      "first_seen_at": "2026-11-10T16:19:29Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/BankSector/Loans_to_corporations/01_13_I_Debt_sme_subj.xlsx",
+      "sha256": "07c80e06af09be207e5bc9f89e20798df9d126fe52dda3e6a58ae6f6e3629f79"
+    },
+    "survey_cb": {
+      "first_seen_at": "2026-11-10T16:19:52Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/credit_statistics/survey/survey_cb.xlsx",
+      "sha256": "e3030363197da5b456ebe4ad441260799548d8d047a2ed01073b3bf8b6e2c130"
+    },
+    "survey_dc_new": {
+      "first_seen_at": "2026-11-10T16:19:56Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/credit_statistics/survey/survey_dc_new.xlsx",
+      "sha256": "c652e19b558ba819086e96e43d9a3e3d65efef43a65845abe9f0aa995e9ffebb"
+    },
+    "survey_odc": {
+      "first_seen_at": "2026-11-10T16:19:55Z",
+      "last_change_at": null,
+      "resolved_url": "https://www.cbr.ru/vfs/statistics/credit_statistics/survey/survey_odc.xlsx",
+      "sha256": "be018f0b903e082181ac56ad843d702b4f025b328b7daf9c89e2313e4fb1280a"
+    }
+  },
+  "version": 1
 }
