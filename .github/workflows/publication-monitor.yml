@@ -16,9 +16,13 @@ on:
           - test-telegram
 
   schedule:
-    # UTC. 08:43 and 20:43 Moscow (fixed UTC+03:00).
-    # GitHub scheduled runs are best effort and may be delayed.
-    - cron: '43 5,17 * * *'
+    # Fixed UTC slots. At UTC+03: 04:00, 08:48, 13:36, 18:24, 23:12.
+    # No daylight saving changes. GitHub scheduled dispatch is best-effort.
+    - cron: '0 1 * * *'
+    - cron: '48 5 * * *'
+    - cron: '36 10 * * *'
+    - cron: '24 15 * * *'
+    - cron: '12 20 * * *'
 
 permissions:
   contents: write
@@ -26,6 +30,8 @@ permissions:
 concurrency:
   group: tabularium-publication-monitor
   cancel-in-progress: false
+  # One active plus one pending; a newer pending run replaces an older one.
+  queue: single
 
 jobs:
   monitor:
