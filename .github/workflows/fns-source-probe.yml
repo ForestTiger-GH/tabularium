@@ -125,11 +125,18 @@ jobs:
                           if val:cells.append((cell.get('r'),val[:95]))
                       print('REG_ROW',row.get('r'),cells)
               except Exception as e:print('REG_XLSX_ERROR',repr(e))
+          print('HISTORICAL_NAME_DIFF_DIAGNOSTIC')
+          for d2 in ('01.08.2016','10.09.2021','10.10.2021'):
+              raw2,_=fetch('https://rmsp.nalog.ru/statistics-proc.json',urlencode({'statDate':d2}).encode())
+              if raw2:
+                  rows2=json.loads(raw2)
+                  diffs=[(o.get('ssrf'),o.get('name'),o.get('cnt_name')) for o in rows2 if o.get('cnt_level')==0 and o.get('name')!=o.get('cnt_name')]
+                  print('NAME_DIFF',d2,'total',len(diffs),'samples',diffs[:8])
           PY
 
 
   initial-history-import:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/feat/fns-sme-pipeline-20261111' && github.event.repository.private == false
+    if: github.event_name == 'push' && github.ref == 'refs/heads/feat/fns-sme-pipeline-20261111' && github.event.repository.private == false && contains(github.event.head_commit.message, 'run-historical-import')
     permissions:
       contents: write
     runs-on: ubuntu-24.04
