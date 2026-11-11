@@ -32,7 +32,7 @@ jobs:
                       return raw, typ
               except Exception as e:
                   print('FETCH_ERROR',type(e).__name__,str(e)[:140]);return None,None
-          for date in ('10.11.2026','10.01.2025'):
+          for date in ('10.11.2026','10.01.2025','01.08.2016'):
               print('DATE',date)
               raw,typ=fetch('https://rmsp.nalog.ru/statistics-proc.json',urlencode({'statDate':date}).encode())
               if raw:
@@ -82,4 +82,42 @@ jobs:
                                       if s:vals.append([cell.get('r'),s[:80]])
                                   print('ROW',row.get('r'),vals)
                   except Exception as e: print('XLSX_ERROR',repr(e),repr(raw[:70]))
+          print('SELECTOR_DISCOVERY')
+          from html.parser import HTMLParser
+          class Opt(HTMLParser):
+              def __init__(self):super().__init__();self.items=[];self.v=None;self.s=[]
+              def handle_starttag(self,tag,a):
+                  if tag=='option':self.v=dict(a).get('value');self.s=[]
+              def handle_data(self,data):
+                  if self.v is not None:self.s.append(data)
+              def handle_endtag(self,tag):
+                  if tag=='option' and self.v is not None:
+                      self.items.append((self.v,''.join(self.s).strip()));self.v=None
+          page,typ=fetch('https://rmsp.nalog.ru/statistics.html')
+          if page:
+              from datetime import datetime
+              p=Opt();p.feed(page.decode('utf-8','replace'))
+              print('OPTIONS',len(p.items),p.items[:6],p.items[-6:])
+              import re
+              dates=re.findall(r'(?:0[1-9]|[12][0-9]|3[01])\.(?:0[1-9]|1[0-2])\.20\d{2}',page.decode('utf-8','replace'))
+              print('DATES_IN_PAGE',len(set(dates)), sorted(set(dates))[:6],sorted(set(dates))[-6:])
+          print('REGIONAL_XLSX')
+          raw,typ=fetch('https://rmsp.nalog.ru/statistics.xlsx?'+urlencode({'fo':'1','level':'0','ssrf':'31','statDate':'10.11.2026'}))
+          if raw:
+              try:
+                  z=zipfile.ZipFile(io.BytesIO(raw)); ns='{http://schemas.openxmlformats.org/spreadsheetml/2006/main}'
+                  ss=[]
+                  if 'xl/sharedStrings.xml' in z.namelist():
+                      for si in ET.fromstring(z.read('xl/sharedStrings.xml')).findall(ns+'si'):
+                          ss.append(''.join(t.text or '' for t in si.iter(ns+'t')))
+                  dat=ET.fromstring(z.read('xl/worksheets/sheet1.xml')).find(ns+'sheetData')
+                  for row in list(dat)[:37]:
+                      cells=[]
+                      for cell in row:
+                          v=cell.find(ns+'v');val='' if v is None else v.text or ''
+                          if cell.get('t')=='s':val=ss[int(val)]
+                          if cell.get('t')=='inlineStr':val=''.join(t.text or '' for t in cell.iter(ns+'t'))
+                          if val:cells.append((cell.get('r'),val[:95]))
+                      print('REG_ROW',row.get('r'),cells)
+              except Exception as e:print('REG_XLSX_ERROR',repr(e))
           PY
