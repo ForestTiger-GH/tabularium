@@ -1,0 +1,40 @@
+name: One-shot FNS 1-YUR historical import 2012-2026 (public only)
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/fns-1yur-backfill-once.yml']
+permissions:
+  contents: write
+concurrency:
+  group: tabularium-publication-monitor
+  cancel-in-progress: false
+  queue: single
+jobs:
+  backfill:
+    if: github.repository == 'ForestTiger-GH/tabularium' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - name: Check out the latest public main
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
+      - name: Install official legacy ZIP/RAR/XLS readers
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends libarchive-tools
+          python -m pip install --disable-pip-version-check -r scripts/requirements_fns_1yur.txt
+      - name: Verify source representations offline
+        run: |
+          python -m unittest discover -s tests -p 'test_capture_fns_1yur.py' -q
+          python -m unittest discover -s tests -p 'test_capture_fns_1yur_history.py' -q
+          python -m unittest discover -s _mw/work/publication-monitor/tests -p 'test_fns_1yur_pipeline.py' -q
+      - name: Source-faithful historical backfill into scrolls (no Telegram)
+        run: |
+          python scripts/backfill_fns_1yur_history.py \
+            --from-date 2012-01-01 --to-date 2026-11-01
