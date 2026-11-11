@@ -1,0 +1,40 @@
+name: One-shot FNS 1-YUR source labels diagnostic (public only)
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/fns-1yur-labels-audit-once.yml']
+permissions:
+  contents: read
+jobs:
+  inspect:
+    if: github.repository == 'ForestTiger-GH/tabularium' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Summarize exact publisher legal-kind labels by date and publication epoch
+        run: |
+          python - <<'PY'
+          import json
+          from collections import defaultdict, Counter
+          from pathlib import Path
+          events=Path('_mw/work/publication-monitor/fns_1yur_events.jsonl')
+          all_={}
+          for line in events.read_text(encoding='utf-8').splitlines():
+              if not line.strip(): continue
+              r=json.loads(line)
+              if r['type'] in ('PUBLISHED_NEW','PUBLISHED_UPDATED','BASELINE_IMPORTED'):
+                  if r.get('source_kind_labels') is not None:
+                      all_[r['reference_date']]=r
+          signatures=defaultdict(list)
+          for day,e in sorted(all_.items()):
+              epoch='A' if day<'2013-05-01' else ('B' if day<'2019-03-01' else 'C')
+              labels=e['source_kind_labels']
+              for code,name in labels.items():
+                  signatures[(epoch,code,name.strip())].append(day)
+          print('TOTAL_DATE_LABELS',len(all_))
+          for (epoch,code,label), days in sorted(signatures.items()):
+              print('SOURCE_KIND',epoch,code,days[0],days[-1],len(days),json.dumps(label,ensure_ascii=False))
+          PY
