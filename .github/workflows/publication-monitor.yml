@@ -1,4 +1,4 @@
-name: Monitor official sources and capture FNS SME statistics
+name: Monitor official sources and capture FNS SME and 1-YUR statistics
 
 on:
   workflow_dispatch:
@@ -17,12 +17,24 @@ on:
           - fns-dry-run
           - fns-backfill
           - fns-verify
+          - fns-1yur-dry-run
+          - fns-1yur-verify
+          - fns-1yur-backfill
+          - fns-1yur-check
       fns_from_date:
         description: 'FNS backfill first official date (YYYY-MM-DD)'
         required: false
         type: string
       fns_to_date:
-        description: 'FNS backfill last official date (YYYY-MM-DD)'
+        description: 'FNS SME backfill last official date (YYYY-MM-DD)'
+        required: false
+        type: string
+      fns_1yur_from_date:
+        description: 'FNS 1-YUR backfill first source date (YYYY-MM-DD)'
+        required: false
+        type: string
+      fns_1yur_to_date:
+        description: 'FNS 1-YUR backfill last source date (YYYY-MM-DD)'
         required: false
         type: string
 
@@ -131,7 +143,9 @@ jobs:
       github.event.repository.private == false &&
       (github.event_name == 'schedule' ||
        inputs.mode == 'check' || inputs.mode == 'dry-run' ||
-       inputs.mode == 'validate' || startsWith(inputs.mode, 'fns-'))
+       inputs.mode == 'validate' ||
+       inputs.mode == 'fns-dry-run' || inputs.mode == 'fns-backfill' ||
+       inputs.mode == 'fns-verify')
     permissions:
       contents: write
     runs-on: ubuntu-24.04
@@ -176,4 +190,67 @@ jobs:
                 --from-date "$FNS_FROM" --to-date "$FNS_TO"
               ;;
             *) echo 'Invalid FNS mode' >&2; exit 2 ;;
+          esac
+
+fns-1yur:
+    needs: fns-sme
+    if: >-
+      always() && !cancelled() &&
+      github.repository == 'ForestTiger-GH/tabularium' &&
+      github.ref == 'refs/heads/main' &&
+      github.event.repository.private == false &&
+      (github.event_name == 'schedule' ||
+       inputs.mode == 'check' || inputs.mode == 'dry-run' ||
+       inputs.mode == 'validate' ||
+       inputs.mode == 'fns-1yur-check' ||
+       inputs.mode == 'fns-1yur-dry-run' ||
+       inputs.mode == 'fns-1yur-verify' ||
+       inputs.mode == 'fns-1yur-backfill')
+    permissions:
+      contents: write
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout current main after other monitor jobs
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Setup Python 3.12
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
+      - name: Install narrowly scoped XLS dependency
+        shell: bash
+        run: python -m pip install --disable-pip-version-check -r scripts/requirements_fns_1yur.txt
+      - name: Offline FNS 1-YUR tests
+        shell: bash
+        run: |
+          python -m unittest discover -s tests -p 'test_capture_fns_1yur.py' -q
+          python -m unittest discover -s _mw/work/publication-monitor/tests -p 'test_fns_1yur_pipeline.py' -q
+      - name: Check, publish, and notify FNS 1-YUR releases
+        shell: bash
+        env:
+          FNS_1YUR_MODE: ${{ github.event_name == 'schedule' && 'check' || inputs.mode }}
+          FNS_1YUR_FROM: ${{ inputs.fns_1yur_from_date || '' }}
+          FNS_1YUR_TO: ${{ inputs.fns_1yur_to_date || '' }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_THREAD_ID: ${{ vars.TELEGRAM_THREAD_ID }}
+        run: |
+          set -euo pipefail
+          case "$FNS_1YUR_MODE" in
+            check|fns-1yur-check) python _mw/work/publication-monitor/fns_1yur_pipeline.py check ;;
+            validate) python _mw/work/publication-monitor/fns_1yur_pipeline.py validate ;;
+            dry-run|fns-1yur-dry-run) python _mw/work/publication-monitor/fns_1yur_pipeline.py dry-run ;;
+            fns-1yur-verify) python _mw/work/publication-monitor/fns_1yur_pipeline.py verify ;;
+            fns-1yur-backfill)
+              if [ -z "$FNS_1YUR_FROM" ] || [ -z "$FNS_1YUR_TO" ]; then
+                echo '1-YUR backfill requires both range dates' >&2; exit 2
+              fi
+              python _mw/work/publication-monitor/fns_1yur_pipeline.py backfill \
+                --from-date "$FNS_1YUR_FROM" --to-date "$FNS_1YUR_TO"
+              ;;
+            *) echo 'Invalid 1-YUR mode' >&2; exit 2 ;;
           esac
