@@ -1,0 +1,83 @@
+name: Temporary FNS source structure probe
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/fns-source-probe.yml'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Inspect public FNS response structure without saving source
+        shell: bash
+        run: |
+          python - <<'PY'
+          from urllib.request import Request, urlopen
+          from urllib.parse import urlencode
+          from urllib.error import URLError, HTTPError
+          import json, zipfile, io, xml.etree.ElementTree as ET
+          def fetch(u, data=None):
+              try:
+                  req = Request(u, data=data, headers={'User-Agent':'Tabularium-Research/1.0','Accept-Encoding':'identity','Content-Type':'application/x-www-form-urlencoded'})
+                  with urlopen(req, timeout=32) as r:
+                      typ=r.headers.get('Content-Type','')
+                      print('SOURCE',r.status,r.geturl(),typ)
+                      raw=r.read(7_000_000)
+                      return raw, typ
+              except Exception as e:
+                  print('FETCH_ERROR',type(e).__name__,str(e)[:140]);return None,None
+          for date in ('10.11.2026','10.01.2025'):
+              print('DATE',date)
+              raw,typ=fetch('https://rmsp.nalog.ru/statistics-proc.json',urlencode({'statDate':date}).encode())
+              if raw:
+                  try:
+                      obj=json.loads(raw)
+                      print('JSON_TOP',type(obj).__name__,len(obj))
+                      if isinstance(obj,dict):
+                          print('TOP_KEYS', sorted(obj))
+                          arr=obj.get('data',[])
+                      else: arr=obj
+                      if isinstance(arr,list):
+                          lv={}
+                          for row in arr:
+                              if isinstance(row,dict):
+                                  key=str(row.get('cnt_level'))
+                                  lv[key]=lv.get(key,0)+1
+                          print('LEVEL_COUNTS',lv)
+                          for row in arr:
+                              if isinstance(row,dict) and row.get('ssrf') not in (None,''):
+                                  print('REGION_KEYS', sorted(row))
+                                  print('REGION_SAMPLE', json.dumps(row,ensure_ascii=False)[:5000])
+                                  break
+                  except Exception as e: print('JSON_ERROR',repr(e),repr(raw[:100]))
+              raw,typ=fetch('https://rmsp.nalog.ru/statistics.xlsx?'+urlencode({'fo':'','level':'2','ssrf':'','statDate':date}))
+              if raw:
+                  try:
+                      with zipfile.ZipFile(io.BytesIO(raw)) as z:
+                          names=z.namelist()
+                          print('XLSX_MEMBERS',len(names),'SHEETS',[n for n in names if n.startswith('xl/worksheets/sheet')][:5])
+                          ns='{http://schemas.openxmlformats.org/spreadsheetml/2006/main}'
+                          shared=[]
+                          if 'xl/sharedStrings.xml' in names:
+                              for item in ET.fromstring(z.read('xl/sharedStrings.xml')).findall(ns+'si'):
+                                  shared.append(''.join(t.text or '' for t in item.iter(ns+'t')))
+                          for path in [n for n in names if n.startswith('xl/worksheets/sheet') and n.endswith('.xml')][:2]:
+                              root=ET.fromstring(z.read(path));dat=root.find(ns+'sheetData')
+                              if dat is None: continue
+                              print('SHEET',path)
+                              for row in list(dat)[:14]:
+                                  vals=[]
+                                  for cell in list(row)[:14]:
+                                      v=cell.find(ns+'v')
+                                      s='' if v is None else v.text or ''
+                                      if cell.get('t')=='s' and s.isdigit():s=shared[int(s)]
+                                      if cell.get('t')=='inlineStr':
+                                          s=''.join(t.text or '' for t in cell.iter(ns+'t'))
+                                      if s:vals.append([cell.get('r'),s[:80]])
+                                  print('ROW',row.get('r'),vals)
+                  except Exception as e: print('XLSX_ERROR',repr(e),repr(raw[:70]))
+          PY
