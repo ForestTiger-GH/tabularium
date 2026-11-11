@@ -61,7 +61,11 @@ for year in (2012,2013,2014,2016,2018,2020,2022,2024,2025,2026):
     else:
         page_url=INDEX+url+"/"
     try:
-        p=Page();p.feed(get(page_url))
+        raw=get(page_url)
+        for needle in ("01.01.2012", "01.12.2012", "01.11.2026", "01.01.2026"):
+            i=raw.find(needle)
+            if i>=0:print("HTML_DATE_SNIPPET",year,needle,repr(raw[max(0,i-180):i+350]))
+        p=Page();p.feed(raw)
         print("YEAR",year,"ROWS",len(p.rows))
         for txt,links in (p.rows[:3]+p.rows[-2:]):
             print("RELEASE",repr(txt[:160]),[(href,label.strip()) for href,label in links[:2]])
