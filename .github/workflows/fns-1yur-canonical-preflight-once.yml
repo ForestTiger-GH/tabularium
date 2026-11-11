@@ -1,0 +1,30 @@
+name: One-shot FNS 1-YUR canonical preflight (public only)
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/fns-1yur-canonical-preflight-once.yml']
+permissions:
+  contents: read
+concurrency:
+  group: tabularium-publication-monitor
+  cancel-in-progress: false
+  queue: single
+jobs:
+  preflight:
+    if: github.repository == 'ForestTiger-GH/tabularium' && github.ref == 'refs/heads/main' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
+      - name: Compile and test source-meaning mapping without editing files
+        run: |
+          python -m py_compile scripts/fns_1yur_semantics.py scripts/migrate_fns_1yur_canonical.py
+          python -m unittest discover -s tests -p 'test_fns_1yur_semantics.py' -v
+      - name: Inspect complete 178-date migration without editing files
+        run: python scripts/migrate_fns_1yur_canonical.py dry-run
