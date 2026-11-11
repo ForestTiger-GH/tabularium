@@ -23,6 +23,61 @@ Special source territory rows `96` (Sirius) and `99` (other territories, includi
 
 Zero is different from missing, omitted, blank, suppressed, unreported, or invalid. Only exact nonnegative integer values are retained. Unknown or changed layouts, ambiguous ZIP members, inconsistent regional/national totals, missing classifications, unexplained territorial changes, and failed double-entry cross-checks cause a **fail-closed** check: existing CSVs remain untouched. Historical classifications may differ; newly encountered layouts must be reviewed before their source representations are accepted.
 
+
+## Column dictionary and legal-entity classification
+
+The first two columns mean: \`region_code\` — the FNS reporting-territory code printed in the source (a string; not OKTMO), and \`region_name\` — the FNS source territory name verbatim. All remaining columns use exactly \`cNN_KKKK\`, where \`NN\` is the selected numbered indicator and \`KKKK\` is the four-digit **source worksheet / legal-kind code**. An example: \`c08_1130\` is FNS indicator 8 for limited liability companies. A code not published in a historical edition is **absent**, not zero.
+
+| Prefix | FNS indicator | Published construct | Interpretation |
+| --- | --- | --- | --- |
+| \`c01\` | 1 | Legal entities with register entries, excluding entities that have ceased operations | Stock at the publication reference date, not an estimate of economically active enterprises |
+| \`c08\` | 8 | Legal entities under procedures applied in bankruptcy cases | A status/stock in the published perimeter |
+| \`c12\` | 12 | Legal entities whose activity ceased through bankruptcy | A cessation count as defined in the release, not automatically a monthly flow |
+
+The following dictionary is transcribed in English from the **national summary sheet of the 2026-11-01 Form 1-YUR issue**, not inferred from an external economic taxonomy. It describes that source edition, **not a universal retroactive mapping for 2012–2025**. Historical names, category sets, boundaries, and underlying legal definitions can differ and must be checked against each release.
+
+| Legal-kind code | Meaning in the 2026-11-01 FNS national summary | Relation / important caution |
+| --- | --- | --- |
+| \`1000\` | All legal entities | Aggregate, includes 1100 and 1200 |
+| \`1100\` | Commercial organizations, total | Aggregate |
+| \`1110\` | General partnerships | Component of 1100 |
+| \`1120\` | Limited partnerships | Component of 1100 |
+| \`1130\` | Limited liability companies | Component of 1100 |
+| \`1131\` | Additional liability companies | Subset of 1130; do not sum with 1130 |
+| \`1140\` | Joint-stock companies, total | Aggregate of 1141–1144 in the source edition |
+| \`1141\` | Public joint-stock companies | Subset of 1140 |
+| \`1142\` | Non-public joint-stock companies | Subset of 1140 |
+| \`1143\` | Open joint-stock companies | Subset of 1140, legacy form |
+| \`1144\` | Closed joint-stock companies | Subset of 1140, legacy form |
+| \`1150\` | Production cooperatives (artels) | Component of 1100 |
+| \`1151\` | Agricultural production cooperatives | Subset of 1150 |
+| \`1160\` | Peasant (farm) enterprises | Component of 1100 in this edition |
+| \`1170\` | Unitary enterprises | Aggregate of relevant subtypes |
+| \`1171\` | Federal unitary enterprises | Subset of 1170 |
+| \`1172\` | Unitary enterprises of constituent entities of Russia | Subset of 1170 |
+| \`1173\` | Municipal unitary enterprises | Subset of 1170 |
+| \`1174\` | Federal treasury enterprises | Subset of 1170; see source-header discrepancy below |
+| \`1175\` | Treasury enterprises of constituent entities of Russia | Subset of 1170; see discrepancy |
+| \`1176\` | Municipal treasury enterprises | Subset of 1170; see discrepancy |
+| \`1180\` | Other commercial organizations | Component of 1100 |
+| \`1190\` | Commercial organizations registered under a special procedure (Bank of Russia) | Independently published source category; not automatically additive to the printed 1100 components |
+| \`1200\` | Non-profit organizations, total | Aggregate |
+| \`1210\` | Consumer cooperatives | Component of 1200 |
+| \`1220\` | Real-estate owners' associations | Component of 1200 |
+| \`1221\` | Gardening, vegetable-growing or dacha non-profit associations | Subset of 1220 |
+| \`1222\` | Homeowners' associations | Subset of 1220 |
+| \`1230\` | Institutions, total | Aggregate |
+| \`1231\` | Federal institutions | Subset of 1230 |
+| \`1232\` | Institutions of constituent entities of Russia | Subset of 1230 |
+| \`1233\` | Municipal institutions | Subset of 1230 |
+| \`1240\` | Non-profit organizations registered under a special procedure, total | Aggregate |
+| \`1241\` | Non-profit organizations registered under the special procedure of the Ministry of Justice | Subset of 1240 |
+| \`1242\` | Non-profit organizations registered under the special procedure of the Bank of Russia | Subset of 1240 |
+| \`1250\` | Other non-profit organizations | Component of 1200 |
+| \`1251\` | Personal foundations | Subset of 1250, only when published in that edition |
+
+The source summary contains explicit subtype relations and may include overlapping categories. Do **not** add all 37 category columns to estimate the total. In the 2026-11-01 workbook, the category sheets \`1174\`, \`1175\`, and \`1176\` carry contradictory / duplicated row-3 descriptions; the national summary gives the meanings above. The CSV preserves the sheet **codes** and published numeric values; the discrepancy is documented, not silently repaired. Sheet \`1300\` measures **registration records**, not entities, and is intentionally outside the selected 1/8/12 representation.
+
 ## Processing and limitations
 
 The [source adapter](../../../../../scripts/capture_fns_1yur.py) handles publisher link discovery, bounded ZIP retrieval, XLS extraction, double-orientation validation, deterministic CSV output, and semantic comparison. [The publication monitor](../../../../../_mw/work/publication-monitor/README.md) integrates this independent source adapter into the established five daily UTC slots and uses a separate operational event/outbox and Telegram notification only **after successful corpus publication**. Local originals and ZIP/XLS parsing use a pinned `xlrd` dependency; no macros or formulas are executed.
