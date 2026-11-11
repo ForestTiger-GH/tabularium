@@ -429,7 +429,13 @@ def extract_observations(xls, reference_date):
                 len(master_order) != 1 + len(districts) + len(subjects)):
             raise HistoryError("SOURCE_GEOGRAPHY_PERIMETER_UNEXPECTED")
         if len({code for code, _ in subjects}) != len(subjects):
-            raise HistoryError("SOURCE_TERRITORY_CODE_AMBIGUOUS")
+            repeated = {
+                code: [name for k, name in subjects if k == code]
+                for code, _ in subjects
+                if sum(1 for k, _ in subjects if k == code) > 1
+            }
+            raise HistoryError("SOURCE_TERRITORY_CODE_AMBIGUOUS:" +
+                               repr(repeated))
         if any(set(records[geo]) != set(kinds) for geo in master_order):
             raise HistoryError("KIND_COVERAGE_INCOMPLETE")
         source_differences = []
