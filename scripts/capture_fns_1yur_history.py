@@ -529,6 +529,7 @@ def extract_observations(xls, reference_date):
         kind_labels = {code: kind_labels_all[code] for code in kinds}
         master_order = None
         order_disagreements = []
+        excluded_incomplete_kind_sheets = {}
         records = {}
         common_mapping = None
         mappings_by_kind = {}
@@ -572,16 +573,39 @@ def extract_observations(xls, reference_date):
                 master_order = order
             elif order != master_order:
                 if set(order) != set(master_order):
-                    raise HistoryError("SOURCE_GEOGRAPHY_DIFFERENT_BETWEEN_KINDS:" + kind)
-                first = next((i for i, (left, right) in
-                              enumerate(zip(master_order, order))
-                              if left != right), None)
-                order_disagreements.append({
-                    "kind_code": kind,
-                    "first_different_source_row_index": first,
-                    "canonical_source_kind_code": kinds[0],
-                    "issue": "SAME_PUBLISHED_TERRITORIES_DIFFERENT_ORDER",
-                })
+                    excluded_incomplete_kind_sheets[kind] = {
+                        "reason": "SOURCE_KIND_WORKSHEET_GEOGRAPHIC_COVERAGE_DIFFERS",
+                        "missing_geographies": [
+                            list(geo) for geo in master_order if geo not in order],
+                        "extra_geographies": [
+                            list(geo) for geo in order if geo not in master_order],
+                    }
+                else:
+                    first = next((i for i, (left, right) in
+                                  enumerate(zip(master_order, order))
+                                  if left != right), None)
+                    order_disagreements.append({
+                        "kind_code": kind,
+                        "first_different_source_row_index": first,
+                        "canonical_source_kind_code": kinds[0],
+                        "issue": "SAME_PUBLISHED_TERRITORIES_DIFFERENT_ORDER",
+                    })
+        if excluded_incomplete_kind_sheets:
+            if len(excluded_incomplete_kind_sheets) > 8:
+                raise HistoryError("TOO_MANY_INCOMPLETE_SOURCE_KIND_SHEETS:" +
+                                   str(len(excluded_incomplete_kind_sheets)))
+            kinds = [k for k in kinds if k not in excluded_incomplete_kind_sheets]
+            kind_labels = {k: kind_labels[k] for k in kinds}
+            for geo in list(records):
+                if geo not in master_order:
+                    del records[geo]
+                    continue
+                for ignored in excluded_incomplete_kind_sheets:
+                    records[geo].pop(ignored, None)
+            print("::warning::FNS_SOURCE_INCOMPLETE_KIND_SHEETS_EXCLUDED",
+                  reference_date, excluded_incomplete_kind_sheets, flush=True)
+        if not 12 <= len(kinds) <= 90:
+            raise HistoryError("TOO_FEW_GEOGRAPHICALLY_COMPLETE_KINDS")
         if common_mapping is None:
             raise HistoryError("SOURCE_BANKRUPTCY_COLUMNS_NOT_PUBLISHED")
         if (not master_order or master_order[0][0] != "" or
@@ -686,6 +710,7 @@ def extract_observations(xls, reference_date):
             "orientation_disagreements": orientation_differences[:50],
             "kind_labels": kind_labels,
             "excluded_source_non_entity_sheets": excluded_non_entity_sheets,
+            "excluded_incomplete_kind_sheets": excluded_incomplete_kind_sheets,
         }
     finally:
         book.release_resources()
