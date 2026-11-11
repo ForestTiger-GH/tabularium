@@ -384,25 +384,53 @@ def write_csv(rows, kinds):
 
 
 def read_csv(data):
+    """Validate source-count CSV with source rows and historical indicator codes.
+
+    A national/district aggregate has the *source's empty* territorial code.
+    Legal-kind classifications and indicator numbers are release-specific.
+    """
     try:
         reader = csv.DictReader(io.StringIO(data.decode("utf-8"), newline=""))
         fields = reader.fieldnames
         check(fields is not None and fields[:2] == ["region_code", "region_name"]
-              and len(fields) >= 5 and len(fields) == len(set(fields)), "CSV_HEADER_INVALID")
-        kinds = sorted(set(field.split("_", 1)[1] for field in fields[2:] if "_" in field))
-        check(fields == csv_columns(kinds), "CSV_SCHEMA_INVALID")
-        parsed = {}
+              and len(fields) >= 3 and len(fields) == len(set(fields)), "CSV_HEADER_INVALID")
+        groups = {}
+        sequence = []
+        for column in fields[2:]:
+            m = re.fullmatch(r"(c\d{2})_(\d{4})", column)
+            check(m is not None, "CSV_MEASURE_COLUMN_INVALID")
+            prefix, kind = m.groups()
+            groups.setdefault(prefix, []).append(kind)
+            if prefix not in sequence:
+                sequence.append(prefix)
+        check(sequence and sequence[0] == "c01" and 1 <= len(sequence) <= 3
+              and len(sequence) == len(set(sequence))
+              and sequence == sorted(sequence), "CSV_INDICATOR_ORDER_INVALID")
+        kinds = groups["c01"]
+        check(len(kinds) >= 15 and kinds == sorted(set(kinds)) and
+              all(g == kinds for g in groups.values()), "CSV_KIND_CLASSIFICATION_INVALID")
+        check(fields == (["region_code", "region_name"] +
+                        [p + "_" + kind for p in sequence for kind in kinds]),
+              "CSV_SCHEMA_INVALID")
+        records = {}
         for row in reader:
             check(None not in row and all(k in row for k in fields), "CSV_ROW_MALFORMED")
-            key = row["region_code"]
-            check(key not in parsed and REGION_RE.fullmatch(key or "") and
-                  isinstance(row["region_name"], str) and row["region_name"].strip(),
-                  "CSV_REGION_INVALID")
+            key, name = row["region_code"], row["region_name"]
+            check(isinstance(name, str) and name.strip(), "CSV_REGION_NAME_INVALID")
+            if key == "":
+                check(name.strip().casefold() == "российская федерация" or
+                      "федеральный округ" in name.casefold(), "CSV_UNCODED_GEO_INVALID")
+                identity = "aggregate:" + name
+            else:
+                check(REGION_RE.fullmatch(key) is not None, "CSV_REGION_CODE_INVALID")
+                identity = key
+            check(identity not in records, "CSV_GEOGRAPHY_DUPLICATE")
             for field in fields[2:]:
                 integer(row[field], "CSV_COUNT_INVALID")
-            parsed[key] = tuple(row[f] for f in fields)
-        check(len(parsed) >= 60, "CSV_REGION_COUNT_INVALID")
-        return fields, parsed
+            records[identity] = tuple(row[f] for f in fields)
+        subjects = sum(1 for key in records if not key.startswith("aggregate:"))
+        check(subjects >= 60, "CSV_SUBJECT_COUNT_INVALID")
+        return fields, records
     except UnicodeError as exc:
         raise SourceError("CSV_ENCODING_INVALID") from exc
 
@@ -413,21 +441,19 @@ def compare(previous, candidate):
         return "NEW", len(fresh)
     old_fields, old = read_csv(previous)
     new_fields, _ = read_csv(candidate)
-    # A reviewed historical reclassification must not be silently rewritten.
     check(old_fields == new_fields, "CSV_SCHEMA_CHANGED")
-    changes = sum(old.get(k) != fresh.get(k) for k in old.keys() | fresh.keys())
-    return ("UPDATED" if changes else "NO_CHANGE", changes)
+    changed = sum(old.get(key) != fresh.get(key) for key in old.keys() | fresh.keys())
+    if not changed and list(old) != list(fresh):
+        changed = 1
+    return ("UPDATED" if changed else "NO_CHANGE", changed)
 
 
 def capture(d, url):
-    archive = download(url, "zip", MAX_ZIP)
-    member, member_name = choose_member(archive, d)
-    rows, kinds = extract_xls(member, d)
-    return write_csv(rows, kinds), {
-        "archive_url": url, "archive_sha256": hashlib.sha256(archive).hexdigest(),
-        "member_name": member_name, "member_sha256": hashlib.sha256(member).hexdigest(),
-        "regions": len(rows), "legal_kinds": len(kinds)
-    }
+    """Use the shared source-faithful parser for modern and archival layouts."""
+    from capture_fns_1yur_history import capture as historic_capture
+    page = page_url(d.year) if d.year in PAGES else None
+    data, metadata = historic_capture(d, page, url)
+    return data, metadata
 
 
 def cli(argv=None):
@@ -450,9 +476,11 @@ def cli(argv=None):
     d = date.fromisoformat(args.date)
     if args.xls:
         data = Path(args.xls).read_bytes()
-        rows, kinds = extract_xls(data, d)
-        candidate = write_csv(rows, kinds)
-        print("Local source:", len(rows), "regions;", len(kinds), "kinds")
+        from capture_fns_1yur_history import extract_observations
+        candidate, metadata = extract_observations(data, d)
+        print("Local source:", metadata["regions"], "regions;",
+              metadata["federal_districts"], "districts;",
+              metadata["legal_kinds"], "kinds")
     else:
         check(d in releases, "DATE_NOT_PUBLISHED")
         candidate, _ = capture(d, releases[d][1])
