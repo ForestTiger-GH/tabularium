@@ -48,7 +48,7 @@ def git(*args, check=True):
 
 
 def events_read(path=EVENTS):
-    items, published, acked, baselined = [], {}, set(), set()
+    items, published, acked, baselined, corrected = [], {}, set(), set(), set()
     if not Path(path).exists():
         return items, published, acked
     for line in Path(path).read_text(encoding="utf-8").splitlines():
@@ -69,6 +69,10 @@ def events_read(path=EVENTS):
             if ident in baselined or ident in published:
                 raise PipelineError("DUPLICATE_HISTORICAL_BASELINE")
             baselined.add(ident)
+        elif item["type"] == "BASELINE_CORRECTED":
+            if ident in corrected or item.get("baseline_event_id") not in baselined:
+                raise PipelineError("INVALID_HISTORICAL_CORRECTION")
+            corrected.add(ident)
         elif item["type"] == "NOTIFIED":
             if ident in acked:
                 raise PipelineError("DUPLICATE_ACK")
