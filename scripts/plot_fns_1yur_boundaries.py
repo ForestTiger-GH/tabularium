@@ -44,9 +44,9 @@ fig,ax=plt.subplots(2,1,figsize=(16.6,10.7),dpi=155)
 dates=[];reported=[];adjusted=[]
 for d in month_dates(2022,8,2023,9):
  header,rows=load(d)
- level=national(rows,"c01_1000")
+ level=national(rows,"le_not_ceased__all")
  newcomers=[r for r in rows if r["region_code"] in ("90","93","94","95")]
- amount=sum(int(r["c01_1000"]) for r in newcomers)
+ amount=sum(int(r["le_not_ceased__all"]) for r in newcomers)
  if d=="2023-02-01":assert len(newcomers)==4 and amount==31805
  dates.append(datetime.strptime(d,"%Y-%m-%d"))
  reported.append(level)
@@ -69,9 +69,9 @@ ax[0].text(.005,.02,"В январе 3 197 542; в феврале 3 227 373 (+29
 ds1=[];vs1=[];ds2=[];vs2=[]
 for day in month_dates(2018,10,2019,8):
  header,rows=load(day)
- key="c11_1010" if "c11_1010" in header else "c12_1000"
+ key="le_ceased_bankruptcy_liquidation__all"
  v=national(rows,key)
- if key=="c11_1010":
+ if day < "2019-03-01":
   ds1.append(datetime.strptime(day,"%Y-%m-%d"));vs1.append(v)
  else:
   ds2.append(datetime.strptime(day,"%Y-%m-%d"));vs2.append(v)
