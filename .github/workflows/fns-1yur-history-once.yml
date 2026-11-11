@@ -47,3 +47,5 @@ jobs:
 # Recheck original kind-sheet order and header rows.
 
 # Re-evaluate FNS legacy geography identifiers.
+
+# Verify overlapping territories from original FNS source.
