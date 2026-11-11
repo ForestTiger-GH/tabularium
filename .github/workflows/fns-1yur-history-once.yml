@@ -1,0 +1,19 @@
+name: One-shot FNS 1-YUR history inspection (public only)
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/fns-1yur-history-once.yml']
+permissions:
+  contents: read
+concurrency:
+  group: tabularium-fns-1yur-history-probe
+  cancel-in-progress: false
+jobs:
+  probe:
+    if: github.repository == 'ForestTiger-GH/tabularium' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Probe official historical FNS pages (read-only)
+        run: python _mw/work/publication-monitor/fns_1yur_history_probe.py
