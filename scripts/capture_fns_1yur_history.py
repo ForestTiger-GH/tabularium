@@ -377,14 +377,22 @@ def extract_observations(xls, reference_date):
         baseline_mapping = None
         for kind in kinds:
             sheet = book.sheet_by_name(kind)
-            header_row, mapping = indicator_plan(sheet)
-            signature = {
-                key: value for key, value in mapping.items()
-            }
             if baseline_mapping is None:
-                baseline_mapping = signature
-            elif signature != baseline_mapping:
-                raise HistoryError("INDICATOR_SCHEMA_DIFFERS_BETWEEN_KINDS:" + kind)
+                header_row, mapping = indicator_plan(sheet)
+                baseline_mapping = dict(mapping)
+            else:
+                header_row = _header_row(sheet)
+                mapping = baseline_mapping
+                # All kind sheets must carry the same numbered source columns.
+                # Some legacy sheets omit descriptive merged-cell captions,
+                # so re-interpretation of each caption would drop valid data.
+                for meaning, (col, _prefix, number) in mapping.items():
+                    if (sheet.ncols <= col or
+                            modern.code(sheet.cell_value(header_row, col), 2)
+                            != str(number).zfill(2)):
+                        raise HistoryError(
+                            "INDICATOR_CODE_DIFFERS_BETWEEN_KINDS:" +
+                            kind + ":" + meaning)
             order = []
             for row in range(header_row + 1, sheet.nrows):
                 geography = _geography(sheet, row)
