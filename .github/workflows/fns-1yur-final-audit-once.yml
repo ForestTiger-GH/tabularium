@@ -63,7 +63,8 @@ jobs:
               rows=list(geography)
               assert rows[0]==("","Российская Федерация"), ("RF_NOT_FIRST",path,rows[0])
               assert len(rows)>=90, ("GEOGRAPHY_TOO_SHORT",path,len(rows))
-              assert ("", "Центральный федеральный округ") in geography, ("NO_DISTRICT",path)
+              districts=[name for code,name in geography if code=="" and "федеральный округ" in name.casefold()]
+              assert 6<=len(districts)<=9, ("DISTRICT_SCOPE_INVALID",path,districts)
               assert path.parent.name==day[:4], ("YEAR_DIRECTORY_WRONG",path)
               prefixes={field.split("_",1)[0] for field in columns[2:]}
               metric_prefixes.update(prefixes)
