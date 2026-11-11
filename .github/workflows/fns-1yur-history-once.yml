@@ -17,3 +17,5 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Probe official historical FNS pages (read-only)
         run: python _mw/work/publication-monitor/fns_1yur_history_probe.py
+
+# Re-probe historical year attachment markup.
