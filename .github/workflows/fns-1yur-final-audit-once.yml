@@ -69,13 +69,13 @@ jobs:
               metric_prefixes.update(prefixes)
               assert prefixes.issubset({"c01","c08","c09","c11","c12","c13"}), ("UNEXPECTED_METRIC",path,prefixes)
               assert "c01" in prefixes
-              assert not any(name.endswith(("_1040","_1050")) for name in columns), ("REGISTRATION_RECORD_FIELD",path)
               if day in baselines:
                   source=baselines[day]
                   labels=source.get("source_kind_labels",{})
                   coverage=source["source_kind_metric_coverage"]
                   original_map=source["source_indicator_map"]
                   excluded={key for key,value in labels.items() if historical.is_registration_record_label(value)}
+                  assert not any(field.rsplit("_",1)[1] in excluded for field in columns[2:]), ("SOURCE_REPORTED_REGISTRATION_RECORD_FIELD",path,excluded)
                   expected={}
                   for meaning,codes in coverage.items():
                       prefix=original_map[meaning]["csv_prefix"]
