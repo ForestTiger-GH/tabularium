@@ -7,7 +7,7 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT / "_mw/work/publication-monitor"))
@@ -126,7 +126,7 @@ class Lifecycle(unittest.TestCase):
                  patch.object(p.source, "capture", return_value=(self.csv_bytes(), "a"*64)), \
                  patch.object(p, "safe_publish", side_effect=lambda *a, **kw: order.append("push") or True), \
                  patch.object(p, "flush_outbox", side_effect=lambda *a, **kw: order.append("notify") or 0), \
-                 patch.dict(os.environ, {"GITHUB_SHA": "f" * 40}):
+                 patch.object(p, "cmd", return_value=Mock(stdout="f" * 40)):
                 self.assertEqual(p.process("check"), 0)
                 self.assertEqual(order, ["notify", "push", "notify"])
                 self.assertEqual(len(p.events_read(journal)[1]), 2)
