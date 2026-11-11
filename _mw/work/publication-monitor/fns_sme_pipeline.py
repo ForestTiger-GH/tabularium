@@ -46,7 +46,7 @@ def cmd(*args, check=True):
 
 def events_read(path=None):
     path = EVENTS if path is None else Path(path)
-    events, published, notified = [], {}, set()
+    events, published, notified, imported = [], {}, set(), set()
     if not Path(path).exists():
         return events, published, notified
     for line in Path(path).read_text(encoding="utf-8").splitlines():
@@ -63,6 +63,11 @@ def events_read(path=None):
             if not isinstance(ident, str) or ident in published:
                 raise PipelineError("DUPLICATE_EVENT_ID")
             published[ident] = event
+        elif event["type"] == "BASELINE_IMPORTED":
+            ident = event.get("event_id")
+            if not isinstance(ident, str) or ident in imported:
+                raise PipelineError("DUPLICATE_BASELINE_EVENT")
+            imported.add(ident)
         elif event["type"] == "NOTIFIED":
             ident = event.get("event_id")
             if not isinstance(ident, str) or ident in notified:
