@@ -16,10 +16,13 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
 sys.path.insert(0, str(REPO / "scripts"))
 import capture_fns_1yur as source
+from migrated_flake_paths import current_csv_path
 from monitor import MonitorError, send_telegram
 
 EVENTS = HERE / "fns_1yur_events.jsonl"
-WATCHED_CODE = ("scripts/capture_fns_1yur.py",
+WATCHED_CODE = ("AGENTS.md", "scripts/capture_fns_1yur.py",
+                "scripts/migrated_flake_paths.py",
+                "flakes/organizations/legal-entity-population/README.md",
                 "scripts/fns_1yur_semantics.py",
                 "scripts/capture_fns_1yur_history.py",
                 "scripts/backfill_fns_1yur_history.py",
@@ -173,7 +176,7 @@ def event_for(d, status, data, changed, metadata):
 def alert(event):
     d = date.fromisoformat(event["reference_date"])
     verb = "обновлён" if event["type"] == "PUBLISHED_UPDATED" else "добавлен"
-    path = event["csv_path"]
+    path = current_csv_path(event["csv_path"])
     url = "https://github.com/" + REPO_NAME + "/blob/main/" + path
     return (
         f"📊 <b>ФНС 1-ЮР: {verb} региональный срез</b>\n"

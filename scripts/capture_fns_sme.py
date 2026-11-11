@@ -21,7 +21,7 @@ from urllib.request import Request, HTTPRedirectHandler, build_opener
 
 SOURCE_PAGE = "https://rmsp.nalog.ru/statistics.html"
 SOURCE_JSON = "https://rmsp.nalog.ru/statistics-proc.json"
-CORPUS = Path("scrolls/russia/authorities/federal-tax-service/sme-registry-statistics")
+CORPUS = Path("flakes/organizations/sme-register-population")
 COLUMNS = ("region_code", "region_name", "total", "ul_micro", "ul_small",
            "ul_medium", "ip_micro", "ip_small", "ip_medium")
 SOURCE_COLUMNS = ("ssrf", "name", "cnt_total", "cnt_ul_micro", "cnt_ul_mini",

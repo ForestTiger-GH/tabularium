@@ -32,7 +32,7 @@ jobs:
           set -euo pipefail
           expected="$(python -c 'from datetime import datetime, timedelta, timezone; print(datetime.now(timezone(timedelta(hours=3))).date().isoformat())')"
           year="${expected:0:4}"
-          file="scrolls/russia/authorities/bank-of-russia/credit-institution-structural-units/${year}/${expected}_OFFICES.csv"
+          file="flakes/banking/service-network/bank-regional-offices/${year}/${expected}_OFFICES.csv"
           if [ ! -s "$file" ]; then
             echo "::error::Missing CBR offices snapshot for UTC+03 date ${expected}: ${file}"
             exit 1

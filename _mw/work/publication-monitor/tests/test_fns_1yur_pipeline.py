@@ -53,6 +53,15 @@ class Outbox(unittest.TestCase):
         self.assertIn("ФНС 1-ЮР", msg)
 
 
+class MigratedLinks(unittest.TestCase):
+    def test_pending_old_event_uses_current_flake_url(self):
+        old_event = event()
+        old_event["csv_path"] = "scrolls/russia/authorities/federal-tax-service/legal-entity-registration/2026/2026-11-01_1-YUR.csv"
+        message = p.alert(old_event)
+        self.assertIn("flakes/organizations/legal-entity-population/2026/2026-11-01_1-YUR.csv", message)
+        self.assertNotIn("scrolls/russia/authorities/federal-tax-service/legal-entity-registration/", message)
+
+
 class Scheduling(unittest.TestCase):
     def test_backfill_bounded_and_explicit(self):
         available = [date(2026, i, 1) for i in range(1, 12)]

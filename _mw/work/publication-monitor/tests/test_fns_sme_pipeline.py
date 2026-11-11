@@ -75,6 +75,13 @@ class Journal(unittest.TestCase):
         self.assertEqual(p.events_read(self.path)[2], set())
 
 
+class MigratedLinks(unittest.TestCase):
+    def test_pending_old_event_uses_current_flake_url(self):
+        message = p.format_alert(sample_event())
+        self.assertIn("flakes/organizations/sme-register-population/2026/2026-11-10_SME-REG.csv", message)
+        self.assertNotIn("scrolls/russia/authorities/federal-tax-service/sme-registry-statistics/", message)
+
+
 class Selection(unittest.TestCase):
     def test_scheduled_checks_latest_and_recent_missing_only(self):
         dates = [date(2026, m, 10) for m in range(1, 11)]

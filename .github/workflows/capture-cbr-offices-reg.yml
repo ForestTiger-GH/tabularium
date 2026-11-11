@@ -62,7 +62,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          find scrolls/russia/authorities/bank-of-russia/credit-institution-structural-units \
+          find flakes/banking/service-network/territorial-offices \
             -name '*_OFFICES-REG.csv' -type f -print0 | \
             while IFS= read -r -d '' file; do
               python scripts/capture_cbr_offices_reg.py validate --file "$file"

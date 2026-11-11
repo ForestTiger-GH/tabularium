@@ -16,10 +16,13 @@ HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[2]
 sys.path.insert(0, str(REPO / "scripts"))
 import capture_fns_sme as source
+from migrated_flake_paths import current_csv_path
 from monitor import send_telegram, MonitorError
 
 EVENTS = HERE / "fns_sme_events.jsonl"
-CHANGING_CODE = ("scripts/capture_fns_sme.py",
+CHANGING_CODE = ("AGENTS.md", "scripts/capture_fns_sme.py",
+                 "scripts/migrated_flake_paths.py",
+                 "flakes/organizations/sme-register-population/README.md",
                  "_mw/work/publication-monitor/fns_sme_pipeline.py",
                  ".github/workflows/publication-monitor.yml")
 REPO_NAME = "ForestTiger-GH/tabularium"
@@ -140,7 +143,7 @@ def format_alert(event):
     update = event["type"] == "PUBLISHED_UPDATED"
     headline = "обновлён" if update else "добавлен"
     d = datetime.fromisoformat(event["reference_date"])
-    url = f"https://github.com/{REPO_NAME}/blob/main/{event['csv_path']}"
+    url = f"https://github.com/{REPO_NAME}/blob/main/{current_csv_path(event['csv_path'])}"
     return (
         f"📊 <b>ФНС: {headline} региональный срез МСП</b>\n\n"
         f"Дата статистики: {d:%d.%m.%Y}\n"

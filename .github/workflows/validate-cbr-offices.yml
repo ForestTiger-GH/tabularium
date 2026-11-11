@@ -13,6 +13,10 @@ on:
       - '.github/workflows/capture-cbr-offices-reg.yml'
       - 'tests/test_capture_cbr_offices.py'
       - 'tests/fixtures/cbr-offices/**'
+      - 'AGENTS.md'
+      - 'flakes/README.md'
+      - 'flakes/banking/service-network/**/README.md'
+      - 'tests/test_migrated_flake_paths.py'
   pull_request:
     paths:
       - '.github/workflows/capture-cbr-offices.yml'
@@ -24,6 +28,10 @@ on:
       - '.github/workflows/capture-cbr-offices-reg.yml'
       - 'tests/test_capture_cbr_offices.py'
       - 'tests/fixtures/cbr-offices/**'
+      - 'AGENTS.md'
+      - 'flakes/README.md'
+      - 'flakes/banking/service-network/**/README.md'
+      - 'tests/test_migrated_flake_paths.py'
   workflow_dispatch:
 
 permissions:
@@ -60,7 +68,9 @@ jobs:
             .github/workflows/capture-cbr-offices-reg.yml
       - name: Run offline extractor and publishing tests
         shell: bash
-        run: python -m unittest discover -s tests -p 'test_capture_cbr_offices*.py' -q
+        run: |
+          python -m unittest discover -s tests -p 'test_capture_cbr_offices*.py' -q
+          python -m unittest discover -s tests -p 'test_migrated_flake_paths.py' -q
       - name: Live read-only CBR HTML extraction smoke test
         if: github.event_name == 'push'
         shell: bash

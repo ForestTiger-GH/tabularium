@@ -87,4 +87,4 @@ jobs:
         run: |
           python scripts/capture_cbr_offices.py publish \
             --input-dir "$RUNNER_TEMP/cbr-offices-input" \
-            --corpus-root scrolls/russia/authorities/bank-of-russia/credit-institution-structural-units
+            --corpus-root flakes/banking/service-network/bank-regional-offices

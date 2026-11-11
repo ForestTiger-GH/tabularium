@@ -166,6 +166,7 @@ jobs:
         run: |
           python -m unittest discover -s tests -p 'test_capture_fns_sme.py' -q
           python -m unittest discover -s _mw/work/publication-monitor/tests -p 'test_fns_sme_pipeline.py' -q
+          python -m unittest discover -s tests -p 'test_migrated_flake_paths.py' -q
       - name: Check, publish and notify FNS SME releases
         shell: bash
         env:
@@ -231,6 +232,7 @@ jobs:
           python -m unittest discover -s tests -p 'test_capture_fns_1yur_history.py' -q
           python -m unittest discover -s tests -p 'test_fns_1yur_semantics.py' -q
           python -m unittest discover -s _mw/work/publication-monitor/tests -p 'test_fns_1yur_pipeline.py' -q
+          python scripts/migrate_fns_1yur_canonical.py verify
       - name: Check, publish, and notify FNS 1-YUR releases
         shell: bash
         env:

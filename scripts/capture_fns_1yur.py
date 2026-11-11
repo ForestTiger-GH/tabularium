@@ -21,7 +21,7 @@ from urllib.parse import urljoin, urlsplit
 from urllib.request import HTTPRedirectHandler, Request, build_opener
 import zipfile
 
-CORPUS = Path("scrolls/russia/authorities/federal-tax-service/legal-entity-registration")
+CORPUS = Path("flakes/organizations/legal-entity-population")
 PAGES = {
     2026: "16601803", 2025: "15764462", 2024: "14414858",
     2023: "13134463", 2022: "11892431", 2021: "10553558",

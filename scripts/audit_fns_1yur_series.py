@@ -13,7 +13,7 @@ import matplotlib.dates as mdates
 from matplotlib.ticker import FuncFormatter
 import fns_1yur_semantics as semantic
 
-BASE=Path("scrolls/russia/authorities/federal-tax-service/legal-entity-registration")
+BASE=Path("flakes/organizations/legal-entity-population")
 OUT=Path("_mw/work/fns-1yur-series-audit-2026-11-11")
 OUT.mkdir(parents=True,exist_ok=True)
 REGIONS=[

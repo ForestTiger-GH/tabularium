@@ -11,4 +11,4 @@ Route by country first unless an explicitly documented cross-country route appli
 - [`russia/`](russia/) — Russian public-source corpus.
 - [`world/`](world/) — non-Russian and international publications routed by stable corporate source class or explicitly documented source institution; corporate reporting-entity jurisdiction is preserved in artifact names.
 
-Registries, repository tooling, research material, derived observations, and analytical work do not belong in this directory.
+Selected source-extracted observations belong in [`flakes/`](../flakes/). Registries, repository tooling, research material, derived calculations, and analytical work do not belong in this directory.

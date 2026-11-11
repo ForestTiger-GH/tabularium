@@ -4,11 +4,14 @@ Machine-readable corpus of primary public financial, corporate, statistical, and
 
 ## Route
 
-Start from the source corpus.
+Start from the source corpus or the source-extracted economic observation layer.
 
 - [scrolls/](scrolls/) — authoritative primary-source corpus.
   - [russia/](scrolls/russia/) — Russian public-source corpus.
   - [world/](scrolls/world/) — non-Russian and international public-source corpus.
+- [flakes/](flakes/) — source-extracted published observations routed by economic meaning.
+  - [organizations/](flakes/organizations/) — legal entities and SMEs.
+  - [banking/](flakes/banking/) — bank service networks.
 
 ## Corpus map
 
@@ -25,10 +28,8 @@ This map lists populated material classes and documented source routes.
   - [Bank of Russia](scrolls/russia/authorities/bank-of-russia/)
     - [Medium-Term Forecast](scrolls/russia/authorities/bank-of-russia/medium-term-forecast/).
     - [Banking Sector Dynamics](scrolls/russia/authorities/bank-of-russia/banking-sector-dynamics/) — monthly information-analytical publications on the development of Russia’s banking sector.
-    - [Credit institution structural units](scrolls/russia/authorities/bank-of-russia/credit-institution-structural-units/) — daily observed CSV extractions of the Bank of Russia's regional office table.
   - [Ministry of Economic Development](scrolls/russia/authorities/ministry-of-economic-development/)
     - [Socio-Economic Development Forecast](scrolls/russia/authorities/ministry-of-economic-development/socio-economic-development-forecast/).
-  - [Federal Tax Service](scrolls/russia/authorities/federal-tax-service/) — source-traceable SME registry and legal-entity registration regional snapshots.
   - [Rosstat](scrolls/russia/authorities/rosstat/)
     - [Short-Term Economic Indicators of the Russian Federation](scrolls/russia/authorities/rosstat/short-term-economic-indicators/).
     - [Social and Economic Situation of Russia](scrolls/russia/authorities/rosstat/social-economic-position-russia/).
@@ -50,13 +51,19 @@ This map lists populated material classes and documented source routes.
   - [McKinsey](scrolls/world/surveys/usa-mckinsey/) — admitted public publications from McKinsey & Company preserved as source objects of that publisher.
   - [ICCO](scrolls/world/surveys/icco/) — primary public publications of the International Cocoa Organization.
 
+## Economic observation routes
+
+- [Bank-by-region offices](flakes/banking/service-network/bank-regional-offices/) and [monthly territorial offices](flakes/banking/service-network/territorial-offices/) — distinct Bank of Russia source-extracted series.
+- [Legal-entity population](flakes/organizations/legal-entity-population/) — FNS Form 1-YUR registered legal entities.
+- [SME register population](flakes/organizations/sme-register-population/) — FNS legal-entity and entrepreneur regional counts.
+
 ## Scope
 
-This repository stores source-faithful machine-readable artifacts, minimal routing metadata, and documented remote-source bridges for official high-volume datasets that are better accessed from their canonical publisher than mirrored in Git.
+This repository stores source-faithful primary publications under `scrolls/`, source-extracted published observations under `flakes/`, minimal routing metadata, and documented remote-source bridges for official high-volume datasets.
 
 A bridge is a retrieval contract, not a local copy of the dataset. It must preserve primary-source identity and clearly distinguish reported values, disclosure suppression, source unavailability, and retrieval failure.
 
-Analytical work, derived calculations, commentary, and private/internal materials belong elsewhere.
+`flakes/` preserves published values without a guarantee of harmonized time series. When a source is accessed directly without being archived in `scrolls/`, no artificial scroll link is required. Analytical work, derived calculations, commentary, and private/internal materials belong elsewhere.
 
 When an original primary publication is no longer publicly accessible, an explicitly documented third-party preservation proxy may be retained to preserve the historical record. Such a proxy must retain its actual provenance and must not be represented as the unavailable primary-source original.
 

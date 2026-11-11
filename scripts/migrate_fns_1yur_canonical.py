@@ -21,8 +21,9 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 sys.path.insert(0, str(HERE))
 import fns_1yur_semantics as semantic
+from migrated_flake_paths import current_csv_path
 
-CORPUS = ROOT / "scrolls/russia/authorities/federal-tax-service/legal-entity-registration"
+CORPUS = ROOT / "flakes/organizations/legal-entity-population"
 EVENTS = ROOT / "_mw/work/publication-monitor/fns_1yur_events.jsonl"
 MANIFEST = CORPUS / "field-provenance.json"
 MANIFEST_VERSION = "fns-1yur-canonical-migration-1"
@@ -232,31 +233,54 @@ def migrate():
 
 
 def verify():
+    """Check the immutable 178-release mapping without rejecting later revisions.
+
+    The original canonical SHA belongs to a historical snapshot. A different
+    current CSV must match a later publication event under the new flake path.
+    """
     if not MANIFEST.is_file():
         raise MigrationError("CANONICAL_MANIFEST_NOT_FOUND")
     doc = json.loads(MANIFEST.read_text(encoding="utf-8"))
     if doc.get("version") != MANIFEST_VERSION:
         raise MigrationError("UNKNOWN_CANONICAL_MANIFEST")
-    latest,_ = latest_event_hashes()
     if len(doc["mapping"]) != EXPECTED_TOTAL:
         raise MigrationError("CANONICAL_MANIFEST_FILE_COUNT_BAD")
-    checks = 0
+    latest, events_by_date = latest_event_hashes()
+    unchanged_checks = 0
+    revised = 0
     for item in doc["mapping"]:
         d = date.fromisoformat(item["reference_date"])
-        path = ROOT / item["path"]
+        # The manifest's original scrolls path is a historical fact.
+        path = ROOT / current_csv_path(item["path"])
         content = path.read_bytes()
-        if latest.get(d.isoformat()) != digest(content) or digest(content) != item["canonical_csv_sha256"]:
+        current_hash = digest(content)
+        if latest.get(d.isoformat()) != current_hash:
             raise MigrationError("CANONICAL_EVENT_HASH_MISMATCH:" + d.isoformat())
         fields, rows = semantic.validate_canonical(content)
-        if len(rows) != item["source_geographic_rows"]:
-            raise MigrationError("CANONICAL_GEO_ROW_COUNT_MISMATCH:" + d.isoformat())
-        if len(fields) != item["canonical_columns"]:
-            raise MigrationError("CANONICAL_FIELD_COUNT_MISMATCH:" + d.isoformat())
-        checks += check_identity_sums(content)
-    if checks != 40506:
+        checks = check_identity_sums(content)
+        if current_hash == item["canonical_csv_sha256"]:
+            if len(rows) != item["source_geographic_rows"]:
+                raise MigrationError("CANONICAL_GEO_ROW_COUNT_MISMATCH:" + d.isoformat())
+            if len(fields) != item["canonical_columns"]:
+                raise MigrationError("CANONICAL_FIELD_COUNT_MISMATCH:" + d.isoformat())
+            unchanged_checks += checks
+        else:
+            # Only a new, explicit, already published revision permits a
+            # deviation from the historical canonical snapshot.
+            if not any(e.get("type") in ("PUBLISHED_NEW", "PUBLISHED_UPDATED")
+                       and e.get("csv_sha256") == current_hash
+                       and e.get("csv_path") == current_csv_path(item["path"])
+                       for e in events_by_date.get(d.isoformat(), [])):
+                raise MigrationError("UNTRACEABLE_CURRENT_REVISION:" + d.isoformat())
+            revised += 1
+    if revised == 0 and unchanged_checks != 40506:
         raise MigrationError("CANONICAL_IDENTITY_SUMS_MISMATCH")
     print("FNS_CANONICAL_POSTCOMMIT_VERIFY_OK",
-          json.dumps({"dates":EXPECTED_TOTAL,"identity_checks":checks},ensure_ascii=False),flush=True)
+          json.dumps({"historical_dates": EXPECTED_TOTAL,
+                      "unchanged_snapshot_dates": EXPECTED_TOTAL - revised,
+                      "event_backed_revisions": revised,
+                      "unchanged_snapshot_identity_checks": unchanged_checks},
+                     ensure_ascii=False), flush=True)
     return 0
 
 

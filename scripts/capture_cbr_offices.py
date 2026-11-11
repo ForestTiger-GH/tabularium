@@ -21,7 +21,7 @@ import urllib.request
 SOURCE_URL = "https://www.cbr.ru/banking_sector/credit/cstat/"
 REPO = "ForestTiger-GH/tabularium"
 BRANCH = "main"
-CORPUS_ROOT = "scrolls/russia/authorities/bank-of-russia/credit-institution-structural-units"
+CORPUS_ROOT = "flakes/banking/service-network/bank-regional-offices"
 # Executable policy inputs; never publish an old run across changes here.
 # Other files, including historical CSVs from different dates, may advance main.
 POLICY_PATHS = ("AGENTS.md", "scripts/capture_cbr_offices.py",

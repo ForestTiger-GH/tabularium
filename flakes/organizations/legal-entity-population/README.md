@@ -66,7 +66,7 @@ The source worksheets for 1174–1176 have contradictory row-3 descriptions in t
 
 ## Historical field mapping and irreversible exclusions
 
-The single [field-provenance.json](field-provenance.json) records, **for every reference date**, the old `cNN_KKKK` source header, canonical heading, old/new CSV SHA-256, exact row count, taxonomy epoch and **every omitted historical field**. It is the machine-readable map from canonical representation back to the captured source-code representation (recoverable through the pre-migration Git commit). The implementation is [fns_1yur_semantics.py](../../../../../scripts/fns_1yur_semantics.py).
+The single [field-provenance.json](field-provenance.json) records, **for every reference date**, the old `cNN_KKKK` source header, canonical heading, old/new CSV SHA-256, exact row count, taxonomy epoch and **every omitted historical field**. It is the machine-readable map from canonical representation back to the captured source-code representation (recoverable through the pre-migration Git commit). The implementation is [fns_1yur_semantics.py](../../../scripts/fns_1yur_semantics.py).
 
 | Source dates | Source taxonomy | Total / commercial / nonprofit codes | Source measure codes |
 | --- | --- | --- | --- |
@@ -90,7 +90,7 @@ Some earlier editions assign the same source code to differently scoped territor
 
 ## Capture and verification
 
-The [historical source reader](../../../../../scripts/capture_fns_1yur_history.py) reads only identifiable FNS Part I source workbooks, including documented legacy publisher format quirks. The [scheduled capture adapter](../../../../../scripts/capture_fns_1yur.py) creates the **same canonical columns** using the reviewed mapping for that reference date; unknown indicator codes or ambiguous mappings fail closed. The [publication monitor](../../../../../_mw/work/publication-monitor/README.md) shares the existing five UTC schedules with the FNS SME and other source checks.
+The [historical source reader](../../../scripts/capture_fns_1yur_history.py) reads only identifiable FNS Part I source workbooks, including documented legacy publisher format quirks. The [scheduled capture adapter](../../../scripts/capture_fns_1yur.py) creates the **same canonical columns** using the reviewed mapping for that reference date; unknown indicator codes or ambiguous mappings fail closed. The [publication monitor](../../../_mw/work/publication-monitor/README.md) shares the existing five UTC schedules with the FNS SME and other source checks.
 
 For each official source issue, the operational publication event records the publisher URL, source member and SHA-256, extract method, reference date, source and canonical mapping version, and changes. The one-time `SCHEMA_MIGRATED` events record both historical CSV hashes and the manifest hash without Telegram alerts. The migration did not modify any retained numeric cell, geographic name/code or geographic row order; dropped columns are fully listed in the manifest.
 

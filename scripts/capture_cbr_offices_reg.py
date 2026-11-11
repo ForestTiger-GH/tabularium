@@ -25,7 +25,7 @@ import xml.etree.ElementTree as ET
 import zipfile
 
 REPO = "ForestTiger-GH/tabularium"
-CORPUS = "scrolls/russia/authorities/bank-of-russia/credit-institution-structural-units"
+CORPUS = "flakes/banking/service-network/territorial-offices"
 SOURCE_PAGE = "https://www.cbr.ru/statistics/bank_sector/lic/"
 FILENAME = re.compile(r"DivisionsPerRegion_(\d{2})(\d{2})(\d{2})\.xlsx\Z", re.I)
 CSV_NAME = re.compile(r"(20\d\d-\d\d-01)_OFFICES-REG\.csv\Z")
