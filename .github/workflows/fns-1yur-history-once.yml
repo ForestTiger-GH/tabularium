@@ -49,3 +49,5 @@ jobs:
 # Re-evaluate FNS legacy geography identifiers.
 
 # Verify overlapping territories from original FNS source.
+
+# Confirm all original composite source rows in historical editions.
