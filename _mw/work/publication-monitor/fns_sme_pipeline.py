@@ -44,7 +44,8 @@ def cmd(*args, check=True):
     return r
 
 
-def events_read(path=EVENTS):
+def events_read(path=None):
+    path = EVENTS if path is None else Path(path)
     events, published, notified = [], {}, set()
     if not Path(path).exists():
         return events, published, notified
@@ -75,7 +76,8 @@ def events_read(path=EVENTS):
     return events, published, notified
 
 
-def events_append(new_records, path=EVENTS):
+def events_append(new_records, path=None):
+    path = EVENTS if path is None else Path(path)
     if not new_records:
         return
     path = Path(path)
