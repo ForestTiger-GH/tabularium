@@ -150,9 +150,10 @@ def extract_releases(html, page):
         except SourceError:
             continue
         dates = DATE_RE.findall(label)
-        if len(dates) != 1:
+        if not dates:
             continue
-        day, month, year = map(int, dates[0])
+        # The FNS link can say only 'Details'; the date precedes the anchor.
+        day, month, year = map(int, dates[-1])
         try:
             d = date(year, month, day)
         except ValueError:
