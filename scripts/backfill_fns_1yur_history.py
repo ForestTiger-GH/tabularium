@@ -39,6 +39,9 @@ def operate(start, end, *, max_releases=0, dry_run=False):
         page, source_url = releases[day]
         try:
             data, meta = history.capture(day, page, source_url)
+            fields, observed_rows = modern.read_csv(data)
+            if len(observed_rows) != meta["rows"]:
+                raise history.HistoryError("CSV_SOURCE_ROW_COUNT_MISMATCH")
             if not data.startswith(b"region_code,region_name,"):
                 raise history.HistoryError("CSV_HEADER_INVALID")
             if dry_run:
