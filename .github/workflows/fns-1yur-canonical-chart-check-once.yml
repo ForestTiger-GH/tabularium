@@ -1,0 +1,55 @@
+name: One-shot FNS 1-YUR canonical charts compatibility audit (public only)
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/fns-1yur-canonical-chart-check-once.yml']
+permissions:
+  contents: write
+concurrency:
+  group: tabularium-fns-1yur-charts-qa
+  cancel-in-progress: false
+  queue: single
+jobs:
+  reproduce:
+    if: github.repository == 'ForestTiger-GH/tabularium' && github.ref == 'refs/heads/main' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
+      - name: Install charting library only for development QA
+        run: python -m pip install --disable-pip-version-check matplotlib==3.10.7
+      - name: Reproduce regional source-era anomaly charts with canonical columns
+        run: |
+          python -m py_compile scripts/audit_fns_1yur_series.py scripts/plot_fns_1yur_boundaries.py
+          python scripts/audit_fns_1yur_series.py
+          python scripts/plot_fns_1yur_boundaries.py
+          python scripts/migrate_fns_1yur_canonical.py verify
+      - name: Publish only the refreshed development-layer diagnostic figures
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          BASE=$(git rev-parse HEAD)
+          git add -- _mw/work/fns-1yur-series-audit-2026-11-11/
+          if git diff --cached --quiet; then
+            echo 'No diagnostic figures changed.'
+            exit 0
+          fi
+          git commit -m 'research(fns): reproduce source-era regional QA on canonical 1-YUR CSVs'
+          git fetch origin main
+          if ! git diff --quiet "$BASE" origin/main -- \
+              scrolls/russia/authorities/federal-tax-service/legal-entity-registration/ \
+              scripts/audit_fns_1yur_series.py scripts/plot_fns_1yur_boundaries.py \
+              _mw/work/fns-1yur-series-audit-2026-11-11/; then
+            echo 'Source or chart inputs changed concurrently; refuse.' >&2
+            exit 2
+          fi
+          git rebase origin/main
+          git push origin HEAD:main
