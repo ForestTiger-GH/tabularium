@@ -315,12 +315,11 @@ def _geography(sheet, row):
     return None
 
 
-def _kind_control(book, geography, kinds, template, expected):
-    """Verify independent transposed sheet if FNS published one for this row."""
+def _kind_control(book, geography, kinds, mappings_by_kind, expected):
+    """Cross-check each *reported* observation against its transposed sheet."""
     code, name = geography
     candidates = [code] if code else [name, name.strip()]
     sheet_name = next((n for n in candidates if n in book.sheet_names()), None)
-    # For older archives, federal-district aggregates have no transposed sheet.
     if sheet_name is None and not code:
         return 0
     if sheet_name is None:
@@ -328,29 +327,30 @@ def _kind_control(book, geography, kinds, template, expected):
     sheet = book.sheet_by_name(sheet_name)
     found = {}
     for row in range(sheet.nrows):
-        if sheet.ncols < max(col for col, _, _ in template.values()) + 1:
+        if sheet.ncols < 3:
             continue
         kind = modern.code(sheet.cell_value(row, 1), 4)
         if kind not in kinds:
             continue
         if kind in found:
             raise HistoryError("DUPLICATE_CONTROL_KIND:" + str(geography))
-        found[kind] = {
-            meaning: modern.integer(sheet.cell_value(row, column),
-                                    "CONTROL_VALUE_NOT_INTEGER")
-            for meaning, (column, _, _) in template.items()
-        }
+        found[kind] = {}
+        for meaning, (col, _, _) in mappings_by_kind[kind].items():
+            if col >= sheet.ncols:
+                raise HistoryError("CONTROL_MEASURE_COLUMN_MISSING")
+            found[kind][meaning] = modern.integer(
+                sheet.cell_value(row, col), "CONTROL_VALUE_NOT_INTEGER")
     if not found:
         if not code:
             return 0
         raise HistoryError("REGION_CONTROL_KIND_ABSENT:" + code)
     if set(found) != set(kinds) or found != expected:
         raise HistoryError("REGION_CONTROL_DISAGREES:" + str(geography))
-    return len(kinds) * len(template)
+    return sum(len(mappings_by_kind[kind]) for kind in kinds)
 
 
 def extract_observations(xls, reference_date):
-    """Build one wide CSV in exact FNS row order, including Russia and districts."""
+    """Preserve the complete printed geographic order and source metric coverage."""
     try:
         import xlrd
     except ImportError as exc:
@@ -366,117 +366,128 @@ def extract_observations(xls, reference_date):
         if not (15 <= len(kinds) <= 90 and "Российская Федерация" in sheet_names):
             raise HistoryError("LEGAL_KIND_SHEETS_UNEXPECTED")
         nation = book.sheet_by_name("Российская Федерация")
-        source_kind_codes = {
+        summary_codes = {
             modern.code(nation.cell_value(r, 1), 4)
             for r in range(nation.nrows) if nation.ncols >= 2
         }
-        if not set(kinds).issubset(source_kind_codes):
-            raise HistoryError("NATIONAL_KIND_SUMMARY_INCOMPLETE")
+        if not set(kinds).issubset(summary_codes):
+            raise HistoryError("SOURCE_NATIONAL_KIND_SUMMARY_INCOMPLETE")
         master_order = None
         records = {}
-        baseline_mapping = None
+        common_mapping = None
+        mappings_by_kind = {}
         for kind in kinds:
             sheet = book.sheet_by_name(kind)
-            if baseline_mapping is None:
-                header_row, mapping = indicator_plan(sheet)
-                baseline_mapping = dict(mapping)
+            header_row = _header_row(sheet)
+            if sheet.ncols == 3:
+                # Publisher prints only indicator 1 for this legal-kind sheet.
+                if modern.code(sheet.cell_value(header_row, 2), 2) != "01":
+                    raise HistoryError("TOTAL_ONLY_SHEET_NUMBER_UNEXPECTED:" + kind)
+                mapping = {"total": (2, "c01", "1")}
             else:
-                header_row = _header_row(sheet)
-                mapping = baseline_mapping
-                # All kind sheets must carry the same numbered source columns.
-                # Some legacy sheets omit descriptive merged-cell captions,
-                # so re-interpretation of each caption would drop valid data.
-                for meaning, (col, _prefix, number) in mapping.items():
-                    if (sheet.ncols <= col or
-                            modern.code(sheet.cell_value(header_row, col), 2)
-                            != str(number).zfill(2)):
-                        raise HistoryError(
-                            "INDICATOR_CODE_DIFFERS_BETWEEN_KINDS:" +
-                            kind + ":" + meaning)
+                if common_mapping is None:
+                    header_row, mapping = indicator_plan(sheet)
+                    common_mapping = dict(mapping)
+                else:
+                    mapping = common_mapping
+                    for meaning, (col, _, number) in mapping.items():
+                        if (sheet.ncols <= col or
+                                modern.code(sheet.cell_value(header_row, col), 2)
+                                != str(number).zfill(2)):
+                            raise HistoryError(
+                                "INDICATOR_CODE_DIFFERS_BETWEEN_KINDS:" +
+                                kind + ":" + meaning)
+            mappings_by_kind[kind] = mapping
             order = []
             for row in range(header_row + 1, sheet.nrows):
-                geography = _geography(sheet, row)
-                if geography is None:
+                geo = _geography(sheet, row)
+                if geo is None:
                     continue
                 counts = {
                     meaning: modern.integer(sheet.cell_value(row, col),
                                             "SOURCE_COUNT_NOT_INTEGER")
                     for meaning, (col, _, _) in mapping.items()
                 }
-                if geography in order:
+                if geo in order:
                     raise HistoryError("DUPLICATE_GEOGRAPHY_ROW")
-                order.append(geography)
-                records.setdefault(geography, {})[kind] = counts
+                order.append(geo)
+                records.setdefault(geo, {})[kind] = counts
             if master_order is None:
                 master_order = order
             elif order != master_order:
                 raise HistoryError("SOURCE_GEOGRAPHIC_ROW_ORDER_CONFLICT:" + kind)
-        if (not master_order or
-                master_order[0][0] != "" or
+        if common_mapping is None:
+            raise HistoryError("SOURCE_BANKRUPTCY_COLUMNS_NOT_PUBLISHED")
+        if (not master_order or master_order[0][0] != "" or
                 master_order[0][1].strip().casefold() != "российская федерация"):
-            raise HistoryError("NATIONAL_GEOGRAPHY_FIRST_REQUIRED")
-        federal_districts = [x for x in master_order if not x[0] and
-                             "федеральный округ" in x[1].casefold()]
+            raise HistoryError("SOURCE_RUSSIA_ROW_NOT_FIRST")
+        districts = [x for x in master_order if not x[0] and
+                     "федеральный округ" in x[1].casefold()]
         subjects = [x for x in master_order if x[0]]
-        if (not 6 <= len(federal_districts) <= 9 or
+        if (not 6 <= len(districts) <= 9 or
                 not 60 <= len(subjects) <= 110 or
-                len(master_order) != 1 + len(federal_districts) + len(subjects)):
+                len(master_order) != 1 + len(districts) + len(subjects)):
             raise HistoryError("SOURCE_GEOGRAPHY_PERIMETER_UNEXPECTED")
-        if len({x[0] for x in subjects}) != len(subjects):
+        if len({code for code, _ in subjects}) != len(subjects):
             raise HistoryError("SOURCE_TERRITORY_CODE_AMBIGUOUS")
-        if any(set(records[x]) != set(kinds) for x in master_order):
-            raise HistoryError("SOURCE_KIND_OBSERVATIONS_MISSING")
-        # Russia, districts and subjects occupy exactly the original positions.
-        # Never add aggregate rows to sum-of-subjects checks.
-        national_differences = []
+        if any(set(records[geo]) != set(kinds) for geo in master_order):
+            raise HistoryError("KIND_COVERAGE_INCOMPLETE")
+        source_differences = []
         for kind in kinds:
-            for meaning in baseline_mapping:
+            for meaning in mappings_by_kind[kind]:
                 total = int(records[master_order[0]][kind][meaning])
-                regional = sum(int(records[x][kind][meaning]) for x in subjects)
-                if total != regional:
-                    national_differences.append({
+                territorial = sum(int(records[geo][kind][meaning]) for geo in subjects)
+                if total != territorial:
+                    source_differences.append({
                         "kind_code": kind, "meaning": meaning,
-                        "reported_russia": total, "sum_territorial_rows": regional,
-                        "difference": total - regional,
+                        "reported_russia": total, "sum_territorial_rows": territorial,
+                        "difference": total - territorial,
                     })
-        if national_differences:
+        if source_differences:
             print("::warning::FNS_SOURCE_NATIONAL_TERRITORIAL_DIFFERENCES",
-                  reference_date, len(national_differences),
-                  national_differences[:5], flush=True)
-        controls_checked = 0
-        for geography in master_order:
-            controls_checked += _kind_control(
-                book, geography, kinds, baseline_mapping, records[geography])
-        cols = ["region_code", "region_name"]
-        meanings = ("total", "in_bankruptcy_procedure", "ceased_bankruptcy")
-        for meaning in meanings:
-            if meaning in baseline_mapping:
-                prefix = baseline_mapping[meaning][1]
-                cols.extend(prefix + "_" + kind for kind in kinds)
-        file = io.StringIO(newline="")
-        writer = csv.writer(file, lineterminator="\n")
-        writer.writerow(cols)
+                  reference_date, len(source_differences),
+                  source_differences[:5], flush=True)
+        crosschecked = 0
         for geo in master_order:
-            value = [geo[0], geo[1]]
-            for meaning in meanings:
-                if meaning in baseline_mapping:
-                    value.extend(records[geo][kind][meaning] for kind in kinds)
-            writer.writerow(value)
+            crosschecked += _kind_control(
+                book, geo, kinds, mappings_by_kind, records[geo])
+        result_columns = ["region_code", "region_name"]
+        coverage = {}
+        metric_order = ("total", "in_bankruptcy_procedure", "ceased_bankruptcy")
+        for meaning in metric_order:
+            matching = [kind for kind in kinds if meaning in mappings_by_kind[kind]]
+            if not matching:
+                continue
+            prefixes = {mappings_by_kind[kind][meaning][1] for kind in matching}
+            if len(prefixes) != 1:
+                raise HistoryError("SOURCE_METRIC_CODE_INCONSISTENT")
+            prefix = next(iter(prefixes))
+            result_columns.extend(prefix + "_" + kind for kind in matching)
+            coverage[meaning] = matching
+        output = io.StringIO(newline="")
+        writer = csv.writer(output, lineterminator="\n")
+        writer.writerow(result_columns)
+        for geo in master_order:
+            line = [geo[0], geo[1]]
+            for meaning in metric_order:
+                for kind in coverage.get(meaning, []):
+                    line.append(records[geo][kind][meaning])
+            writer.writerow(line)
         source_map = {
-            meaning: {"source_column_index_0based": col,
-                      "source_indicator": numeric,
-                      "csv_prefix": prefix}
-            for meaning, (col, prefix, numeric) in baseline_mapping.items()
+            meaning: {"source_column_index_0based": column,
+                      "source_indicator": number, "csv_prefix": prefix}
+            for meaning, (column, prefix, number) in common_mapping.items()
         }
-        return file.getvalue().encode("utf-8"), {
+        return output.getvalue().encode("utf-8"), {
             "rows": len(master_order),
             "regions": len(subjects),
-            "federal_districts": len(federal_districts),
+            "federal_districts": len(districts),
             "legal_kinds": len(kinds),
             "source_indicator_map": source_map,
-            "crosschecked_values": controls_checked,
+            "source_kind_metric_coverage": coverage,
+            "crosschecked_values": crosschecked,
             "kind_codes": kinds,
-            "national_territorial_differences": national_differences,
+            "national_territorial_differences": source_differences,
         }
     finally:
         book.release_resources()
