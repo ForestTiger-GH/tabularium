@@ -11,6 +11,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from matplotlib.ticker import FuncFormatter
+import fns_1yur_semantics as semantic
 
 BASE=Path("scrolls/russia/authorities/federal-tax-service/legal-entity-registration")
 OUT=Path("_mw/work/fns-1yur-series-audit-2026-11-11")
@@ -21,9 +22,9 @@ REGIONS=[
  ("02","Башкортостан"),("52","Нижегородская область"),("54","Новосибирская область"),
  ("61","Ростовская область"),("24","Красноярский край"),("63","Самарская область")]
 COLUMNS={
- "total":("c01_1010","c01_1000"),
- "status":("c08_1000","c09_1000","c08_1010","c09_1010"),
- "ceased":("c11_1010","c12_1010","c12_1000","c13_1000","c11_1000")}
+ "total":("le_not_ceased__all",),
+ "status":("le_bankruptcy_proceedings__all",),
+ "ceased":("le_ceased_bankruptcy_liquidation__all",)}
 TITLES={
  "total":"Юридические лица, не прекратившие деятельность",
  "status":"Юридические лица в процедурах банкротства",
@@ -71,21 +72,23 @@ for path in sorted(BASE.glob("*/*_1-YUR.csv")):
  vals={key:{metric:exact_number(row,field) for metric,field in keys.items()}
        for key,row in geos.items()}
  series.append({"date":day,"reference_date":day.strftime("%Y-%m-%d"),
+  "epoch":semantic.epoch(day.date()),
   "fields":keys,"values":vals,"rows":len(rows),
   "geographic_names":{code:row["region_name"] for code,row in geos.items()}})
 if len(series)!=178:raise ValueError("UNEXPECTED_MONTH_COUNT:"+str(len(series)))
 D=[s["date"] for s in series]
 
 def segments(code,metric):
- result=[];current=[];prev_field=None;prev_month=None
+ result=[];current=[];prev_field=None;prev_epoch=None;prev_month=None
  for i,s in enumerate(series):
   field=s["fields"][metric];v=s["values"][code][metric];month=month_index(s["date"])
   national_boundary=(code=="RU" and s["reference_date"]=="2023-02-01")
-  if (v is None or field!=prev_field or national_boundary or
-      (prev_month is not None and month!=prev_month+1)):
+  if (v is None or field!=prev_field or s["epoch"]!=prev_epoch or
+      national_boundary or (prev_month is not None and month!=prev_month+1)):
    if current:result.append(current);current=[]
   if v is not None:current.append((s["date"],v))
-  prev_field=field;prev_month=month if v is not None else None
+  prev_field=field;prev_epoch=s["epoch"]
+  prev_month=month if v is not None else None
  if current:result.append(current)
  return result
 
@@ -103,7 +106,7 @@ def format_axis(ax):
 def source_boundaries(ax,metric):
  prior=None
  for s in series:
-  key=s["fields"][metric]
+  key=(s["epoch"],s["fields"][metric])
   if prior is not None and key!=prior:
    ax.axvline(s["date"],lw=.75,ls="--",alpha=.65,color="#fb7c91")
   prior=key
@@ -123,7 +126,7 @@ def chart(metric,path):
   "ceased":"Число прекращений через банкротство по публикации ФНС; исторические номера колонок менялись."}
  fig.suptitle(TITLES[metric],fontsize=23,x=.048,y=.991,ha="left",fontweight="bold")
  fig.text(.048,.968,subtitles[metric],color=MUTED,fontsize=10.5,ha="left")
- fig.text(.048,.015,"Розовые пунктирные линии — смены исходного поля ФНС. Между редакциями не дорисована непрерывная линия.",
+ fig.text(.048,.015,"Pink dashed lines mark source-method epochs; lines are not connected across methodological boundaries.",
           fontsize=9,color=MUTED)
  fig.subplots_adjust(top=.927,bottom=.065,left=.052,right=.988,hspace=.38,wspace=.22)
  fig.savefig(OUT/path,dpi=145,facecolor=BG);plt.close(fig)
@@ -139,7 +142,8 @@ for code,label in [("RU","Россия")]+REGIONS:
   for i in range(1,len(series)):
    a,b=series[i-1],series[i]
    av=a["values"][code][metric];bv=b["values"][code][metric]
-   same_field=a["fields"][metric]==b["fields"][metric]
+   same_field=(a["fields"][metric]==b["fields"][metric] and
+               a["epoch"]==b["epoch"])
    contiguous=month_index(b["date"])==month_index(a["date"])+1
    if av is not None and av>0 and bv is not None and same_field and contiguous:
     pct=100*(bv/av-1)
@@ -159,8 +163,8 @@ ax.set_yticklabels([n for c,n in REGIONS],fontsize=11)
 xticks=[i for i,s in enumerate(series) if s["date"].month==1]
 ax.set_xticks(xticks);ax.set_xticklabels([series[i]["date"].strftime("%Y") for i in xticks])
 for i in xticks:ax.axvline(i-.5,color=INK,linewidth=.5,alpha=.19)
-ax.set_title("Изменение числа юридических лиц по месяцам, %",fontsize=22,loc="left",pad=18)
-ax.set_xlabel("Серые ячейки: разрыв даты или смена исходного кода поля",color=MUTED,labelpad=10)
+ax.set_title("Month-on-month change in legal entities, %",fontsize=22,loc="left",pad=18)
+ax.set_xlabel("Grey cells: missing month or source epoch boundary",color=MUTED,labelpad=10)
 bar=fig.colorbar(heat,ax=ax,orientation="horizontal",fraction=.052,pad=.14,aspect=55)
 bar.set_label("Изменение к предыдущему месяцу; шкала ограничена ±7%")
 fig.subplots_adjust(left=.16,right=.987,top=.9,bottom=.14)
@@ -189,9 +193,9 @@ transitions=defaultdict(list)
 for metric in COLUMNS:
  prior=None
  for s in series:
-  field=s["fields"][metric]
+  field=(s["epoch"],s["fields"][metric])
   if field!=prior:
-   transitions[metric].append([s["reference_date"],field])
+   transitions[metric].append([s["reference_date"],"epoch "+field[0]+": "+str(field[1])])
    prior=field
 levels={}
 for code,label in REGIONS:
@@ -251,13 +255,13 @@ for x in shocks[:45]:
 report+=["",
  "## Interpretation boundaries",
  "",
- "- Code 1010 (older) and 1000 (newer) name the broad legal-entity class in distinct source classifications. The figure is a provisional bridge, not proof of construct identity.",
+ "- Canonical aliases do not prove uniform economic constructs across A, B, C1, C2 and C3 source-method epochs. The source column lineage remains in field-provenance.json.",
  "- In 2019-06, only the complete 1000 category is retained; missing category columns are absent, not zero.",
  "- Moscow Oblast uses the uncombined row, not the source line including Baikonur.",
  "- A gap in source bankruptcy-status reporting is not a zero. Some historical kinds have no bankruptcy columns.",
  "- Changes in the geographic source name do not automatically establish changed territorial perimeter.",
  "- Source national/district rows are not summed with constituent subjects.",
- "- Same-field jumps are review flags; they do not establish ingestion failure without cross-checking the original source.",
+ "- Only month-on-month changes within the same source-method epoch are ranked; jumps across epoch boundaries are excluded.",
  ""]
 (OUT/"README.md").write_text("\n".join(report),encoding="utf-8")
 print("FNS_SERIES_AUDIT_SUMMARY",json.dumps({
