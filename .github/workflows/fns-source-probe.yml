@@ -1,5 +1,7 @@
 name: Temporary FNS source structure probe
 on:
+  push:
+    branches: [feat/fns-sme-pipeline-20261111]
   pull_request:
     branches: [main]
     paths:
