@@ -14,6 +14,17 @@ on:
           - bootstrap
           - check
           - test-telegram
+          - fns-dry-run
+          - fns-backfill
+          - fns-verify
+      fns_from_date:
+        description: 'FNS backfill first official date (YYYY-MM-DD)'
+        required: false
+        type: string
+      fns_to_date:
+        description: 'FNS backfill last official date (YYYY-MM-DD)'
+        required: false
+        type: string
 
   schedule:
     # Fixed UTC slots. At UTC+03: 04:00, 08:48, 13:36, 18:24, 23:12.
@@ -38,7 +49,8 @@ jobs:
     if: >-
       github.repository == 'ForestTiger-GH/tabularium' &&
       github.ref == 'refs/heads/main' &&
-      github.event.repository.private == false
+      github.event.repository.private == false &&
+      (github.event_name == 'schedule' || !startsWith(inputs.mode, 'fns-'))
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:
@@ -108,3 +120,60 @@ jobs:
           done
           echo 'Unable to publish checkpoints; a notification may repeat.' >&2
           exit 1
+
+
+  fns-sme:
+    needs: monitor
+    if: >-
+      always() && !cancelled() &&
+      github.repository == 'ForestTiger-GH/tabularium' &&
+      github.ref == 'refs/heads/main' &&
+      github.event.repository.private == false &&
+      (github.event_name == 'schedule' ||
+       inputs.mode == 'check' || inputs.mode == 'dry-run' ||
+       inputs.mode == 'validate' || startsWith(inputs.mode, 'fns-'))
+    permissions:
+      contents: write
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout the current main after XLSX monitoring
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Setup Python 3.12
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
+      - name: Offline source and pipeline validation
+        shell: bash
+        run: |
+          python -m unittest discover -s tests -p 'test_capture_fns_sme.py' -q
+          python -m unittest discover -s _mw/work/publication-monitor/tests -p 'test_fns_sme_pipeline.py' -q
+      - name: Check, publish and notify FNS SME releases
+        shell: bash
+        env:
+          FNS_MODE: ${{ github.event_name == 'schedule' && 'check' || inputs.mode }}
+          FNS_FROM: ${{ inputs.fns_from_date || '' }}
+          FNS_TO: ${{ inputs.fns_to_date || '' }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_THREAD_ID: ${{ vars.TELEGRAM_THREAD_ID }}
+        run: |
+          set -euo pipefail
+          case "$FNS_MODE" in
+            check) python _mw/work/publication-monitor/fns_sme_pipeline.py check ;;
+            validate) python _mw/work/publication-monitor/fns_sme_pipeline.py validate ;;
+            dry-run|fns-dry-run) python _mw/work/publication-monitor/fns_sme_pipeline.py dry-run ;;
+            fns-verify) python _mw/work/publication-monitor/fns_sme_pipeline.py verify ;;
+            fns-backfill)
+              if [ -z "$FNS_FROM" ] || [ -z "$FNS_TO" ]; then
+                echo 'FNS backfill requires both range dates' >&2; exit 2
+              fi
+              python _mw/work/publication-monitor/fns_sme_pipeline.py backfill \
+                --from-date "$FNS_FROM" --to-date "$FNS_TO"
+              ;;
+            *) echo 'Invalid FNS mode' >&2; exit 2 ;;
+          esac

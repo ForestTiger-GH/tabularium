@@ -28,6 +28,7 @@ This map lists populated material classes and documented source routes.
     - [Credit institution structural units](scrolls/russia/authorities/bank-of-russia/credit-institution-structural-units/) — daily observed CSV extractions of the Bank of Russia's regional office table.
   - [Ministry of Economic Development](scrolls/russia/authorities/ministry-of-economic-development/)
     - [Socio-Economic Development Forecast](scrolls/russia/authorities/ministry-of-economic-development/socio-economic-development-forecast/).
+  - [Federal Tax Service](scrolls/russia/authorities/federal-tax-service/) — source-traceable regional SME registry snapshots.
   - [Rosstat](scrolls/russia/authorities/rosstat/)
     - [Short-Term Economic Indicators of the Russian Federation](scrolls/russia/authorities/rosstat/short-term-economic-indicators/).
     - [Social and Economic Situation of Russia](scrolls/russia/authorities/rosstat/social-economic-position-russia/).
