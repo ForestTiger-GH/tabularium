@@ -61,6 +61,9 @@ def operate(start, end, *, max_releases=0, dry_run=False):
             event["overlapping_territory_codes"] = meta["overlapping_territory_codes"]
             event["national_territorial_differences"] = meta["national_territorial_differences"]
             event["source_orientation_disagreements"] = meta["orientation_disagreements"]
+            event["source_orientation_disagreements_count"] = meta["orientation_disagreements_count"]
+            event["source_orientation_disagreements_sha256"] = meta["orientation_disagreements_sha256"]
+            event["source_kind_labels"] = meta["kind_labels"]
             service.append_events([event])
             staged.append((day, service.relative(target)))
             print("HISTORY_STAGED", day, "regions", meta["regions"],
