@@ -5,198 +5,226 @@
     "total": [
       [
         "2012-01-01",
-        "c01_1010"
+        "epoch A: le_not_ceased__all"
+      ],
+      [
+        "2013-05-01",
+        "epoch B: le_not_ceased__all"
       ],
       [
         "2019-03-01",
-        "c01_1000"
+        "epoch C1: le_not_ceased__all"
+      ],
+      [
+        "2021-02-01",
+        "epoch C2: le_not_ceased__all"
+      ],
+      [
+        "2023-02-01",
+        "epoch C3: le_not_ceased__all"
       ]
     ],
     "status": [
       [
+        "2012-01-01",
+        "epoch A: None"
+      ],
+      [
+        "2013-05-01",
+        "epoch B: None"
+      ],
+      [
+        "2019-03-01",
+        "epoch C1: None"
+      ],
+      [
         "2021-02-01",
-        "c09_1000"
+        "epoch C2: le_bankruptcy_proceedings__all"
       ],
       [
         "2023-02-01",
-        "c08_1000"
+        "epoch C3: le_bankruptcy_proceedings__all"
       ]
     ],
     "ceased": [
       [
         "2012-01-01",
-        "c11_1010"
+        "epoch A: le_ceased_bankruptcy_liquidation__all"
+      ],
+      [
+        "2013-05-01",
+        "epoch B: le_ceased_bankruptcy_liquidation__all"
       ],
       [
         "2019-03-01",
-        "c12_1000"
+        "epoch C1: le_ceased_bankruptcy_liquidation__all"
       ],
       [
         "2021-02-01",
-        "c13_1000"
+        "epoch C2: le_ceased_bankruptcy_liquidation__all"
       ],
       [
         "2023-02-01",
-        "c12_1000"
+        "epoch C3: le_ceased_bankruptcy_liquidation__all"
       ]
     ]
   },
   "monthly_shocks": [
     {
-      "region": "Башкортостан",
+      "region": "Bashkortostan",
       "code": "02",
       "metric": "status",
-      "field": "c09_1000",
+      "field": "le_bankruptcy_proceedings__all",
       "date": "2022-03-01",
       "previous": 676,
       "current": 804,
       "monthly_change_pct": 18.935
     },
     {
-      "region": "Краснодарский край",
+      "region": "Krasnodar Krai",
       "code": "23",
       "metric": "status",
-      "field": "c09_1000",
+      "field": "le_bankruptcy_proceedings__all",
       "date": "2022-03-01",
       "previous": 1083,
       "current": 1280,
       "monthly_change_pct": 18.19
     },
     {
-      "region": "Новосибирская область",
+      "region": "Novosibirsk Oblast",
       "code": "54",
       "metric": "total",
-      "field": "c01_1010",
+      "field": "le_not_ceased__all",
       "date": "2013-01-01",
       "previous": 150422,
       "current": 138988,
       "monthly_change_pct": -7.601
     },
     {
-      "region": "Санкт-Петербург",
+      "region": "Saint Petersburg",
       "code": "78",
       "metric": "total",
-      "field": "c01_1010",
+      "field": "le_not_ceased__all",
       "date": "2017-01-01",
       "previous": 370965,
       "current": 349194,
       "monthly_change_pct": -5.869
     },
     {
-      "region": "Московская область",
+      "region": "Moscow Oblast",
       "code": "50",
       "metric": "total",
-      "field": "c01_1000",
+      "field": "le_not_ceased__all",
       "date": "2019-10-01",
       "previous": 199388,
       "current": 209771,
       "monthly_change_pct": 5.207
     },
     {
-      "region": "Москва",
+      "region": "Moscow",
       "code": "77",
       "metric": "total",
-      "field": "c01_1000",
+      "field": "le_not_ceased__all",
       "date": "2019-06-01",
       "previous": 783086,
       "current": 746354,
       "monthly_change_pct": -4.691
     },
     {
-      "region": "Москва",
+      "region": "Moscow",
       "code": "77",
       "metric": "total",
-      "field": "c01_1010",
+      "field": "le_not_ceased__all",
       "date": "2016-10-01",
       "previous": 1025965,
       "current": 982251,
       "monthly_change_pct": -4.261
     },
     {
-      "region": "Татарстан",
+      "region": "Tatarstan",
       "code": "16",
       "metric": "total",
-      "field": "c01_1010",
+      "field": "le_not_ceased__all",
       "date": "2017-08-01",
       "previous": 123088,
       "current": 118032,
       "monthly_change_pct": -4.108
     },
     {
-      "region": "Москва",
+      "region": "Moscow",
       "code": "77",
       "metric": "total",
-      "field": "c01_1010",
+      "field": "le_not_ceased__all",
       "date": "2016-09-01",
       "previous": 1069408,
       "current": 1025965,
       "monthly_change_pct": -4.062
     },
     {
-      "region": "Москва",
+      "region": "Moscow",
       "code": "77",
       "metric": "total",
-      "field": "c01_1000",
+      "field": "le_not_ceased__all",
       "date": "2021-10-01",
       "previous": 591045,
       "current": 567695,
       "monthly_change_pct": -3.951
     },
     {
-      "region": "Свердловская область",
+      "region": "Sverdlovsk Oblast",
       "code": "66",
       "metric": "total",
-      "field": "c01_1010",
+      "field": "le_not_ceased__all",
       "date": "2018-01-01",
       "previous": 155301,
       "current": 149188,
       "monthly_change_pct": -3.936
     },
     {
-      "region": "Краснодарский край",
+      "region": "Krasnodar Krai",
       "code": "23",
       "metric": "total",
-      "field": "c01_1000",
+      "field": "le_not_ceased__all",
       "date": "2019-05-01",
       "previous": 127537,
       "current": 123334,
       "monthly_change_pct": -3.296
     },
     {
-      "region": "Санкт-Петербург",
+      "region": "Saint Petersburg",
       "code": "78",
       "metric": "total",
-      "field": "c01_1010",
+      "field": "le_not_ceased__all",
       "date": "2018-01-01",
       "previous": 349379,
       "current": 337913,
       "monthly_change_pct": -3.282
     },
     {
-      "region": "Московская область",
+      "region": "Moscow Oblast",
       "code": "50",
       "metric": "total",
-      "field": "c01_1010",
+      "field": "le_not_ceased__all",
       "date": "2012-08-01",
       "previous": 227772,
       "current": 220506,
       "monthly_change_pct": -3.19
     },
     {
-      "region": "Новосибирская область",
+      "region": "Novosibirsk Oblast",
       "code": "54",
       "metric": "total",
-      "field": "c01_1010",
+      "field": "le_not_ceased__all",
       "date": "2019-01-01",
       "previous": 115165,
       "current": 111502,
       "monthly_change_pct": -3.181
     },
     {
-      "region": "Москва",
+      "region": "Moscow",
       "code": "77",
       "metric": "total",
-      "field": "c01_1000",
+      "field": "le_not_ceased__all",
       "date": "2020-08-01",
       "previous": 677360,
       "current": 656665,
@@ -205,40 +233,40 @@
   ],
   "bankruptcy_cessation_declines": [
     {
-      "region": "Россия",
+      "region": "Russia",
       "code": "RU",
       "metric": "ceased",
-      "field": "c11_1010",
+      "field": "le_ceased_bankruptcy_liquidation__all",
       "date": "2012-11-01",
       "previous": 191013,
       "current": 190531,
       "monthly_change_pct": -0.252
     },
     {
-      "region": "Татарстан",
+      "region": "Tatarstan",
       "code": "16",
       "metric": "ceased",
-      "field": "c11_1010",
+      "field": "le_ceased_bankruptcy_liquidation__all",
       "date": "2012-11-01",
       "previous": 4724,
       "current": 4689,
       "monthly_change_pct": -0.741
     },
     {
-      "region": "Новосибирская область",
+      "region": "Novosibirsk Oblast",
       "code": "54",
       "metric": "ceased",
-      "field": "c12_1000",
+      "field": "le_ceased_bankruptcy_liquidation__all",
       "date": "2024-03-01",
       "previous": 8668,
       "current": 8574,
       "monthly_change_pct": -1.084
     },
     {
-      "region": "Ростовская область",
+      "region": "Rostov Oblast",
       "code": "61",
       "metric": "ceased",
-      "field": "c11_1010",
+      "field": "le_ceased_bankruptcy_liquidation__all",
       "date": "2016-02-01",
       "previous": 5552,
       "current": 5425,
@@ -246,7 +274,7 @@
     }
   ],
   "major_region_levels": {
-    "Москва": {
+    "Moscow": {
       "total": {
         "first": [
           "2012-01-01",
@@ -281,7 +309,7 @@
         "observations": 178
       }
     },
-    "Санкт-Петербург": {
+    "Saint Petersburg": {
       "total": {
         "first": [
           "2012-01-01",
@@ -316,7 +344,7 @@
         "observations": 178
       }
     },
-    "Московская область": {
+    "Moscow Oblast": {
       "total": {
         "first": [
           "2012-01-01",
@@ -351,7 +379,7 @@
         "observations": 178
       }
     },
-    "Краснодарский край": {
+    "Krasnodar Krai": {
       "total": {
         "first": [
           "2012-01-01",
@@ -386,7 +414,7 @@
         "observations": 178
       }
     },
-    "Татарстан": {
+    "Tatarstan": {
       "total": {
         "first": [
           "2012-01-01",
@@ -421,7 +449,7 @@
         "observations": 178
       }
     },
-    "Свердловская область": {
+    "Sverdlovsk Oblast": {
       "total": {
         "first": [
           "2012-01-01",
@@ -456,7 +484,7 @@
         "observations": 178
       }
     },
-    "Башкортостан": {
+    "Bashkortostan": {
       "total": {
         "first": [
           "2012-01-01",
@@ -491,7 +519,7 @@
         "observations": 178
       }
     },
-    "Нижегородская область": {
+    "Nizhny Novgorod Oblast": {
       "total": {
         "first": [
           "2012-01-01",
@@ -526,7 +554,7 @@
         "observations": 178
       }
     },
-    "Новосибирская область": {
+    "Novosibirsk Oblast": {
       "total": {
         "first": [
           "2012-01-01",
@@ -561,7 +589,7 @@
         "observations": 178
       }
     },
-    "Ростовская область": {
+    "Rostov Oblast": {
       "total": {
         "first": [
           "2012-01-01",
@@ -596,7 +624,7 @@
         "observations": 178
       }
     },
-    "Красноярский край": {
+    "Krasnoyarsk Krai": {
       "total": {
         "first": [
           "2012-01-01",
@@ -631,7 +659,7 @@
         "observations": 178
       }
     },
-    "Самарская область": {
+    "Samara Oblast": {
       "total": {
         "first": [
           "2012-01-01",
