@@ -428,14 +428,14 @@ def extract_observations(xls, reference_date):
                 not 60 <= len(subjects) <= 110 or
                 len(master_order) != 1 + len(districts) + len(subjects)):
             raise HistoryError("SOURCE_GEOGRAPHY_PERIMETER_UNEXPECTED")
-        if len({code for code, _ in subjects}) != len(subjects):
-            repeated = {
-                code: [name for k, name in subjects if k == code]
-                for code, _ in subjects
-                if sum(1 for k, _ in subjects if k == code) > 1
-            }
-            raise HistoryError("SOURCE_TERRITORY_CODE_AMBIGUOUS:" +
-                               repr(repeated))
+        repeated = {
+            code: [name for k, name in subjects if k == code]
+            for code, _ in subjects
+            if sum(1 for k, _ in subjects if k == code) > 1
+        }
+        if repeated:
+            print("::warning::FNS_SOURCE_OVERLAPPING_TERRITORY_PERIMETERS",
+                  reference_date, repeated, flush=True)
         if any(set(records[geo]) != set(kinds) for geo in master_order):
             raise HistoryError("KIND_COVERAGE_INCOMPLETE")
         source_differences = []
@@ -455,6 +455,12 @@ def extract_observations(xls, reference_date):
                   source_differences[:5], flush=True)
         crosschecked = 0
         for geo in master_order:
+            if geo[0] in repeated:
+                # A single code does not identify which of the source's
+                # overlapping territories a transposed sheet represents.
+                # Both rows remain in the evidence; this auxiliary check is
+                # explicitly omitted for those ambiguous controls.
+                continue
             crosschecked += _kind_control(
                 book, geo, kinds, mappings_by_kind, records[geo])
         result_columns = ["region_code", "region_name"]
@@ -494,6 +500,8 @@ def extract_observations(xls, reference_date):
             "crosschecked_values": crosschecked,
             "kind_codes": kinds,
             "national_territorial_differences": source_differences,
+            "overlapping_territory_codes": repeated,
+            "geographic_order": "identical_to_source",
         }
     finally:
         book.release_resources()
