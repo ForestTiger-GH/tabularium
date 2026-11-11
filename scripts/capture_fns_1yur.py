@@ -407,9 +407,13 @@ def read_csv(data):
               and len(sequence) == len(set(sequence))
               and sequence == sorted(sequence), "CSV_INDICATOR_ORDER_INVALID")
         kinds = groups["c01"]
-        check(len(kinds) >= 12 and kinds == sorted(set(kinds)) and
-              all(group and group == sorted(set(group)) and
-                  set(group).issubset(set(kinds)) for group in groups.values()),
+        # The source's 2019-06 Part I has one complete kind sheet (1000).
+        # Its other legal-kind worksheets omit Novgorod, so no empty/zero
+        # placeholders for their unreported geographic observations are made.
+        check((len(kinds) >= 12 or kinds == ["1000"])
+              and kinds == sorted(set(kinds))
+              and all(group and group == sorted(set(group)) and
+                      set(group).issubset(set(kinds)) for group in groups.values()),
               "CSV_KIND_CLASSIFICATION_INVALID")
         check(fields == (["region_code", "region_name"] +
                         [p + "_" + kind for p in sequence for kind in groups[p]]),
