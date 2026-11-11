@@ -186,7 +186,8 @@ def decode_snapshot(blob, d):
         require(isinstance(code, str) and re.fullmatch(r"\d{1,3}", code),
                 "REGION_CODE_INVALID")
         require(isinstance(label, str) and bool(label.strip()) and
-                label == item.get("cnt_name") and
+                isinstance(item.get("cnt_name"), str) and
+                bool(item.get("cnt_name").strip()) and
                 not any(ord(ch) < 32 for ch in label), "REGION_NAME_INVALID")
         require(code not in rows, "REGION_DUPLICATE")
         vals = [counter(item.get(key)) for key in SOURCE_COLUMNS[2:]]
