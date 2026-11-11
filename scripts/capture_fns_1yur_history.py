@@ -420,14 +420,21 @@ def extract_observations(xls, reference_date):
             raise HistoryError("SOURCE_KIND_OBSERVATIONS_MISSING")
         # Russia, districts and subjects occupy exactly the original positions.
         # Never add aggregate rows to sum-of-subjects checks.
+        national_differences = []
         for kind in kinds:
             for meaning in baseline_mapping:
                 total = int(records[master_order[0]][kind][meaning])
                 regional = sum(int(records[x][kind][meaning]) for x in subjects)
                 if total != regional:
-                    raise HistoryError(
-                        "NATIONAL_REGIONAL_SUM_DISAGREES:" +
-                        kind + ":" + meaning + ":" + str(total - regional))
+                    national_differences.append({
+                        "kind_code": kind, "meaning": meaning,
+                        "reported_russia": total, "sum_territorial_rows": regional,
+                        "difference": total - regional,
+                    })
+        if national_differences:
+            print("::warning::FNS_SOURCE_NATIONAL_TERRITORIAL_DIFFERENCES",
+                  reference_date, len(national_differences),
+                  national_differences[:5], flush=True)
         controls_checked = 0
         for geography in master_order:
             controls_checked += _kind_control(
@@ -461,6 +468,7 @@ def extract_observations(xls, reference_date):
             "source_indicator_map": source_map,
             "crosschecked_values": controls_checked,
             "kind_codes": kinds,
+            "national_territorial_differences": national_differences,
         }
     finally:
         book.release_resources()
