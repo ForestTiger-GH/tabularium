@@ -38,3 +38,5 @@ jobs:
         run: |
           python scripts/backfill_fns_1yur_history.py \
             --from-date 2012-01-01 --to-date 2026-11-01
+
+# Reconcile previously missing source dates after reviewed XLSX/RAR scope fixes.
