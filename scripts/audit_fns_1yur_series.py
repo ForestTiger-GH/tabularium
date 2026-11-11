@@ -43,6 +43,8 @@ def file_rows(path):
  return header,rows
 def choose(rows,code):
  matches=[r for r in rows if r["region_code"]==code]
+ if code=="":
+  matches=[r for r in matches if r["region_name"].strip().casefold()=="российская федерация"]
  if code=="50":
   matches=[r for r in matches if r["region_name"].strip().casefold()=="московская область"]
  if len(matches)!=1:raise ValueError("GEOGRAPHIC_SCOPE:"+code+":"+str(len(matches)))
