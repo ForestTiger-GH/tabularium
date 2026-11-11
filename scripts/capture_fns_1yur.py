@@ -119,19 +119,23 @@ class AnchorParser(HTMLParser):
         self.entries = []
         self.href = None
         self.words = []
+        self.recent = ''
+        self.context = ''
 
     def handle_starttag(self, tag, attrs):
         if tag.lower() == "a":
             self.href = dict(attrs).get("href", "")
+            self.context = self.recent[-240:]
             self.words = []
 
     def handle_data(self, data):
+        self.recent = (self.recent + data)[-500:]
         if self.href is not None:
             self.words.append(data)
 
     def handle_endtag(self, tag):
         if tag.lower() == "a" and self.href is not None:
-            self.entries.append((self.href, "".join(self.words)))
+            self.entries.append((self.href, self.context + " " + "".join(self.words)))
             self.href = None
 
 
@@ -255,7 +259,7 @@ def extract_xls(xls, d):
             loc = {}
             for indicator, prefix in INDICATORS:
                 matches = [c for c in range(sh.ncols)
-                           if code(sh.cell_value(9, c), 1) == str(indicator)]
+                           if code(sh.cell_value(9, c), 2) == str(indicator).zfill(2)]
                 check(len(matches) == 1, "INDICATOR_HEADER_AMBIGUOUS")
                 loc[prefix] = matches[0]
             check(loc == {"c01": 2, "c08": 9, "c12": 13}, "INDICATOR_COLUMNS_CHANGED")
@@ -292,7 +296,7 @@ def extract_xls(xls, d):
             loc = {}
             for indicator, prefix in INDICATORS:
                 matches = [c for c in range(sh.ncols)
-                           if code(sh.cell_value(8, c), 2) == str(indicator)]
+                           if code(sh.cell_value(8, c), 2) == str(indicator).zfill(2)]
                 check(len(matches) == 1, "REGION_CONTROL_HEADER_INVALID")
                 loc[prefix] = matches[0]
             check(loc == {"c01": 2, "c08": 9, "c12": 13}, "REGION_CONTROL_COLUMNS_CHANGED")
