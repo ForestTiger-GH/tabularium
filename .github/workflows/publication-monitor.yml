@@ -229,6 +229,7 @@ jobs:
         run: |
           python -m unittest discover -s tests -p 'test_capture_fns_1yur.py' -q
           python -m unittest discover -s tests -p 'test_capture_fns_1yur_history.py' -q
+          python -m unittest discover -s tests -p 'test_fns_1yur_semantics.py' -q
           python -m unittest discover -s _mw/work/publication-monitor/tests -p 'test_fns_1yur_pipeline.py' -q
       - name: Check, publish, and notify FNS 1-YUR releases
         shell: bash
