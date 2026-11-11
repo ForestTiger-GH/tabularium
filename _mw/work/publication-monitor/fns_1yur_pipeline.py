@@ -96,6 +96,11 @@ def safe_publish(paths, message):
     if not paths:
         return False
     base = git("rev-parse", "HEAD").stdout.strip()
+    # Rebase replays the commit, so identity must also be configured for that
+    # operation; -c only on git commit is insufficient.
+    git("config", "user.name", "github-actions[bot]")
+    git("config", "user.email",
+        "41898282+github-actions[bot]@users.noreply.github.com")
     git("add", "--", *paths)
     if git("diff", "--cached", "--quiet", check=False).returncode == 0:
         return False
