@@ -126,3 +126,85 @@ jobs:
                       print('REG_ROW',row.get('r'),cells)
               except Exception as e:print('REG_XLSX_ERROR',repr(e))
           PY
+
+
+  initial-history-import:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/feat/fns-sme-pipeline-20261111' && github.event.repository.private == false
+    permissions:
+      contents: write
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: feat/fns-sme-pipeline-20261111
+          fetch-depth: 0
+      - name: Import confirmed historical monthly data once into the PR branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+          import hashlib, json, time, os
+          from datetime import datetime, timezone
+          sys.path.insert(0, 'scripts')
+          import capture_fns_sme as fns
+          dates=fns.discover_dates()
+          if len(dates)<120 or dates[0].isoformat()!='2016-08-01':
+              raise SystemExit('UNEXPECTED_DATE_CATALOG')
+          print('HISTORY_AVAILABLE',len(dates), dates[0],dates[-1])
+          eventfile=Path('_mw/work/publication-monitor/fns_sme_events.jsonl')
+          all_events=[]
+          failures=[]
+          changed=[]
+          for d in dates:
+              try:
+                  body,source_hash=fns.capture(d)
+                  dest=fns.file_for(d)
+                  prev=dest.read_bytes() if dest.exists() else None
+                  status,affected=fns.compare(prev,body)
+                  if status=='NO_CHANGE':
+                      print('UNCHANGED',d)
+                      continue
+                  if status!='NEW':
+                      raise ValueError('UNEXPECTED_EXISTING_DATA_CHANGED')
+                  dest.parent.mkdir(parents=True,exist_ok=True)
+                  dest.write_bytes(body)
+                  event={
+                      'type':'BASELINE_IMPORTED',
+                      'event_id':'fns-sme-initial-'+d.isoformat(),
+                      'observed_at':datetime.now(timezone.utc).isoformat(timespec='seconds').replace('+00:00','Z'),
+                      'reference_date':d.isoformat(),
+                      'csv_path':dest.as_posix(),
+                      'csv_sha256':hashlib.sha256(body).hexdigest(),
+                      'source_sha256':source_hash,
+                      'source_url':fns.SOURCE_JSON,
+                      'request':{'method':'POST','statDate':fns.format_source_date(d)},
+                      'regions':len(fns.read_csv(body)),
+                      'changed_regions':affected,
+                      'parser_commit':os.getenv('GITHUB_SHA'),
+                      'initial_historical_baseline':True,
+                  }
+                  all_events.append(event)
+                  changed.append(d.isoformat())
+                  print('IMPORTED',d,len(fns.read_csv(body)))
+              except (fns.FnsError,OSError,ValueError) as e:
+                  print('IMPORT_FAILED',d,str(e))
+                  failures.append(d.isoformat())
+              time.sleep(0.15)
+          if all_events:
+              with eventfile.open('a',encoding='utf-8',newline='\n') as fp:
+                  for event in all_events:
+                      fp.write(json.dumps(event,ensure_ascii=False,sort_keys=True,separators=(',',':'))+'\n')
+          print('HISTORY_SUMMARY imported',len(changed),'failed',len(failures),failures)
+          if all_events:
+              import subprocess
+              subprocess.run(['git','add','--','scrolls/russia/authorities/federal-tax-service/sme-registry-statistics',
+                              '_mw/work/publication-monitor/fns_sme_events.jsonl'],check=True)
+              subprocess.run(['git','-c','user.name=github-actions[bot]',
+                              '-c','user.email=41898282+github-actions[bot]@users.noreply.github.com',
+                              'commit','-m',f'data(fns): baseline {len(changed)} historical monthly SME snapshots'],check=True)
+              subprocess.run(['git','push','origin','HEAD:feat/fns-sme-pipeline-20261111'],check=True)
+          if failures:raise SystemExit(1)
+          PY
