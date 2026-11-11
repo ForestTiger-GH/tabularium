@@ -45,3 +45,5 @@ jobs:
         run: python scripts/backfill_fns_1yur_history.py --from-date 2026-10-01 --to-date 2026-11-01 --max-releases 1 --dry-run
 
 # Recheck original kind-sheet order and header rows.
+
+# Re-evaluate FNS legacy geography identifiers.
