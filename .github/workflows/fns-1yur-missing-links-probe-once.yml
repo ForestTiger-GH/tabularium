@@ -1,4 +1,4 @@
-name: One-shot FNS 1-YUR missing links audit (public only)
+name: One-shot FNS 1-YUR legacy links validation (public only)
 on:
   push:
     branches: [main]
@@ -6,31 +6,31 @@ on:
 permissions:
   contents: read
 jobs:
-  probe:
+  validate:
     if: github.repository == 'ForestTiger-GH/tabularium' && github.event.repository.private == false
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           ref: main
           persist-credentials: false
-      - name: Inspect original official monthly links
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
+      - name: Install legacy source readers
         run: |
-          python - <<'PY'
-          import sys
-          sys.path.insert(0,"scripts")
-          import capture_fns_1yur_history as h
-          for year, targets in (
-              (2013,("01.08.2013","01.09.2013","01.10.2013")),
-              (2015,("01.03.2015",)),
-          ):
-              page=h.BASE+h.YEAR_PAGES[year]+"/"
-              parser=h.ListParser()
-              parser.feed(h.retrieve(page,page=True).decode("utf-8-sig"))
-              for label,links in parser.items:
-                  if any(t in label for t in targets):
-                      print("MISSING_SOURCE_ITEM",year,repr(label.strip()[:300]))
-                      for link in links:
-                          print("MISSING_SOURCE_HREF",year,repr(link))
-          PY
+          pip install -r scripts/requirements_fns_1yur.txt
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends libarchive-tools
+      - name: Recover August 2013 official RAR
+        run: python scripts/backfill_fns_1yur_history.py --from-date 2013-08-01 --to-date 2013-08-01 --dry-run
+      - name: Recover September 2013 official RAR
+        if: always()
+        run: python scripts/backfill_fns_1yur_history.py --from-date 2013-09-01 --to-date 2013-09-01 --dry-run
+      - name: Recover October 2013 official RAR
+        if: always()
+        run: python scripts/backfill_fns_1yur_history.py --from-date 2013-10-01 --to-date 2013-10-01 --dry-run
+      - name: Recover March 2015 official RAR
+        if: always()
+        run: python scripts/backfill_fns_1yur_history.py --from-date 2015-03-01 --to-date 2015-03-01 --dry-run
