@@ -127,6 +127,20 @@ for year in (2012,2013,2014,2016,2018,2020,2022,2024,2025,2026):
             for row in range(min(14,sh.nrows)):
                 print("SHEET_HEAD",year,row+1,[str(sh.cell_value(row,c))[:70] for c in range(min(6,sh.ncols))],
                      "indicatorcols",[(i,str(sh.cell_value(row,i))[:18]) for i in (2,9,13) if i<sh.ncols])
+
+            if year in (2012,2016,2020,2022,2024,2026):
+                for kind_code in ([book.sheet_names()[1]] if len(book.sheet_names())>1 else []):
+                    sub=book.sheet_by_name(kind_code)
+                    print("KIND_LAYOUT",year,kind_code,"nrows",sub.nrows,"ncols",sub.ncols)
+                    for rr in range(min(18,sub.nrows)):
+                        print("KIND_ROW",year,kind_code,rr+1,[(cc,str(sub.cell_value(rr,cc)).replace(chr(10)," ")[:80]) for cc in (0,1,2,7,8,9,10,12,13,14) if cc<sub.ncols])
+                    seen=set()
+                    for rr in range(sub.nrows):
+                        key=str(sub.cell_value(rr,0)).strip()
+                        if key in seen and key in ("1","1.0","01","01.0","2","2.0","02","02.0"):
+                            print("SUSPECT_DUPLICATE",year,kind_code,rr+1,key,str(sub.cell_value(rr,1))[:80])
+                        seen.add(key)
+
             if year in (2012,2014,2016,2018,2020,2022,2024,2026):
                 print("FORM_COLUMN_LABELS",year,sh.name,sh.ncols)
                 for rr in range(4,min(14,sh.nrows)):
