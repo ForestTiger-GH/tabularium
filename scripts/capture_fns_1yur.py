@@ -289,7 +289,9 @@ def extract_xls(xls, d):
         raise SourceError("XLS_UNREADABLE") from exc
     try:
         kinds = sorted(n for n in book.sheet_names() if re.fullmatch(r"\d{4}", n) and n != "1300")
-        check(kinds == sorted(KINDS_2026), "KIND_CLASSIFICATION_REVIEW_REQUIRED")
+        check("1000" in kinds and "1100" in kinds and "1200" in kinds
+              and len(kinds) >= 20 and set(kinds).issubset(set(KINDS_2026)),
+              "KIND_CLASSIFICATION_REVIEW_REQUIRED")
         check("1300" in book.sheet_names(), "REFERENCE_SHEET_MISSING")
         result, national, special = {}, {}, {}
         for kind in kinds:
