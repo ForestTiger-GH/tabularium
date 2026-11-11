@@ -5,6 +5,7 @@ import io
 from pathlib import Path
 import sys
 import unittest
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 import fns_1yur_semantics as f
@@ -106,6 +107,27 @@ class Epochs(unittest.TestCase):
         with self.assertRaisesRegex(f.SchemaError,"DUPLICATE_FIELD"):
             fake=sample("2019-03-01",["1000","1000"],[1,12])
             f.convert("2019-03-01",fake)
+
+    def test_routine_source_capture_produces_canonical_csv(self):
+        import capture_fns_1yur as source
+        raw = sample("2026-11-01",["1000","1100","1200"],[1,8,12])
+        with patch("capture_fns_1yur_history.capture",
+                   return_value=(raw,{"regions":60,"legal_kinds":3})):
+            rendered, meta = source.capture(date(2026,11,1),
+                "https://www.nalog.gov.ru/html/sites/www.new.nalog.ru/files/related_activities/statistics_and_analytics/forms/reg/1ur11_26.zip")
+        fields, rows = source.read_csv(rendered)
+        self.assertEqual(len(rows),62)
+        self.assertIn("le_bankruptcy_proceedings__all",fields)
+        self.assertEqual(meta["semantic_map_version"],f.MAP_VERSION)
+        self.assertEqual(len(meta["canonical_retained_fields"]),9)
+        self.assertEqual(source.compare(rendered,rendered),("NO_CHANGE",0))
+
+    def test_routine_can_refuse_mixing_old_and_current_schemas(self):
+        import capture_fns_1yur as source
+        raw = sample("2026-11-01",["1000","1100","1200"],[1,8,12])
+        canonical, _ = f.convert("2026-11-01",raw)
+        with self.assertRaisesRegex(source.SourceError,"SOURCE_CSV_UNREADABLE|NONCANONICAL_FIELD|ROW_WIDTH|SCHEMA"):
+            source.compare(raw,canonical)
 
     def test_changed_geography_is_a_real_change(self):
         raw=sample("2026-11-01",["1000","1100","1200"],[1,8,12])
