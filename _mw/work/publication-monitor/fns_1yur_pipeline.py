@@ -118,6 +118,7 @@ def event_for(d, status, data, changed, metadata):
         "reference_date": d.isoformat(),
         "csv_path": source.file_for(d).as_posix(),
         "csv_sha256": digest,
+        "source_page": metadata["source_page"],
         "archive_url": metadata["archive_url"],
         "archive_sha256": metadata["archive_sha256"],
         "member_name": metadata["member_name"],
