@@ -108,7 +108,7 @@ def make_event(d, status, data, source_sha, changed, *, now=None):
         "request": {"method": "POST", "statDate": source.format_source_date(d)},
         "regions": len(source.read_csv(data)),
         "changed_regions": changed,
-        "parser_commit": os.environ.get("GITHUB_SHA") or cmd("git", "rev-parse", "HEAD").stdout.strip(),
+        "parser_commit": cmd("git", "rev-parse", "HEAD").stdout.strip(),
     }
 
 
