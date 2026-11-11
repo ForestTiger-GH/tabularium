@@ -104,6 +104,13 @@ class Extract(unittest.TestCase):
         with self.assertRaisesRegex(fns.FnsError, "COUNT_NOT_NONNEGATIVE_INTEGER"):
             fns.decode_snapshot(encoded(rows), date(2026, 11, 10))
 
+    def test_historical_city_display_name_kept_verbatim(self):
+        rows = fixture(date(2016, 8, 1), 84)
+        rows[10]["name"] = "Г.Москва"
+        rows[10]["cnt_name"] = "г.Москва"
+        out = fns.decode_snapshot(encoded(rows), date(2016, 8, 1))
+        self.assertEqual(out["01"][1], "Г.Москва")
+
     def test_source_date_mismatch(self):
         rows = fixture()
         rows[10]["stat_date"] = "10.10.2026 00:00:00"
