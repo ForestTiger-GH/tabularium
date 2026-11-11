@@ -321,7 +321,7 @@ def _kind_control(book, geography, kinds, mappings_by_kind, expected):
     candidates = [code] if code else [name, name.strip()]
     sheet_name = next((n for n in candidates if n in book.sheet_names()), None)
     if sheet_name is None and not code:
-        return 0
+        return 0, []
     if sheet_name is None:
         raise HistoryError("REGION_CONTROL_SHEET_MISSING:" + code)
     sheet = book.sheet_by_name(sheet_name)
@@ -342,11 +342,25 @@ def _kind_control(book, geography, kinds, mappings_by_kind, expected):
                 sheet.cell_value(row, col), "CONTROL_VALUE_NOT_INTEGER")
     if not found:
         if not code:
-            return 0
+            return 0, []
         raise HistoryError("REGION_CONTROL_KIND_ABSENT:" + code)
-    if set(found) != set(kinds) or found != expected:
-        raise HistoryError("REGION_CONTROL_DISAGREES:" + str(geography))
-    return sum(len(mappings_by_kind[kind]) for kind in kinds)
+    if set(found) != set(kinds):
+        raise HistoryError("REGION_CONTROL_KIND_SET_DIFFERS:" + str(geography))
+    disagreements = []
+    checked = 0
+    for kind in kinds:
+        for meaning in mappings_by_kind[kind]:
+            checked += 1
+            if found[kind][meaning] != expected[kind][meaning]:
+                disagreements.append({
+                    "territory_code": code,
+                    "territory_name": name,
+                    "kind": kind,
+                    "meaning": meaning,
+                    "kind_sheet_value": expected[kind][meaning],
+                    "region_sheet_value": found[kind][meaning],
+                })
+    return checked, disagreements
 
 
 def extract_observations(xls, reference_date):
@@ -454,15 +468,23 @@ def extract_observations(xls, reference_date):
                   reference_date, len(source_differences),
                   source_differences[:5], flush=True)
         crosschecked = 0
+        orientation_differences = []
         for geo in master_order:
             if geo[0] in repeated:
                 # A single code does not identify which of the source's
                 # overlapping territories a transposed sheet represents.
-                # Both rows remain in the evidence; this auxiliary check is
-                # explicitly omitted for those ambiguous controls.
+                # Both rows remain in the evidence; do not double-match them.
                 continue
-            crosschecked += _kind_control(
+            cells, disagreements = _kind_control(
                 book, geo, kinds, mappings_by_kind, records[geo])
+            crosschecked += cells
+            orientation_differences.extend(disagreements)
+            if len(orientation_differences) > 100:
+                raise HistoryError("SOURCE_ORIENTATION_CONFLICT_TOO_BROAD")
+        if orientation_differences:
+            print("::warning::FNS_SOURCE_REPRESENTATION_DISAGREEMENTS",
+                  reference_date, len(orientation_differences),
+                  orientation_differences[:5], flush=True)
         result_columns = ["region_code", "region_name"]
         coverage = {}
         metric_order = ("total", "in_bankruptcy_procedure", "ceased_bankruptcy")
@@ -502,6 +524,7 @@ def extract_observations(xls, reference_date):
             "national_territorial_differences": source_differences,
             "overlapping_territory_codes": repeated,
             "geographic_order": "identical_to_source",
+            "orientation_disagreements": orientation_differences,
         }
     finally:
         book.release_resources()
