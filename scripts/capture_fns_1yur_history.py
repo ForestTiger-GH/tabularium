@@ -499,6 +499,12 @@ def extract_observations(xls, reference_date):
         candidate_codes = sorted(name for name in sheet_names
                                 if re.fullmatch(r"1[0-2][0-9]{2}", name)
                                 and name != "1300")
+        if not candidate_codes and "Российская Федерация" in sheet_names:
+            national_title = str(
+                book.sheet_by_name("Российская Федерация").cell_value(0, 0)
+            ).casefold()
+            if "раздел 2" in national_title:
+                raise HistoryError("SOURCE_SECTION_ONE_NOT_PUBLISHED")
         if not (12 <= len(candidate_codes) <= 90
                 and "Российская Федерация" in sheet_names):
             raise HistoryError("LEGAL_KIND_SHEETS_UNEXPECTED")
@@ -591,10 +597,23 @@ def extract_observations(xls, reference_date):
                         "issue": "SAME_PUBLISHED_TERRITORIES_DIFFERENT_ORDER",
                     })
         if excluded_incomplete_kind_sheets:
-            if len(excluded_incomplete_kind_sheets) > 8:
+            retained = [k for k in kinds if k not in excluded_incomplete_kind_sheets]
+            reviewed_2019_sparse_release = (
+                reference_date == date(2019, 6, 1)
+                and retained == ["1000"]
+                and len(excluded_incomplete_kind_sheets) == 32
+                and all(
+                    [list(geo) for geo in master_order if geo == ("53", "Новгородская область")]
+                    == detail["missing_geographies"]
+                    and not detail["extra_geographies"]
+                    for detail in excluded_incomplete_kind_sheets.values()
+                )
+            )
+            if (len(excluded_incomplete_kind_sheets) > 8
+                    and not reviewed_2019_sparse_release):
                 raise HistoryError("TOO_MANY_INCOMPLETE_SOURCE_KIND_SHEETS:" +
                                    str(len(excluded_incomplete_kind_sheets)))
-            kinds = [k for k in kinds if k not in excluded_incomplete_kind_sheets]
+            kinds = retained
             kind_labels = {k: kind_labels[k] for k in kinds}
             for geo in list(records):
                 if geo not in master_order:
@@ -603,8 +622,10 @@ def extract_observations(xls, reference_date):
                 for ignored in excluded_incomplete_kind_sheets:
                     records[geo].pop(ignored, None)
             print("::warning::FNS_SOURCE_INCOMPLETE_KIND_SHEETS_EXCLUDED",
-                  reference_date, excluded_incomplete_kind_sheets, flush=True)
-        if not 12 <= len(kinds) <= 90:
+                  reference_date, len(excluded_incomplete_kind_sheets),
+                  excluded_incomplete_kind_sheets, flush=True)
+        if not (12 <= len(kinds) <= 90 or
+                (reference_date == date(2019, 6, 1) and kinds == ["1000"])):
             raise HistoryError("TOO_FEW_GEOGRAPHICALLY_COMPLETE_KINDS")
         if common_mapping is None:
             raise HistoryError("SOURCE_BANKRUPTCY_COLUMNS_NOT_PUBLISHED")
