@@ -112,9 +112,10 @@ for year in (2012,2013,2014,2016,2018,2020,2022,2024,2025,2026):
                     c=subprocess.run(["bsdtar","-tf",str(pth)],capture_output=True,text=True,timeout=15)
                     print("RAR_MEMBERS",year,c.returncode,c.stdout[:1000],c.stderr[:120])
                     members=[x for x in c.stdout.splitlines() if x.lower().endswith(".xls")]
-                    if c.returncode==0 and len(members)==1:
-                        out=subprocess.run(["bsdtar","-xOf",str(pth),members[0]],capture_output=True,timeout=20)
-                        if out.returncode==0:xls=out.stdout;print("RAR_EXTRACTED",year,members[0],len(xls))
+                    if c.returncode==0 and len([m for m in members if m.lower().endswith("_i.xls")])==1:
+                        main_file=[m for m in members if m.lower().endswith("_i.xls")][0]
+                        out=subprocess.run(["bsdtar","-xOf",str(pth),main_file],capture_output=True,timeout=20)
+                        if out.returncode==0:xls=out.stdout;print("RAR_EXTRACTED",year,main_file,len(xls))
                 except Exception as exc:print("RAR_TOOL_UNAVAILABLE",type(exc).__name__)
         if xls:
             if not xls.startswith(bytes.fromhex('D0CF11E0A1B11AE1')):
@@ -126,6 +127,12 @@ for year in (2012,2013,2014,2016,2018,2020,2022,2024,2025,2026):
             for row in range(min(14,sh.nrows)):
                 print("SHEET_HEAD",year,row+1,[str(sh.cell_value(row,c))[:70] for c in range(min(6,sh.ncols))],
                      "indicatorcols",[(i,str(sh.cell_value(row,i))[:18]) for i in (2,9,13) if i<sh.ncols])
+            if year in (2012,2014,2016,2018,2020,2022,2024,2026):
+                print("FORM_COLUMN_LABELS",year,sh.name,sh.ncols)
+                for rr in range(4,min(14,sh.nrows)):
+                    pairs=[(cc, str(sh.cell_value(rr,cc)).replace("\\n"," ")[:120])
+                           for cc in range(min(26,sh.ncols)) if str(sh.cell_value(rr,cc)).strip()]
+                    print("FORM_LABEL_ROW",year,rr+1,pairs)
             if year==2026:
                 ns=book.sheet_by_name("Российская Федерация")
                 for row in range(min(80,ns.nrows)):
