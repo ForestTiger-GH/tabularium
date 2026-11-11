@@ -1,4 +1,4 @@
-name: Monitor official XLSX sources
+name: Monitor official sources and capture FNS SME statistics
 
 on:
   workflow_dispatch:
