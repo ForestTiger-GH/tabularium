@@ -371,6 +371,19 @@ def _kind_control(book, geography, kinds, mappings_by_kind, expected):
     return checked, disagreements
 
 
+def is_registration_record_label(label):
+    """Exclude a count of registration *records*, not a legal-entity kind.
+
+    This is based exclusively on the current release's national-summary label.
+    It does not exclude legal entities merely described as specially registered.
+    """
+    if not isinstance(label, str):
+        return False
+    words = " ".join(label.casefold().split())
+    return bool(re.search(r"запис\w*\s+(?:о\s+)?(?:государственн\w*\s+)?регистрац\w*", words)
+                or re.search(r"регистрационн\w*\s+запис\w*", words))
+
+
 def extract_observations(xls, reference_date):
     """Preserve the complete printed geographic order and source metric coverage."""
     try:
@@ -383,29 +396,37 @@ def extract_observations(xls, reference_date):
         raise HistoryError("XLS_UNREADABLE") from exc
     try:
         sheet_names = set(book.sheet_names())
-        kinds = sorted(name for name in sheet_names
-                       if re.fullmatch(r"1[0-2][0-9]{2}", name) and name != "1300")
-        if not (15 <= len(kinds) <= 90 and "Российская Федерация" in sheet_names):
+        candidate_codes = sorted(name for name in sheet_names
+                                if re.fullmatch(r"1[0-2][0-9]{2}", name)
+                                and name != "1300")
+        if not (12 <= len(candidate_codes) <= 90
+                and "Российская Федерация" in sheet_names):
             raise HistoryError("LEGAL_KIND_SHEETS_UNEXPECTED")
         nation = book.sheet_by_name("Российская Федерация")
-        summary_codes = {
-            modern.code(nation.cell_value(r, 1), 4)
-            for r in range(nation.nrows) if nation.ncols >= 2
-        }
-        if not set(kinds).issubset(summary_codes):
-            raise HistoryError("SOURCE_NATIONAL_KIND_SUMMARY_INCOMPLETE")
-        kind_labels = {}
+        kind_labels_all = {}
         for row in range(nation.nrows):
-            number = modern.code(nation.cell_value(row, 1), 4)
-            if number in kinds:
+            number = modern.code(nation.cell_value(row, 1), 4) if nation.ncols >= 2 else None
+            if number in candidate_codes:
                 label = nation.cell_value(row, 0)
                 if not isinstance(label, str) or not label.strip():
                     raise HistoryError("SOURCE_KIND_DESCRIPTION_MISSING:" + number)
-                if number in kind_labels and kind_labels[number] != label:
+                if number in kind_labels_all and kind_labels_all[number] != label:
                     raise HistoryError("SOURCE_KIND_DESCRIPTION_CONFLICT:" + number)
-                kind_labels[number] = label
-        if set(kind_labels) != set(kinds):
-            raise HistoryError("SOURCE_KIND_DESCRIPTION_INCOMPLETE")
+                kind_labels_all[number] = label
+        if set(kind_labels_all) != set(candidate_codes):
+            raise HistoryError("SOURCE_NATIONAL_KIND_SUMMARY_INCOMPLETE")
+        excluded_non_entity_sheets = {
+            code: label for code, label in kind_labels_all.items()
+            if is_registration_record_label(label)
+        }
+        kinds = [code for code in candidate_codes
+                 if code not in excluded_non_entity_sheets]
+        if not 12 <= len(kinds) <= 90:
+            raise HistoryError("LEGAL_ENTITY_KIND_COUNT_UNEXPECTED")
+        if excluded_non_entity_sheets:
+            print("FNS_SOURCE_NON_ENTITY_SHEETS_EXCLUDED",
+                  reference_date, sorted(excluded_non_entity_sheets), flush=True)
+        kind_labels = {code: kind_labels_all[code] for code in kinds}
         master_order = None
         records = {}
         common_mapping = None
@@ -552,6 +573,7 @@ def extract_observations(xls, reference_date):
                 if orientation_differences else None),
             "orientation_disagreements": orientation_differences[:50],
             "kind_labels": kind_labels,
+            "excluded_source_non_entity_sheets": excluded_non_entity_sheets,
         }
     finally:
         book.release_resources()
