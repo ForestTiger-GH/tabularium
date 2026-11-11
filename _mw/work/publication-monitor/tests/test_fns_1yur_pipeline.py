@@ -85,6 +85,8 @@ class Scheduling(unittest.TestCase):
         self.assertIn("cancel-in-progress: false", flow)
         self.assertIn("github.event.repository.private == false", flow)
         self.assertIn("needs: fns-sme", flow)
+        self.assertIn("\n  fns-1yur:\n    needs: fns-sme", flow)
+        self.assertNotIn("\nfns-1yur:\n", flow)
 
 
 class Lifecycle(unittest.TestCase):
