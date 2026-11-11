@@ -27,7 +27,7 @@ EVENTS = ROOT / "_mw/work/publication-monitor/fns_1yur_events.jsonl"
 MANIFEST = CORPUS / "field-provenance.json"
 MANIFEST_VERSION = "fns-1yur-canonical-migration-1"
 EXPECTED_TOTAL = 178
-EXPECTED_BY_EPOCH = {"A": 16, "B": 69, "C1": 22, "C2": 24, "C3": 47}
+EXPECTED_BY_EPOCH = {"A": 16, "B": 69, "C1": 23, "C2": 24, "C3": 46}
 # Source date coverage is checked by a deliberately narrow list of allowable
 # final years; no missing July 2015 file is fabricated.
 SOURCE_MISSING_2015 = date(2015, 7, 1)
