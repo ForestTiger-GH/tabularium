@@ -246,3 +246,167 @@ def workbook_from_asset(raw, asset):
     if not 0 < len(data) <= modern.MAX_XLS or not data.startswith(modern.OLE):
         raise HistoryError("XLS_MEMBER_INVALID")
     return data, member, suffix
+
+
+def indicator_plan(sheet):
+    """Inspect source captions and the actual numeric indicator header."""
+    header = []
+    for row in range(7, min(16, sheet.nrows)):
+        if modern.code(sheet.cell_value(row, 2), 2) == "01":
+            header.append(row)
+    if len(header) != 1:
+        raise HistoryError("INDICATOR_NUMBER_ROW_UNRESOLVED")
+    header_row = header[0]
+    if sheet.ncols < 14:
+        raise HistoryError("SOURCE_INDICATOR_COLUMNS_TRUNCATED")
+    captions = {}
+    for col in range(2, sheet.ncols):
+        text = " ".join(str(sheet.cell_value(row, col)).replace("\n", " ").lower()
+                        for row in range(4, header_row))
+        captions[col] = re.sub(r"\s+", " ", text).strip()
+    proceedings = [col for col, text in captions.items()
+                   if re.search(r"процедур\w*.*банкротств", text)]
+    ceased = [col for col, text in captions.items()
+              if "в порядке банкротства" in text]
+    if len(ceased) != 1 or len(proceedings) > 1:
+        raise HistoryError("BANKRUPTCY_CAPTION_AMBIGUOUS")
+    indices = {"total": 2, "ceased_bankruptcy": ceased[0]}
+    if proceedings:
+        indices["in_bankruptcy_procedure"] = proceedings[0]
+    plan = {}
+    for meaning, col in indices.items():
+        number = modern.code(sheet.cell_value(header_row, col), 2)
+        if number is None:
+            raise HistoryError("SOURCE_INDICATOR_CODE_MISSING")
+        plan[meaning] = (col, "c" + number, str(int(number)))
+    if len({value[0] for value in plan.values()}) != len(plan):
+        raise HistoryError("BANKRUPTCY_COLUMNS_OVERLAP")
+    return header_row, plan
+
+
+def extract_observations(xls, reference_date):
+    try:
+        import xlrd
+    except ImportError as exc:
+        raise HistoryError("XLRD_REQUIRED") from exc
+    try:
+        book = xlrd.open_workbook(file_contents=xls, on_demand=True)
+    except Exception as exc:
+        raise HistoryError("XLS_UNREADABLE") from exc
+    try:
+        kinds = sorted(name for name in book.sheet_names()
+                       if re.fullmatch(r"1[0-2][0-9]{2}", name) and name != "1300")
+        if not (15 <= len(kinds) <= 90 and "Российская Федерация" in book.sheet_names()):
+            raise HistoryError("LEGAL_KIND_SHEETS_UNEXPECTED")
+        nation = book.sheet_by_name("Российская Федерация")
+        # A kind exists only if it appears in this release's national summary.
+        national_codes = {modern.code(nation.cell_value(r, 1), 4)
+                          for r in range(nation.nrows) if nation.ncols >= 2}
+        if set(kinds) != {x for x in national_codes if x in kinds}:
+            raise HistoryError("SOURCE_KIND_SUMMARY_INCOMPLETE")
+        rows, controls, plans, total_national = {}, {}, {}, {}
+        for kind in kinds:
+            sheet = book.sheet_by_name(kind)
+            header_row, plan = indicator_plan(sheet)
+            if plans and plan != next(iter(plans.values())):
+                raise HistoryError("INDICATOR_SCHEMA_DIFFERS_BETWEEN_KINDS")
+            plans[kind] = plan
+            national = {}
+            for meaning, (col, prefix, _) in plan.items():
+                national[meaning] = modern.integer(sheet.cell_value(header_row + 1, col),
+                                                   "SOURCE_NATIONAL_COUNT_BAD")
+            total_national[kind] = national
+            found_regions = set()
+            for row in range(header_row + 2, sheet.nrows):
+                key = modern.code(sheet.cell_value(row, 0), 2)
+                if key is None or not modern.REGION_RE.fullmatch(key):
+                    continue
+                name = sheet.cell_value(row, 1)
+                if not isinstance(name, str) or not name.strip():
+                    raise HistoryError("REGION_LABEL_MISSING")
+                count = {
+                    meaning: modern.integer(sheet.cell_value(row, col),
+                                            "SOURCE_REGION_COUNT_BAD")
+                    for meaning, (col, _, _) in plan.items()
+                }
+                if key in ("96", "99"):
+                    if any(x != "0" for x in count.values()):
+                        raise HistoryError("NON_SUBJECT_TERRITORY_HAS_DATA")
+                    continue
+                if key in found_regions:
+                    raise HistoryError("DUPLICATE_REGION_IN_SHEET")
+                found_regions.add(key)
+                entity = rows.setdefault(key, {"name": name, "kinds": {}})
+                if entity["name"] != name:
+                    raise HistoryError("REGION_NAME_DIFFERS_BETWEEN_SHEETS")
+                entity["kinds"][kind] = count
+        if not (60 <= len(rows) <= 100
+                and all(set(record["kinds"]) == set(kinds) for record in rows.values())):
+            raise HistoryError("REGION_KIND_COVERAGE_INCOMPLETE")
+        template = next(iter(plans.values()))
+        for kind, expected in total_national.items():
+            for meaning, value in expected.items():
+                actual = sum(int(r["kinds"][kind][meaning]) for r in rows.values())
+                if actual != int(value):
+                    raise HistoryError("NATIONAL_TOTAL_DISAGREES:" + kind + ":" + meaning)
+        # Where the publisher supplies the transposed regional views, every
+        # published cell must agree with the source kind-oriented view.
+        cross_checked = 0
+        for region, record in rows.items():
+            if region not in book.sheet_names():
+                raise HistoryError("REGION_CONTROL_SHEET_MISSING:" + region)
+            sheet = book.sheet_by_name(region)
+            for row in range(sheet.nrows):
+                if sheet.ncols < 14:
+                    continue
+                code = modern.code(sheet.cell_value(row, 1), 4)
+                if code not in kinds:
+                    continue
+                if code in controls.setdefault(region, set()):
+                    raise HistoryError("DUPLICATE_REGION_CONTROL_KIND")
+                controls[region].add(code)
+                for meaning, (col, _, _) in template.items():
+                    value = modern.integer(sheet.cell_value(row, col),
+                                           "REGION_CONTROL_COUNT_BAD")
+                    if value != record["kinds"][code][meaning]:
+                        raise HistoryError("REGION_CONTROL_COUNT_DIFFERS")
+                cross_checked += len(template)
+            if controls.get(region) != set(kinds):
+                raise HistoryError("REGION_CONTROL_KIND_INCOMPLETE:" + region)
+        columns = ["region_code", "region_name"]
+        for meaning in ("total", "in_bankruptcy_procedure", "ceased_bankruptcy"):
+            if meaning not in template:
+                continue
+            prefix = template[meaning][1]
+            columns += [prefix + "_" + kind for kind in kinds]
+        output = io.StringIO(newline="")
+        writer = csv.writer(output, lineterminator="\n")
+        writer.writerow(columns)
+        for code in sorted(rows):
+            entity = rows[code]
+            values = [code, entity["name"]]
+            for meaning in ("total", "in_bankruptcy_procedure", "ceased_bankruptcy"):
+                if meaning in template:
+                    values.extend(entity["kinds"][kind][meaning] for kind in kinds)
+            writer.writerow(values)
+        data = output.getvalue().encode("utf-8")
+        # Raw source indicator numbers, not synthetic 2026-equivalent ids.
+        mapping = {meaning: {"source_column_index_0based": value[0],
+                              "source_indicator": value[2],
+                              "csv_prefix": value[1]} for meaning, value in template.items()}
+        return data, {"regions": len(rows), "legal_kinds": len(kinds),
+                      "source_indicator_map": mapping, "crosschecked_values": cross_checked,
+                      "kind_codes": kinds}
+    finally:
+        book.release_resources()
+
+
+def capture(reference_date, page, source_url):
+    raw = retrieve(source_url)
+    xls, member, format_name = workbook_from_asset(raw, source_url)
+    data, shape = extract_observations(xls, reference_date)
+    shape.update({"source_page": page, "archive_url": source_url,
+                  "archive_sha256": hashlib.sha256(raw).hexdigest(),
+                  "member_name": member, "member_sha256": hashlib.sha256(xls).hexdigest(),
+                  "container_format": format_name})
+    return data, shape
