@@ -87,6 +87,15 @@ class Discovery(unittest.TestCase):
         self.assertEqual(set(found), {date(2026, 11, 1), date(2026, 10, 1)})
         self.assertTrue(found[DAY].endswith("1ur11_26.zip"))
 
+    def test_future_year_report_discovered_from_official_index(self):
+        index = ('<html><a href="/rn77/related_activities/statistics_and_analytics/'
+                 'forms/99999999/">Отчет по форме № 1-ЮР (2027 год)</a></html>').encode()
+        links = src.discover_year_pages(index)
+        self.assertEqual(
+            links[2027],
+            "https://www.nalog.gov.ru/rn77/related_activities/statistics_and_analytics/forms/99999999/"
+        )
+
     def test_fail_closed_empty_publication_page(self):
         with self.assertRaisesRegex(src.SourceError, "SOURCE_RELEASE_LINKS_MISSING"):
             src.extract_releases(b"<html>maintenance</html>", src.page_url(2026))
