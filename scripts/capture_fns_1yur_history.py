@@ -257,9 +257,90 @@ def workbook_from_asset(raw, asset):
             data = extracted.stdout
     else:
         raise HistoryError("SOURCE_FORMAT_UNSUPPORTED")
-    if not 0 < len(data) <= modern.MAX_XLS or not data.startswith(modern.OLE):
+    if not 0 < len(data) <= modern.MAX_XLS:
+        raise HistoryError("XLS_MEMBER_SIZE_INVALID")
+    if not (data.startswith(modern.OLE) or is_spreadsheet_ooxml(data)):
         raise HistoryError("XLS_MEMBER_INVALID")
     return data, member, suffix
+
+
+def is_spreadsheet_ooxml(data):
+    """Accept mislabeled .xls members only if they are valid OOXML spreadsheets."""
+    if not data.startswith(bytes.fromhex("504b0304")):
+        return False
+    try:
+        with zipfile.ZipFile(io.BytesIO(data)) as archive:
+            entries = archive.infolist()
+            names = {item.filename for item in entries}
+            if not (0 < len(entries) <= 500
+                    and sum(item.file_size for item in entries) <= 100_000_000):
+                raise HistoryError("XLSX_ZIP_SIZE_LIMIT")
+            if "xl/vbaProject.bin" in names:
+                raise HistoryError("XLSX_MACROS_NOT_ALLOWED")
+            return "[Content_Types].xml" in names and "xl/workbook.xml" in names
+    except (zipfile.BadZipFile, EOFError):
+        return False
+
+
+class XlsxSheetAdapter:
+    """Cached cell values with xlrd-like read-only access; no formula evaluation."""
+    def __init__(self, sheet):
+        self.name = sheet.title
+        self._rows = [
+            tuple("" if value is None else value for value in row)
+            for row in sheet.iter_rows(values_only=True)
+        ]
+        self.nrows = len(self._rows)
+        self.ncols = max((len(row) for row in self._rows), default=0)
+
+    def cell_value(self, row, col):
+        if row < 0 or col < 0 or row >= self.nrows or col >= self.ncols:
+            return ""
+        return self._rows[row][col]
+
+
+class XlsxBookAdapter:
+    def __init__(self, file_bytes):
+        try:
+            import openpyxl
+        except ImportError as exc:
+            raise HistoryError("OPENPYXL_REQUIRED_FOR_OOXML_HISTORY") from exc
+        try:
+            self._book = openpyxl.load_workbook(
+                io.BytesIO(file_bytes), read_only=True, data_only=True,
+                keep_links=False
+            )
+        except Exception as exc:
+            raise HistoryError("OOXML_WORKBOOK_UNREADABLE") from exc
+        self._sheets = {}
+
+    def sheet_names(self):
+        return self._book.sheetnames
+
+    def sheet_by_name(self, name):
+        if name not in self._sheets:
+            if name not in self._book.sheetnames:
+                raise HistoryError("OOXML_SHEET_NOT_FOUND:" + name)
+            self._sheets[name] = XlsxSheetAdapter(self._book[name])
+        return self._sheets[name]
+
+    def release_resources(self):
+        self._book.close()
+
+
+def open_source_workbook(file_bytes):
+    if file_bytes.startswith(modern.OLE):
+        try:
+            import xlrd
+        except ImportError as exc:
+            raise HistoryError("XLRD_REQUIRED") from exc
+        try:
+            return xlrd.open_workbook(file_contents=file_bytes, on_demand=True)
+        except Exception as exc:
+            raise HistoryError("XLS_UNREADABLE") from exc
+    if is_spreadsheet_ooxml(file_bytes):
+        return XlsxBookAdapter(file_bytes)
+    raise HistoryError("SOURCE_WORKBOOK_TYPE_UNSUPPORTED")
 
 
 def _header_row(sheet):
@@ -386,14 +467,7 @@ def is_registration_record_label(label):
 
 def extract_observations(xls, reference_date):
     """Preserve the complete printed geographic order and source metric coverage."""
-    try:
-        import xlrd
-    except ImportError as exc:
-        raise HistoryError("XLRD_REQUIRED") from exc
-    try:
-        book = xlrd.open_workbook(file_contents=xls, on_demand=True)
-    except Exception as exc:
-        raise HistoryError("XLS_UNREADABLE") from exc
+    book = open_source_workbook(xls)
     try:
         sheet_names = set(book.sheet_names())
         candidate_codes = sorted(name for name in sheet_names
