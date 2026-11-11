@@ -34,6 +34,8 @@ YEAR_PAGES = {
 BASE = "https://www.nalog.gov.ru/rn77/related_activities/statistics_and_analytics/forms/"
 PATHS = (
     "/files/docs/gosreg/",
+    "/files/docs/svot/",
+    "/html/sites/www.new.nalog.ru/docs/",
     "/html/sites/www.new.nalog.ru/docs/otchet/",
     "/html/sites/www.new.nalog.ru/docs/analit/",
     "/html/sites/www.new.nalog.ru/svod/",
