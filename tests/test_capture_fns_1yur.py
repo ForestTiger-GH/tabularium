@@ -102,7 +102,7 @@ class Discovery(unittest.TestCase):
 
     def test_no_guessing_unknown_year(self):
         with self.assertRaisesRegex(src.SourceError, "YEAR_PAGE_NOT_REVIEWED"):
-            src.page_url(2017)
+            src.page_url(2011)
 
 
 class Archives(unittest.TestCase):
