@@ -11,6 +11,7 @@ from datetime import date
 import hashlib
 from html.parser import HTMLParser
 import io
+import json
 from pathlib import Path
 import re
 import subprocess
@@ -393,6 +394,18 @@ def extract_observations(xls, reference_date):
         }
         if not set(kinds).issubset(summary_codes):
             raise HistoryError("SOURCE_NATIONAL_KIND_SUMMARY_INCOMPLETE")
+        kind_labels = {}
+        for row in range(nation.nrows):
+            number = modern.code(nation.cell_value(row, 1), 4)
+            if number in kinds:
+                label = nation.cell_value(row, 0)
+                if not isinstance(label, str) or not label.strip():
+                    raise HistoryError("SOURCE_KIND_DESCRIPTION_MISSING:" + number)
+                if number in kind_labels and kind_labels[number] != label:
+                    raise HistoryError("SOURCE_KIND_DESCRIPTION_CONFLICT:" + number)
+                kind_labels[number] = label
+        if set(kind_labels) != set(kinds):
+            raise HistoryError("SOURCE_KIND_DESCRIPTION_INCOMPLETE")
         master_order = None
         records = {}
         common_mapping = None
@@ -531,7 +544,14 @@ def extract_observations(xls, reference_date):
             "national_territorial_differences": source_differences,
             "overlapping_territory_codes": repeated,
             "geographic_order": "identical_to_source",
-            "orientation_disagreements": orientation_differences,
+            "orientation_disagreements_count": len(orientation_differences),
+            "orientation_disagreements_sha256": (
+                hashlib.sha256(json.dumps(orientation_differences,
+                   ensure_ascii=False, sort_keys=True,
+                   separators=(",", ":")).encode("utf-8")).hexdigest()
+                if orientation_differences else None),
+            "orientation_disagreements": orientation_differences[:50],
+            "kind_labels": kind_labels,
         }
     finally:
         book.release_resources()
