@@ -190,11 +190,11 @@ def decode_snapshot(blob, d):
                 not any(ord(ch) < 32 for ch in label), "REGION_NAME_INVALID")
         require(code not in rows, "REGION_DUPLICATE")
         vals = [counter(item.get(key)) for key in SOURCE_COLUMNS[2:]]
-        require(int(vals[0]) == int(item["cnt_ul_total"]) + int(item["cnt_ip_total"]),
+        require(int(vals[0]) == int(counter(item.get("cnt_ul_total"))) + int(counter(item.get("cnt_ip_total"))),
                 "SOURCE_TOTAL_INCONSISTENT")
-        require(int(item["cnt_ul_total"]) ==
+        require(int(counter(item.get("cnt_ul_total"))) ==
                 sum(int(vals[i]) for i in (1, 2, 3)), "SOURCE_UL_INCONSISTENT")
-        require(int(item["cnt_ip_total"]) ==
+        require(int(counter(item.get("cnt_ip_total"))) ==
                 sum(int(vals[i]) for i in (4, 5, 6)), "SOURCE_IP_INCONSISTENT")
         rows[code] = (code, label, *vals)
     require(levels[2] == 1 and levels[1] >= 8 and 80 <= levels[0] <= 120,
@@ -243,7 +243,7 @@ def compare(existing, candidate):
     if existing is None:
         return "NEW", len(newer)
     older = read_csv(existing)
-    require(len(newer) >= int(len(older) * 0.90),
+    require(len(newer) * 10 >= len(older) * 9,
             "SOURCE_REGION_DROP_UNEXPECTED")
     changed = sum(older.get(k) != newer.get(k) for k in older.keys() | newer.keys())
     return ("UPDATED" if changed else "NO_CHANGE"), changed
