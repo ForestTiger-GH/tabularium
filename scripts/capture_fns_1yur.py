@@ -422,15 +422,16 @@ def read_csv(data):
             if key == "":
                 check(name.strip().casefold() == "российская федерация" or
                       "федеральный округ" in name.casefold(), "CSV_UNCODED_GEO_INVALID")
-                identity = "aggregate:" + name
             else:
                 check(REGION_RE.fullmatch(key) is not None, "CSV_REGION_CODE_INVALID")
-                identity = key
+            # FNS historically repeats the same code for different published
+            # perimeters (e.g. region alone and region + adjacent territory).
+            identity = (key, name)
             check(identity not in records, "CSV_GEOGRAPHY_DUPLICATE")
             for field in fields[2:]:
                 integer(row[field], "CSV_COUNT_INVALID")
             records[identity] = tuple(row[f] for f in fields)
-        subjects = sum(1 for key in records if not key.startswith("aggregate:"))
+        subjects = sum(1 for key, _ in records if key != "")
         check(subjects >= 60, "CSV_SUBJECT_COUNT_INVALID")
         return fields, records
     except UnicodeError as exc:
