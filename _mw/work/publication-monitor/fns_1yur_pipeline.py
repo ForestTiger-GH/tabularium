@@ -151,6 +151,7 @@ def event_for(d, status, data, changed, metadata):
         "source_orientation_disagreements_sha256": metadata.get("orientation_disagreements_sha256"),
         "source_kind_labels": metadata.get("kind_labels"),
         "excluded_source_non_entity_sheets": metadata.get("excluded_source_non_entity_sheets", {}),
+        "excluded_incomplete_kind_sheets": metadata.get("excluded_incomplete_kind_sheets", {}),
         "source_sheet_order_disagreements": metadata.get("source_sheet_order_disagreements", []),
         "indicators": [v["source_indicator"] for v in
                        metadata.get("source_indicator_map", {}).values()] or ["1", "8", "12"],
