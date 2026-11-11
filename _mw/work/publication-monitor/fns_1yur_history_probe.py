@@ -101,6 +101,7 @@ for year in (2012,2013,2014,2016,2018,2020,2022,2024,2025,2026):
             with zipfile.ZipFile(io.BytesIO(body)) as z:
                 names=z.namelist();print("ZIP_NAMES",year,names[:12])
                 options=[n for n in names if n.lower().endswith("(1).xls")]
+                if not options:options=[n for n in names if n.lower().endswith("_i.xls")]
                 if len(options)==1:xls=z.read(options[0])
                 elif len(names)==1 and names[0].lower().endswith('.xls'):xls=z.read(names[0])
         elif suff=="rar":
@@ -109,7 +110,11 @@ for year in (2012,2013,2014,2016,2018,2020,2022,2024,2025,2026):
                 pth=pathlib.Path(t)/"archive.rar";pth.write_bytes(body)
                 try:
                     c=subprocess.run(["bsdtar","-tf",str(pth)],capture_output=True,text=True,timeout=15)
-                    print("RAR_MEMBERS",year,c.returncode,c.stdout[:400],c.stderr[:120])
+                    print("RAR_MEMBERS",year,c.returncode,c.stdout[:1000],c.stderr[:120])
+                    members=[x for x in c.stdout.splitlines() if x.lower().endswith(".xls")]
+                    if c.returncode==0 and len(members)==1:
+                        out=subprocess.run(["bsdtar","-xOf",str(pth),members[0]],capture_output=True,timeout=20)
+                        if out.returncode==0:xls=out.stdout;print("RAR_EXTRACTED",year,members[0],len(xls))
                 except Exception as exc:print("RAR_TOOL_UNAVAILABLE",type(exc).__name__)
         if xls:
             if not xls.startswith(bytes.fromhex('D0CF11E0A1B11AE1')):
