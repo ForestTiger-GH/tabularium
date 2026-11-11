@@ -91,8 +91,20 @@ def operate(start, end, *, max_releases=0, dry_run=False):
             "data(fns): backfill " + str(len(staged)) + " source-verified 1-YUR dates")
         done.extend(x.isoformat() for x, _ in staged)
         print("HISTORY_PUSHED", [str(x) for x, _ in staged], flush=True)
+    # FNS's July 2015 Part I itself publishes Section 2 (registration
+    # transactions), not the requested Section 1 count/stock. That source
+    # absence is an explicit limitation, not an ingestion failure.
+    reviewed_unavailable = {
+        ("2015-07-01", "SOURCE_SECTION_ONE_NOT_PUBLISHED"),
+    }
+    unexpected = [(day, reason) for day, reason in errors
+                  if (day, reason) not in reviewed_unavailable]
     info = {"discovered": len(selected), "published_or_validated": len(done),
             "already_existing": len(existing), "blocked": errors,
+            "expected_unavailable_source_dates": [
+                day for day, reason in errors
+                if (day, reason) in reviewed_unavailable],
+            "unexpected_errors": unexpected,
             "year_discovery_errors": failed_pages, "dry_run": dry_run}
     print("FNS_1YUR_HISTORY_COMPLETE", json.dumps(info, ensure_ascii=False), flush=True)
     if os.getenv("GITHUB_STEP_SUMMARY"):
@@ -102,7 +114,7 @@ def operate(start, end, *, max_releases=0, dry_run=False):
                       (len(selected), len(done), len(existing), len(errors)))
             for day, reason in errors:
                 out.write("- " + day + " : " + reason.replace("\n", " ") + "\n")
-    return 1 if errors or failed_pages else 0
+    return 1 if unexpected or failed_pages else 0
 
 
 def main(argv=None):
