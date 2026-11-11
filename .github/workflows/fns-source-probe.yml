@@ -1,4 +1,5 @@
 name: Temporary FNS source structure probe
+# One-time import retry after verified historical title-case handling
 on:
   push:
     branches: [feat/fns-sme-pipeline-20261111]
