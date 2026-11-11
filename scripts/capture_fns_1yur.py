@@ -166,11 +166,49 @@ def extract_releases(html, page):
     return found
 
 
+def discover_year_pages(html):
+    """Find explicitly linked future report pages in FNS's official forms index."""
+    parser = AnchorParser()
+    parser.feed(html.decode("utf-8-sig"))
+    result = {}
+    for href, label in parser.entries:
+        match = re.findall(r"1\s*[-–]\s*ЮР\W+(20\d{2})\s*год", label,
+                           flags=re.IGNORECASE)
+        if not match:
+            continue
+        year = int(match[-1])
+        url = urljoin(BASE, href)
+        try:
+            allowed_url(url, "page")
+        except SourceError:
+            continue
+        check(url != BASE, "YEAR_INDEX_LINK_NOT_REPORT")
+        if year in result and result[year] != url:
+            raise SourceError("YEAR_PAGE_AMBIGUOUS")
+        result[year] = url
+    return result
+
+
 def discover(years=None):
     years = years or (date.today().year, date.today().year - 1)
+    wanted = sorted(set(years), reverse=True)
+    unknown = [year for year in wanted if year not in PAGES]
+    discovered = {}
+    if unknown:
+        discovered = discover_year_pages(download(BASE, "page", MAX_HTML))
     releases = {}
-    for year in sorted(set(years), reverse=True):
-        page = page_url(year)
+    for year in wanted:
+        if year in PAGES:
+            page = page_url(year)
+        elif year in discovered:
+            page = discovered[year]
+        elif year >= 2027 and year == date.today().year:
+            # The next-year page may not yet exist; its January issue can
+            # still occur on the preceding year's official report page.
+            print("FNS_1YUR_YEAR_PAGE_NOT_YET_PUBLISHED", year, file=sys.stderr)
+            continue
+        else:
+            raise SourceError("YEAR_PAGE_UNAVAILABLE")
         for d, url in extract_releases(download(page, "page", MAX_HTML), page).items():
             if d in releases and releases[d][1] != url:
                 raise SourceError("CROSS_PAGE_DATE_AMBIGUOUS")
