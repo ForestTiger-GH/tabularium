@@ -408,9 +408,11 @@ def read_csv(data):
               and sequence == sorted(sequence), "CSV_INDICATOR_ORDER_INVALID")
         kinds = groups["c01"]
         check(len(kinds) >= 15 and kinds == sorted(set(kinds)) and
-              all(g == kinds for g in groups.values()), "CSV_KIND_CLASSIFICATION_INVALID")
+              all(group and group == sorted(set(group)) and
+                  set(group).issubset(set(kinds)) for group in groups.values()),
+              "CSV_KIND_CLASSIFICATION_INVALID")
         check(fields == (["region_code", "region_name"] +
-                        [p + "_" + kind for p in sequence for kind in kinds]),
+                        [p + "_" + kind for p in sequence for kind in groups[p]]),
               "CSV_SCHEMA_INVALID")
         records = {}
         for row in reader:
