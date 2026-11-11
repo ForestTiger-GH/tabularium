@@ -14,6 +14,11 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 8
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Run new offline FNS tests
+        run: |
+          python -m unittest discover -s tests -p 'test_capture_fns_sme.py' -v
+          python -m unittest discover -s _mw/work/publication-monitor/tests -p 'test_fns_sme_pipeline.py' -v
       - name: Inspect public FNS response structure without saving source
         shell: bash
         run: |
