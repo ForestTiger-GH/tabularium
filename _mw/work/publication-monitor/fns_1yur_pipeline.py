@@ -143,6 +143,9 @@ def event_for(d, status, data, changed, metadata):
         "overlapping_territory_codes": metadata.get("overlapping_territory_codes", {}),
         "national_territorial_differences": metadata.get("national_territorial_differences", []),
         "source_orientation_disagreements": metadata.get("orientation_disagreements", []),
+        "source_orientation_disagreements_count": metadata.get("orientation_disagreements_count", 0),
+        "source_orientation_disagreements_sha256": metadata.get("orientation_disagreements_sha256"),
+        "source_kind_labels": metadata.get("kind_labels"),
         "indicators": [v["source_indicator"] for v in
                        metadata.get("source_indicator_map", {}).values()] or ["1", "8", "12"],
         "changed_regions": changed,
