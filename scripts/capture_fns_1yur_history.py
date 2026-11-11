@@ -31,8 +31,14 @@ YEAR_PAGES = {
     2024: "14414858", 2025: "15764462", 2026: "16601803",
 }
 BASE = "https://www.nalog.gov.ru/rn77/related_activities/statistics_and_analytics/forms/"
-PATHS = ("/files/docs/gosreg/", "/html/sites/www.new.nalog.ru/docs/otchet/",
-         "/html/sites/www.new.nalog.ru/files/related_activities/statistics_and_analytics/forms/reg/")
+PATHS = (
+    "/files/docs/gosreg/",
+    "/html/sites/www.new.nalog.ru/docs/otchet/",
+    "/html/sites/www.new.nalog.ru/docs/analit/",
+    "/html/sites/www.new.nalog.ru/svod/",
+    "/html/sites/www.new.nalog.ru/files/related_activities/statistics_and_analytics/forms/reg/",
+    "/html/sites/www.new.nalog.ru/2023/related_activities/statistics_and_analytics/forms/",
+)
 DATE_RX = re.compile(r"(?<!\d)(0[1-9]|[12]\d|3[01])\.(0[1-9]|1[0-2])\.(20\d{2})(?!\d)")
 MAX_SOURCE = 30_000_000
 
@@ -205,7 +211,8 @@ def discover(start=MIN_DATE, end=date(2026, 11, 1)):
 def member_name(names):
     valid = [name for name in names if name.lower().endswith(".xls") and len(name) < 300
              and not name.startswith(("/", "\\")) and ".." not in name.replace("\\", "/").split("/")]
-    for pattern in (r"\(1\)\.xls\Z", r"_I\.xls\Z"):
+    for pattern in (r"\(1\)\.xls\Z", r"_I\.xls\Z",
+                    r"_I_[^/\\]+\.xls\Z"):
         selected = [name for name in valid if re.search(pattern, name, flags=re.I)]
         if selected:
             if len(selected) != 1:
@@ -479,7 +486,7 @@ def extract_observations(xls, reference_date):
                 book, geo, kinds, mappings_by_kind, records[geo])
             crosschecked += cells
             orientation_differences.extend(disagreements)
-            if len(orientation_differences) > 100:
+            if len(orientation_differences) > 5000:
                 raise HistoryError("SOURCE_ORIENTATION_CONFLICT_TOO_BROAD")
         if orientation_differences:
             print("::warning::FNS_SOURCE_REPRESENTATION_DISAGREEMENTS",
