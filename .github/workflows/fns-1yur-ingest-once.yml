@@ -1,0 +1,38 @@
+name: One-shot FNS 1-YUR source snapshots 2026 (public only)
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/fns-1yur-ingest-once.yml']
+permissions:
+  contents: write
+concurrency:
+  group: tabularium-publication-monitor
+  cancel-in-progress: false
+  queue: single
+jobs:
+  capture:
+    if: github.repository == 'ForestTiger-GH/tabularium' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
+      - name: Install reviewed XLS dependency
+        run: python -m pip install --disable-pip-version-check -r scripts/requirements_fns_1yur.txt
+      - name: Offline source tests
+        run: |
+          python -m unittest discover -s tests -p 'test_capture_fns_1yur.py' -q
+          python -m unittest discover -s tests -p 'test_capture_fns_1yur_history.py' -q
+          python -m unittest discover -s _mw/work/publication-monitor/tests -p 'test_fns_1yur_pipeline.py' -q
+      - name: Capture 2026 official snapshots and replace November with original row order
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_THREAD_ID: ${{ vars.TELEGRAM_THREAD_ID }}
+        run: python _mw/work/publication-monitor/fns_1yur_pipeline.py check
