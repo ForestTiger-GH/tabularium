@@ -162,7 +162,7 @@ class SourceObservations(unittest.TestCase):
         after = src.write_csv(rows, KINDS)
         self.assertEqual(src.compare(before, after), ("UPDATED", 1))
         header, parsed = src.read_csv(after)
-        self.assertEqual(parsed["01"][header.index("c08_1000")], "1")
+        self.assertEqual(parsed[("01", "Region 01")][header.index("c08_1000")], "1")
 
     def test_no_implicit_null_to_zero(self):
         rows = fake_rows()
