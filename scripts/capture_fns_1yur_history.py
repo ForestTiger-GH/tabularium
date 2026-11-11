@@ -156,8 +156,14 @@ def releases_from_page(raw, page):
                 candidates.append(asset)
             except HistoryError:
                 continue
+        if not candidates:
+            # Some historical month entries have no downloadable official XLS/RAR/ZIP.
+            # Record the gap, but keep the independently verified other releases.
+            print("::warning::FNS_HISTORY_OFFICIAL_FILE_UNAVAILABLE",
+                  day.isoformat(), page, flush=True)
+            continue
         if len(set(candidates)) != 1:
-            raise HistoryError("SOURCE_ASSET_MISSING_OR_AMBIGUOUS:" + day.isoformat())
+            raise HistoryError("SOURCE_ASSET_AMBIGUOUS:" + day.isoformat())
         if day in result and result[day] != candidates[0]:
             raise HistoryError("SOURCE_DATE_DUPLICATE")
         result[day] = candidates[0]
