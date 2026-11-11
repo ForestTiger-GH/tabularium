@@ -1,0 +1,82 @@
+name: One-shot FNS 1-YUR historic semantic identity audit (public only)
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/fns-1yur-semantic-audit-once.yml']
+permissions:
+  contents: read
+jobs:
+  semantic:
+    if: github.repository == 'ForestTiger-GH/tabularium' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: main
+          persist-credentials: false
+      - name: Audit original release-specific all-commercial-nonprofit identities
+        run: |
+          python - <<'PY'
+          from collections import Counter,defaultdict
+          from pathlib import Path
+          import csv,json
+          root=Path('scrolls/russia/authorities/federal-tax-service/legal-entity-registration')
+          files=sorted(root.glob('*/*_1-YUR.csv'))
+          assert len(files)==178
+          groups={'A':('1010','1020','1030'), 'B':('1010','1020','1040'),
+                  'C':('1000','1100','1200')}
+          measures=('c01','c08','c09','c11','c12','c13')
+          period=Counter()
+          first={}
+          mismatches=[]
+          missing=[]
+          source_checks=Counter()
+          extra=[]
+          for path in files:
+              with path.open('r',encoding='utf-8',newline='') as f:
+                  reader=csv.DictReader(f);rows=list(reader);fields=set(reader.fieldnames)
+              day=path.name[:10]
+              if 'c01_1000' in fields:phase='C'
+              elif 'c01_1040' in fields:phase='B'
+              elif 'c01_1030' in fields:phase='A'
+              else:raise ValueError('UNIDENTIFIED_SOURCE_SCHEMA '+str(path))
+              period[phase]+=1
+              first.setdefault(phase,day)
+              total,com,npo=groups[phase]
+              for p in measures:
+                  all_f=p+'_'+total; commercial=p+'_'+com; nonprofit=p+'_'+npo
+                  if all_f not in fields:continue
+                  if commercial not in fields or nonprofit not in fields:
+                      missing.append({'day':day,'phase':phase,'metric':p,
+                                      'commercial_missing':commercial not in fields,
+                                      'nonprofit_missing':nonprofit not in fields})
+                      continue
+                  for idx,row in enumerate(rows,1):
+                      source_checks[(phase,p)]+=1
+                      values=[int(row[f]) for f in (all_f,commercial,nonprofit)]
+                      if values[0]!=values[1]+values[2]:
+                          if len(mismatches)<100:
+                              mismatches.append({'date':day,'phase':phase,
+                                'row':idx,'geo':row['region_code'],'name':row['region_name'],
+                                'measure':p,'values':values,'diff':values[0]-values[1]-values[2]})
+              if phase=='A' and day>='2013-05-01':
+                  extra.append('A persisted after 2013-05 '+day)
+              if phase=='B' and (day<'2013-05-01' or day>='2019-03-01'):
+                  extra.append('B out of expected date '+day)
+              if phase=='C' and day<'2019-03-01':
+                  extra.append('C before 2019-03 '+day)
+          output={'releases':len(files),'source_grammar':period,'phase_first_dates':first,
+                  'checks':{str(k):v for k,v in source_checks.items()},
+                  'mismatch_count_truncated':len(mismatches),'mismatch_examples':mismatches[:25],
+                  'unpublished_components':missing,'phase_date_anomalies':extra}
+          print('FNS_SEMANTIC_AUDIT_RESULT',json.dumps(output,ensure_ascii=False,default=dict))
+          assert not extra
+          with open(__import__('os').environ['GITHUB_STEP_SUMMARY'],'a',encoding='utf-8') as f:
+              f.write('## FNS 1-YUR source taxonomy audit\n\n')
+              f.write('Found '+str(len(files))+' dated CSVs. Epoch counts '+str(period)+'.\n\n')
+              f.write('Source arithmetic checks: '+str(sum(source_checks.values()))+
+                      '; discrepancies (first 100 retained): '+str(len(mismatches))+'.\n\n')
+              for issue in mismatches[:15]:
+                  f.write('- '+str(issue)+'\n')
+          PY
