@@ -47,6 +47,31 @@ Printed source indicator numbers, Excel column coordinates and economic construc
 
 Exact mappings and class coverage are recorded for each accepted release; this table must not be used to infer changes on unreviewed dates.
 
+### Earlier legal-entity classes: example from 01.01.2012
+
+The earlier source uses a different legal-kind coding scheme. The descriptions below correspond to the national summary of **that specific release**. They are not assumed to be comparable with similarly named 2026 columns.
+
+| 2012 code | Source category | Scope |
+| --- | --- | --- |
+| `1010` | All legal entities in the EGRUL perimeter published by FNS | Total, includes `1020` and `1030` |
+| `1020` | Commercial organizations | Aggregate |
+| `1021` | General partnerships | Component of `1020` |
+| `1022` | Limited partnerships | Component of `1020` |
+| `1023` | Limited **and additional** liability companies | Combined historical category |
+| `1024` | Joint-stock companies (open and closed) | Combined historical category |
+| `1025` | Production cooperatives | Component of `1020` |
+| `1026` | Unitary enterprises | Component of `1020` |
+| `1027` | Other commercial organizations | Component of `1020` |
+| `1030` | Non-profit organizations | Aggregate |
+| `1031` | Consumer cooperatives | Component of `1030` |
+| `1032` | State and municipal institutions | Component of `1030` |
+| `1033` | Legal entities registered according to a special procedure (Rosregistration) | Historical category as written in the source |
+| `1034` | Other non-profit organizations | Component of `1030` |
+
+**Excluded non-entity sheets:** Historical source codes `1040` and, in some later editions, `1050` designate *numbers of registration records*, not types of legal entities. They must not produce `c01_1040`, `c01_1050` or other CSV measure columns. Exclusion is based on each release's own national-sheet wording, not a universal code blacklist. Sixty already imported historical CSVs were corrected on 2026-11-11, with original and revised SHA-256 hashes linked in separate `BASELINE_CORRECTED` outbox events. All other source cell values and geographic row ordering remained unchanged.
+
+When an earlier sheet contains only indicator `1`, it contributes `c01_...` but **no** bankruptcy columns. If another historical sheet supplies indicator `11`, `12`, or `13` for bankruptcy cessation, only that actually reported indicator-kind column appears. No missing bankruptcy field is turned into zero. Regional control worksheets and legal-kind worksheets occasionally contradict one another or order territories differently; the canonical source order comes from the main legal-kind worksheet (normally the aggregate), and any discrepancy is explicitly attached to provenance. No cross-year legal-form bridge is implied.
+
 The following dictionary is transcribed in English from the **national summary sheet of the 2026-11-01 Form 1-YUR issue**, not inferred from an external economic taxonomy. It describes that source edition, **not a universal retroactive mapping for 2012–2025**. Historical names, category sets, boundaries, and underlying legal definitions can differ and must be checked against each release.
 
 | Legal-kind code | Meaning in the 2026-11-01 FNS national summary | Relation / important caution |
