@@ -96,9 +96,11 @@ def retrieve(url, *, page=False):
                     if b"<html" not in raw[:3000].lower() and b"<!doctype" not in raw[:3000].lower():
                         raise HistoryError("SOURCE_NOT_HTML")
                 else:
-                    ext = urlsplit(url).path.lower().rsplit(".", 1)[-1]
-                    signatures = {"xls": modern.OLE, "rar": b"Rar!", "zip": bytes.fromhex("504b0304")}
-                    if not raw.startswith(signatures[ext]):
+                    # Publisher sometimes labels a RAR as ZIP, or an OOXML
+                    # workbook as XLS. Validate the *actual* bytes rather
+                    # than silently changing the source's URL.
+                    if not (raw.startswith(modern.OLE) or raw.startswith(b"Rar!")
+                            or raw.startswith(bytes.fromhex("504b0304"))):
                         raise HistoryError("SOURCE_MAGIC_MISMATCH")
                 return raw
         except HTTPError as exc:
@@ -210,25 +212,36 @@ def discover(start=MIN_DATE, end=date(2026, 11, 1)):
 
 
 def member_name(names):
-    valid = [name for name in names if name.lower().endswith(".xls") and len(name) < 300
-             and not name.startswith(("/", "\\")) and ".." not in name.replace("\\", "/").split("/")]
-    for pattern in (r"\(1\)\.xls\Z", r"_I\.xls\Z",
-                    r"_I_[^/\\]+\.xls\Z"):
+    """First part only: (1), _I, or _I_DATE; never auto-select Part II."""
+    valid = [name for name in names
+             if name.lower().endswith((".xls", ".xlsx"))
+             and len(name) < 300
+             and not name.startswith(("/", "\\"))
+             and ".." not in name.replace("\\", "/").split("/")]
+    for pattern in (
+        r"\(1\)\.xlsx?\Z",
+        r"_I\.xlsx?\Z",
+        r"_I_[^/\\]+\.xlsx?\Z",
+    ):
         selected = [name for name in valid if re.search(pattern, name, flags=re.I)]
         if selected:
             if len(selected) != 1:
                 raise HistoryError("MULTIPLE_PART_I_WORKBOOKS")
             return selected[0]
     if len(valid) == 1:
+        if re.search(r"_II(?:_[^/\\]+)?\.xlsx?\Z", valid[0], flags=re.I):
+            raise HistoryError("SOURCE_ONLY_PART_II_PRESENT")
         return valid[0]
     raise HistoryError("PART_I_WORKBOOK_UNRESOLVED")
 
-
 def workbook_from_asset(raw, asset):
-    suffix = urlsplit(asset).path.lower().rsplit(".", 1)[-1]
-    if suffix == "xls":
-        data, member = raw, urlsplit(asset).path.rsplit("/", 1)[-1]
-    elif suffix == "zip":
+    """Interpret actual source container without trusting FNS file extension."""
+    declared = urlsplit(asset).path.lower().rsplit(".", 1)[-1]
+    if raw.startswith(modern.OLE) or is_spreadsheet_ooxml(raw):
+        member = urlsplit(asset).path.rsplit("/", 1)[-1]
+        data = raw
+        source_container = "standalone_xls" if raw.startswith(modern.OLE) else "standalone_ooxml"
+    elif raw.startswith(bytes.fromhex("504b0304")):
         with zipfile.ZipFile(io.BytesIO(raw)) as z:
             members = z.infolist()
             if len(members) > 100 or sum(x.file_size for x in members) > 100_000_000:
@@ -238,13 +251,15 @@ def workbook_from_asset(raw, asset):
             if info.file_size > modern.MAX_XLS:
                 raise HistoryError("ZIP_MEMBER_TOO_LARGE")
             data = z.read(member)
-    elif suffix == "rar":
+        source_container = "zip"
+    elif raw.startswith(b"Rar!"):
         with tempfile.TemporaryDirectory(prefix="fns-1yur-") as tmp:
             path = Path(tmp) / "source.rar"
             path.write_bytes(raw)
             try:
                 listing = subprocess.run(["bsdtar", "-tf", str(path)],
-                    capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=30)
+                    capture_output=True, text=True, encoding="utf-8",
+                    errors="replace", timeout=30)
             except (OSError, subprocess.TimeoutExpired) as exc:
                 raise HistoryError("RAR_READER_FAILED") from exc
             if listing.returncode or len(listing.stdout.splitlines()) > 100:
@@ -255,14 +270,19 @@ def workbook_from_asset(raw, asset):
             if extracted.returncode:
                 raise HistoryError("RAR_EXTRACT_FAILED")
             data = extracted.stdout
+        source_container = "rar"
     else:
         raise HistoryError("SOURCE_FORMAT_UNSUPPORTED")
     if not 0 < len(data) <= modern.MAX_XLS:
         raise HistoryError("XLS_MEMBER_SIZE_INVALID")
     if not (data.startswith(modern.OLE) or is_spreadsheet_ooxml(data)):
         raise HistoryError("XLS_MEMBER_INVALID")
-    return data, member, suffix
-
+    if declared not in ("xls", "xlsx", "zip", "rar"):
+        raise HistoryError("UNEXPECTED_SOURCE_FILENAME_EXTENSION")
+    if declared in ("zip", "rar") and declared != source_container:
+        print("::warning::FNS_SOURCE_CONTAINER_EXTENSION_MISMATCH",
+              asset, declared, source_container, flush=True)
+    return data, member, source_container
 
 def is_spreadsheet_ooxml(data):
     """Accept mislabeled .xls members only if they are valid OOXML spreadsheets."""
