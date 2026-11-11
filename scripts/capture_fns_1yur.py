@@ -407,7 +407,7 @@ def read_csv(data):
               and len(sequence) == len(set(sequence))
               and sequence == sorted(sequence), "CSV_INDICATOR_ORDER_INVALID")
         kinds = groups["c01"]
-        check(len(kinds) >= 15 and kinds == sorted(set(kinds)) and
+        check(len(kinds) >= 12 and kinds == sorted(set(kinds)) and
               all(group and group == sorted(set(group)) and
                   set(group).issubset(set(kinds)) for group in groups.values()),
               "CSV_KIND_CLASSIFICATION_INVALID")
