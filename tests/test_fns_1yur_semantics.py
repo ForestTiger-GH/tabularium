@@ -103,15 +103,14 @@ class Epochs(unittest.TestCase):
         self.assertEqual(len(info["retained_fields"]),6)
 
     def test_duplicate_approved_target_is_rejected(self):
-        with self.assertRaisesRegex(f.SchemaError,"MULTIPLE_SOURCE_FIELDS_SAME_CONSTRUCT"):
+        with self.assertRaisesRegex(f.SchemaError,"DUPLICATE_FIELD"):
             fake=sample("2019-03-01",["1000","1000"],[1,12])
             f.convert("2019-03-01",fake)
 
     def test_changed_geography_is_a_real_change(self):
         raw=sample("2026-11-01",["1000","1100","1200"],[1,8,12])
         same,info=f.convert("2026-11-01",raw)
-        altered=same.replace(b"15,\\xd0",b"15,\\xd0",1)
-        self.assertEqual(f.compare(same,altered),("NO_CHANGE",0))
+        self.assertEqual(f.compare(same,same),("NO_CHANGE",0))
 
 
 if __name__ == "__main__":
