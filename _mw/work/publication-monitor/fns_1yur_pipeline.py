@@ -20,6 +20,8 @@ from monitor import MonitorError, send_telegram
 
 EVENTS = HERE / "fns_1yur_events.jsonl"
 WATCHED_CODE = ("scripts/capture_fns_1yur.py",
+                "scripts/capture_fns_1yur_history.py",
+                "scripts/backfill_fns_1yur_history.py",
                 "scripts/requirements_fns_1yur.txt",
                 "_mw/work/publication-monitor/fns_1yur_pipeline.py",
                 ".github/workflows/publication-monitor.yml")
@@ -46,7 +48,7 @@ def git(*args, check=True):
 
 
 def events_read(path=EVENTS):
-    items, published, acked = [], {}, set()
+    items, published, acked, baselined = [], {}, set(), set()
     if not Path(path).exists():
         return items, published, acked
     for line in Path(path).read_text(encoding="utf-8").splitlines():
@@ -63,6 +65,10 @@ def events_read(path=EVENTS):
             if ident in published:
                 raise PipelineError("DUPLICATE_PUBLICATION_EVENT")
             published[ident] = item
+        elif item["type"] == "BASELINE_IMPORTED":
+            if ident in baselined or ident in published:
+                raise PipelineError("DUPLICATE_HISTORICAL_BASELINE")
+            baselined.add(ident)
         elif item["type"] == "NOTIFIED":
             if ident in acked:
                 raise PipelineError("DUPLICATE_ACK")
