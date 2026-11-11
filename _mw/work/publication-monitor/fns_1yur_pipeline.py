@@ -20,6 +20,7 @@ from monitor import MonitorError, send_telegram
 
 EVENTS = HERE / "fns_1yur_events.jsonl"
 WATCHED_CODE = ("scripts/capture_fns_1yur.py",
+                "scripts/fns_1yur_semantics.py",
                 "scripts/capture_fns_1yur_history.py",
                 "scripts/backfill_fns_1yur_history.py",
                 "scripts/requirements_fns_1yur.txt",
@@ -48,7 +49,7 @@ def git(*args, check=True):
 
 
 def events_read(path=EVENTS):
-    items, published, acked, baselined, corrected = [], {}, set(), set(), set()
+    items, published, acked, baselined, corrected, migrated = [], {}, set(), set(), set(), set()
     if not Path(path).exists():
         return items, published, acked
     for line in Path(path).read_text(encoding="utf-8").splitlines():
@@ -73,6 +74,10 @@ def events_read(path=EVENTS):
             if ident in corrected or item.get("baseline_event_id") not in baselined:
                 raise PipelineError("INVALID_HISTORICAL_CORRECTION")
             corrected.add(ident)
+        elif item["type"] == "SCHEMA_MIGRATED":
+            if ident in migrated:
+                raise PipelineError("DUPLICATE_SCHEMA_MIGRATION_EVENT")
+            migrated.add(ident)
         elif item["type"] == "NOTIFIED":
             if ident in acked:
                 raise PipelineError("DUPLICATE_ACK")
@@ -150,6 +155,10 @@ def event_for(d, status, data, changed, metadata):
         "source_orientation_disagreements_count": metadata.get("orientation_disagreements_count", 0),
         "source_orientation_disagreements_sha256": metadata.get("orientation_disagreements_sha256"),
         "source_kind_labels": metadata.get("kind_labels"),
+        "semantic_map_version": metadata.get("semantic_map_version"),
+        "raw_csv_sha256": metadata.get("raw_csv_sha256"),
+        "canonical_retained_fields": metadata.get("canonical_retained_fields"),
+        "canonical_omitted_fields": metadata.get("canonical_omitted_fields"),
         "excluded_source_non_entity_sheets": metadata.get("excluded_source_non_entity_sheets", {}),
         "excluded_incomplete_kind_sheets": metadata.get("excluded_incomplete_kind_sheets", {}),
         "source_sheet_order_disagreements": metadata.get("source_sheet_order_disagreements", []),
