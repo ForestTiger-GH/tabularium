@@ -223,6 +223,7 @@ report=[
  "- [Major regions: ceased via bankruptcy](03_bankruptcy_cessation_regions.png)",
  "- [Monthly stock changes (heatmap)](04_mom_changes_heatmap.png)",
  "- [Russian Federation: original national rows](05_russia_totals.png)",
+ "- [Confirmed 2019 and 2023 source-break checks](06_confirmed_source_breaks.png)",
  "",
  "## Source field transitions",
  ""]
