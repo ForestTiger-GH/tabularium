@@ -52,6 +52,21 @@ class LegacyWorkbook(unittest.TestCase):
         self.assertEqual(outer, "zip")
         self.assertEqual(raw, body)
 
+    def test_first_part_xlsx_member_from_legacy_rar_names(self):
+        self.assertEqual(
+            history.member_name(["1-ЮР_2015_07_01_I.xlsx"]), 
+            "1-ЮР_2015_07_01_I.xlsx",
+        )
+        self.assertEqual(
+            history.member_name(["1-ЮР_2016_09_01_II.xls",
+                                 "1-ЮР_2016_09_01_I.xls"]),
+            "1-ЮР_2016_09_01_I.xls",
+        )
+
+    def test_only_part_two_cannot_be_treated_as_legal_entity_table(self):
+        with self.assertRaisesRegex(history.HistoryError, "SOURCE_ONLY_PART_II_PRESENT"):
+            history.member_name(["1-ЮР_2016_09_01_II.xls"])
+
     def test_generic_zip_is_not_a_spreadsheet(self):
         z = io.BytesIO()
         with zipfile.ZipFile(z, "w") as archive:
