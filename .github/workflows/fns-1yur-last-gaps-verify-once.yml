@@ -1,0 +1,57 @@
+name: One-shot FNS 1-YUR last historical gaps validation (public only)
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/fns-1yur-last-gaps-verify-once.yml']
+permissions:
+  contents: read
+jobs:
+  verify:
+    if: github.repository == 'ForestTiger-GH/tabularium' && github.event.repository.private == false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
+      - name: Install source-appropriate readers
+        run: |
+          python -m pip install --disable-pip-version-check -r scripts/requirements_fns_1yur.txt
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends libarchive-tools
+      - name: Offline extraction and scope regression tests
+        run: |
+          python -m unittest discover -s tests -p 'test_capture_fns_1yur*.py' -q
+          python -m unittest discover -s tests -p 'test_repair_fns_1yur_history_scope.py' -q
+          python -m unittest discover -s _mw/work/publication-monitor/tests -p 'test_fns_1yur_pipeline.py' -q
+      - name: July 2015 XLSX in RAR
+        run: python scripts/backfill_fns_1yur_history.py --from-date 2015-07-01 --to-date 2015-07-01 --dry-run
+      - name: April 2018 OOXML mislabeled XLS
+        run: python scripts/backfill_fns_1yur_history.py --from-date 2018-04-01 --to-date 2018-04-01 --dry-run
+      - name: February 2019 OOXML mislabeled XLS
+        run: python scripts/backfill_fns_1yur_history.py --from-date 2019-02-01 --to-date 2019-02-01 --dry-run
+      - name: June 2019 source-incomplete per-kind geographic data
+        run: python scripts/backfill_fns_1yur_history.py --from-date 2019-06-01 --to-date 2019-06-01 --dry-run
+      - name: Explicitly refuse September 2016 archive with Part II only
+        run: |
+          python - <<'PY'
+          from datetime import date
+          import sys
+          sys.path.insert(0,"scripts")
+          import capture_fns_1yur_history as h
+          d=date(2016,9,1)
+          releases,_=h.discover(d,d)
+          _,asset=releases[d]
+          try:
+              h.workbook_from_asset(h.retrieve(asset),asset)
+          except h.HistoryError as exc:
+              if str(exc)!="SOURCE_ONLY_PART_II_PRESENT":
+                  raise
+              print("EXPECTED_SOURCE_ONLY_PART_II_PRESENT",d,asset)
+          else:
+              raise SystemExit("Invalid Part II accepted as Part I")
+          PY
