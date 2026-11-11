@@ -429,15 +429,20 @@ def _kind_control(book, geography, kinds, mappings_by_kind, expected):
                 raise HistoryError("CONTROL_MEASURE_COLUMN_MISSING")
             found[kind][meaning] = modern.integer(
                 sheet.cell_value(row, col), "CONTROL_VALUE_NOT_INTEGER")
-    if not found:
-        if not code:
-            return 0, []
-        raise HistoryError("REGION_CONTROL_KIND_ABSENT:" + code)
-    if set(found) != set(kinds):
-        raise HistoryError("REGION_CONTROL_KIND_SET_DIFFERS:" + str(geography))
+    # The transposed region view can itself omit publisher categories.
+    # Such omissions are recorded as source inconsistencies. They do not
+    # erase values present on the selected legal-kind worksheets.
     disagreements = []
+    for missing_kind in sorted(set(kinds) - set(found)):
+        disagreements.append({
+            "territory_code": code,
+            "territory_name": name,
+            "kind": missing_kind,
+            "issue": "REGION_CONTROL_KIND_NOT_PUBLISHED",
+            "kind_sheet_values": expected[missing_kind],
+        })
     checked = 0
-    for kind in kinds:
+    for kind in sorted(set(kinds) & set(found)):
         for meaning in mappings_by_kind[kind]:
             checked += 1
             if found[kind][meaning] != expected[kind][meaning]:
@@ -446,6 +451,7 @@ def _kind_control(book, geography, kinds, mappings_by_kind, expected):
                     "territory_name": name,
                     "kind": kind,
                     "meaning": meaning,
+                    "issue": "REGION_CONTROL_VALUE_DIFFERS",
                     "kind_sheet_value": expected[kind][meaning],
                     "region_sheet_value": found[kind][meaning],
                 })
@@ -502,6 +508,7 @@ def extract_observations(xls, reference_date):
                   reference_date, sorted(excluded_non_entity_sheets), flush=True)
         kind_labels = {code: kind_labels_all[code] for code in kinds}
         master_order = None
+        order_disagreements = []
         records = {}
         common_mapping = None
         mappings_by_kind = {}
@@ -544,7 +551,17 @@ def extract_observations(xls, reference_date):
             if master_order is None:
                 master_order = order
             elif order != master_order:
-                raise HistoryError("SOURCE_GEOGRAPHIC_ROW_ORDER_CONFLICT:" + kind)
+                if set(order) != set(master_order):
+                    raise HistoryError("SOURCE_GEOGRAPHY_DIFFERENT_BETWEEN_KINDS:" + kind)
+                first = next((i for i, (left, right) in
+                              enumerate(zip(master_order, order))
+                              if left != right), None)
+                order_disagreements.append({
+                    "kind_code": kind,
+                    "first_different_source_row_index": first,
+                    "canonical_source_kind_code": kinds[0],
+                    "issue": "SAME_PUBLISHED_TERRITORIES_DIFFERENT_ORDER",
+                })
         if common_mapping is None:
             raise HistoryError("SOURCE_BANKRUPTCY_COLUMNS_NOT_PUBLISHED")
         if (not master_order or master_order[0][0] != "" or
@@ -638,7 +655,8 @@ def extract_observations(xls, reference_date):
             "kind_codes": kinds,
             "national_territorial_differences": source_differences,
             "overlapping_territory_codes": repeated,
-            "geographic_order": "identical_to_source",
+            "geographic_order": "canonical_first_legal_kind_sheet",
+            "source_sheet_order_disagreements": order_disagreements,
             "orientation_disagreements_count": len(orientation_differences),
             "orientation_disagreements_sha256": (
                 hashlib.sha256(json.dumps(orientation_differences,
