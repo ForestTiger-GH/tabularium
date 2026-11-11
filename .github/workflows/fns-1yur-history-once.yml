@@ -15,6 +15,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Install legacy archive reader
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends libarchive-tools
       - name: Install read-only BIFF inspector
         run: pip install -r scripts/requirements_fns_1yur.txt
       - name: Probe official historical FNS pages (read-only)
@@ -23,3 +25,5 @@ jobs:
 # Re-probe historical year attachment markup.
 
 # Probe archives and reviewed national category labels.
+
+# Probe RAR member and historical Part-I workbook schemas.
