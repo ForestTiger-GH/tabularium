@@ -394,6 +394,12 @@ def read_csv(data):
         fields = reader.fieldnames
         check(fields is not None and fields[:2] == ["region_code", "region_name"]
               and len(fields) >= 3 and len(fields) == len(set(fields)), "CSV_HEADER_INVALID")
+        if fields[2].startswith("le_"):
+            from fns_1yur_semantics import validate_canonical, SchemaError
+            try:
+                return validate_canonical(data)
+            except SchemaError as exc:
+                raise SourceError(str(exc)) from exc
         groups = {}
         sequence = []
         for column in fields[2:]:
@@ -443,6 +449,12 @@ def read_csv(data):
 
 
 def compare(previous, candidate):
+    if candidate.startswith(b"region_code,region_name,le_"):
+        from fns_1yur_semantics import compare as compare_canonical, SchemaError
+        try:
+            return compare_canonical(previous, candidate)
+        except SchemaError as exc:
+            raise SourceError(str(exc)) from exc
     _, fresh = read_csv(candidate)
     if previous is None:
         return "NEW", len(fresh)
@@ -459,7 +471,16 @@ def capture(d, url):
     """Use the shared source-faithful parser for modern and archival layouts."""
     from capture_fns_1yur_history import capture as historic_capture
     page = page_url(d.year) if d.year in PAGES else None
-    data, metadata = historic_capture(d, page, url)
+    raw, metadata = historic_capture(d, page, url)
+    from fns_1yur_semantics import convert, SchemaError
+    try:
+        data, lineage = convert(d, raw)
+    except SchemaError as exc:
+        raise SourceError(str(exc)) from exc
+    metadata["semantic_map_version"] = lineage["map_version"]
+    metadata["raw_csv_sha256"] = lineage["source_csv_sha256"]
+    metadata["canonical_retained_fields"] = lineage["retained_fields"]
+    metadata["canonical_omitted_fields"] = lineage["omitted_fields"]
     return data, metadata
 
 
@@ -484,7 +505,9 @@ def cli(argv=None):
     if args.xls:
         data = Path(args.xls).read_bytes()
         from capture_fns_1yur_history import extract_observations
-        candidate, metadata = extract_observations(data, d)
+        raw, metadata = extract_observations(data, d)
+        from fns_1yur_semantics import convert
+        candidate, _lineage = convert(d, raw)
         print("Local source:", metadata["regions"], "regions;",
               metadata["federal_districts"], "districts;",
               metadata["legal_kinds"], "kinds")
