@@ -17,6 +17,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(ROOT / "_mw/work/publication-monitor"))
 import capture_fns_1yur_history as history
 import capture_fns_1yur as modern
+from fns_1yur_semantics import convert as canonicalize, SchemaError
 import fns_1yur_pipeline as service
 
 
@@ -38,7 +39,12 @@ def operate(start, end, *, max_releases=0, dry_run=False):
             continue
         page, source_url = releases[day]
         try:
-            data, meta = history.capture(day, page, source_url)
+            raw, meta = history.capture(day, page, source_url)
+            data, lineage = canonicalize(day, raw)
+            meta["semantic_map_version"] = lineage["map_version"]
+            meta["raw_csv_sha256"] = lineage["source_csv_sha256"]
+            meta["canonical_retained_fields"] = lineage["retained_fields"]
+            meta["canonical_omitted_fields"] = lineage["omitted_fields"]
             fields, observed_rows = modern.read_csv(data)
             if len(observed_rows) != meta["rows"]:
                 raise history.HistoryError("CSV_SOURCE_ROW_COUNT_MISMATCH")
@@ -82,7 +88,7 @@ def operate(start, end, *, max_releases=0, dry_run=False):
                 done.extend(x.isoformat() for x, _ in staged)
                 print("HISTORY_PUSHED", [str(x) for x, _ in staged], flush=True)
                 staged.clear()
-        except (history.HistoryError, modern.SourceError, ValueError, OSError) as exc:
+        except (history.HistoryError, modern.SourceError, SchemaError, ValueError, OSError) as exc:
             errors.append((day.isoformat(), str(exc)))
             print("::warning::FNS_HISTORY_BLOCKED", day, str(exc), flush=True)
     if staged and not dry_run:
@@ -128,7 +134,7 @@ def main(argv=None):
         return operate(date.fromisoformat(args.from_date), date.fromisoformat(args.to_date),
                        max_releases=args.max_releases, dry_run=args.dry_run)
     except (history.HistoryError, modern.SourceError, service.PipelineError,
-            OSError, ValueError) as exc:
+            SchemaError, OSError, ValueError) as exc:
         print("::error::FNS_1YUR_HISTORY_FAILED", str(exc), flush=True)
         return 2
 
