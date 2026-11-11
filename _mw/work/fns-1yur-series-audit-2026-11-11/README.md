@@ -11,12 +11,20 @@ All source values are unchanged; metric-code crosswalk is an analytical interpre
 - [Major regions: ceased via bankruptcy](03_bankruptcy_cessation_regions.png)
 - [Monthly stock changes (heatmap)](04_mom_changes_heatmap.png)
 - [Russian Federation: original national rows](05_russia_totals.png)
+- [Confirmed 2019 and 2023 source-break checks](06_confirmed_source_breaks.png)
 
 ## Source field transitions
 
 - total: 2012-01-01: c01_1010, 2019-03-01: c01_1000
 - status: 2021-02-01: c09_1000, 2023-02-01: c08_1000
 - ceased: 2012-01-01: c11_1010, 2019-03-01: c12_1000, 2021-02-01: c13_1000, 2023-02-01: c12_1000
+
+## Known changes in source coverage
+
+2023-02: the FNS geographic perimeter changes from 93 to 97 rows. The new source codes 90, 93, 94 and 95 report 31,805 legal entities combined. The national level changes 3,197,542 to 3,227,373 (+29,831); excluding the four newly appearing territory rows gives -1,974. This is a derived perimeter check, not a source-adjusted series.
+
+2019-03: source classification changes from c01_1010 to c01_1000, and bankruptcy cessation changes from c11_1010 (249,949) to c12_1000 (227,557), a nominal -8.96% discontinuity. This cannot be interpreted as the actual disappearance of past bankruptcies.
+
 
 ## Largest within-source monthly shocks
 
