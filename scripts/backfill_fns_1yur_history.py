@@ -68,6 +68,7 @@ def operate(start, end, *, max_releases=0, dry_run=False):
             event["source_orientation_disagreements_sha256"] = meta["orientation_disagreements_sha256"]
             event["source_kind_labels"] = meta["kind_labels"]
             event["excluded_source_non_entity_sheets"] = meta["excluded_source_non_entity_sheets"]
+            event["excluded_incomplete_kind_sheets"] = meta["excluded_incomplete_kind_sheets"]
             event["source_sheet_order_disagreements"] = meta["source_sheet_order_disagreements"]
             service.append_events([event])
             staged.append((day, service.relative(target)))
