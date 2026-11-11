@@ -29,34 +29,20 @@ jobs:
         run: |
           python -m unittest discover -s tests -p 'test_capture_fns_1yur.py' -q
           python -m unittest discover -s _mw/work/publication-monitor/tests -p 'test_fns_1yur_pipeline.py' -q
-      - name: Inspect official unavailable years and 2019 workbook names
-        run: |
-          python - <<'PY'
-          import sys,io,zipfile
-          sys.path.insert(0,"scripts")
-          import capture_fns_1yur_history as h
-          for year in (2018,2019,2023):
-              page=h.BASE+h.YEAR_PAGES[year]+"/"
-              items=h.ListParser()
-              items.feed(h.retrieve(page,page=True).decode("utf-8-sig"))
-              for label, links in items.items:
-                  if (year==2018 and "01.04.2018" in label or
-                      year==2019 and any(d in label for d in ("01.02.2019","01.03.2019","01.04.2019","01.05.2019")) or
-                      year==2023 and any(d in label for d in ("01.06.2023","01.10.2023","01.12.2023"))):
-                      print("HISTORICAL_PUBLISHER_ASSET",year,label.strip()[-85:],links)
-          from datetime import date
-          info,err=h.discover(date(2019,2,1),date(2019,2,1))
-          url=info[date(2019,2,1)][1]
-          raw=h.retrieve(url)
-          if raw.startswith(b"PK"):
-              with zipfile.ZipFile(io.BytesIO(raw)) as z:
-                  print("HISTORICAL_2019_MEMBER_NAMES",z.namelist())
-          PY
       - name: Validate first 2012 releases
         run: python scripts/backfill_fns_1yur_history.py --from-date 2012-01-01 --to-date 2012-12-01 --max-releases 3 --dry-run
       - name: Validate 2018 historical classification
         if: always()
         run: python scripts/backfill_fns_1yur_history.py --from-date 2018-01-01 --to-date 2018-12-01 --max-releases 1 --dry-run
+      - name: Validate corrected April 2018 archive path
+        if: always()
+        run: python scripts/backfill_fns_1yur_history.py --from-date 2018-04-01 --to-date 2018-04-01 --dry-run
+      - name: Validate corrected April 2019 archive path
+        if: always()
+        run: python scripts/backfill_fns_1yur_history.py --from-date 2019-04-01 --to-date 2019-04-01 --dry-run
+      - name: Validate corrected November 2023 archive path
+        if: always()
+        run: python scripts/backfill_fns_1yur_history.py --from-date 2023-11-01 --to-date 2023-11-01 --dry-run
       - name: Validate 2022 historical indicator mapping
         if: always()
         run: python scripts/backfill_fns_1yur_history.py --from-date 2022-01-01 --to-date 2022-12-01 --max-releases 1 --dry-run
