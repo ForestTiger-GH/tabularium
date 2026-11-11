@@ -80,7 +80,8 @@ def segments(code,metric):
  result=[];current=[];prev_field=None;prev_month=None
  for i,s in enumerate(series):
   field=s["fields"][metric];v=s["values"][code][metric];month=month_index(s["date"])
-  if (v is None or field!=prev_field or
+  national_boundary=(code=="RU" and s["reference_date"]=="2023-02-01")
+  if (v is None or field!=prev_field or national_boundary or
       (prev_month is not None and month!=prev_month+1)):
    if current:result.append(current);current=[]
   if v is not None:current.append((s["date"],v))
@@ -170,6 +171,7 @@ for ax,metric in zip(axes,("total","ceased")):
  for seg in segments("RU",metric):
   if len(seg)>1:ax.plot(*zip(*seg),lw=2.3,color=COLORS[metric])
  source_boundaries(ax,metric)
+ ax.axvline(datetime(2023,2,1),color="#ffd067",ls=":",lw=1.4)
  ax.set_title("Российская Федерация: "+TITLES[metric],loc="left",fontsize=15,pad=12)
  format_axis(ax)
  ax.xaxis.set_major_locator(mdates.YearLocator(1))
@@ -226,6 +228,20 @@ report=[
  ""]
 for metric,groups in transitions.items():
  report.append("- "+metric+": "+", ".join(date+": "+str(field) for date,field in groups))
+report+=["",
+ "## Known changes in source coverage",
+ "",
+ "2023-02: the FNS geographic perimeter changes from 93 to 97 rows. The"
+ " new source codes 90, 93, 94 and 95 report 31,805 legal entities combined."
+ " The national level changes 3,197,542 to 3,227,373 (+29,831);"
+ " excluding the four newly appearing territory rows gives -1,974."
+ " This is a derived perimeter check, not a source-adjusted series.",
+ "",
+ "2019-03: source classification changes from c01_1010 to c01_1000,"
+ " and bankruptcy cessation changes from c11_1010 (249,949) to"
+ " c12_1000 (227,557), a nominal -8.96% discontinuity."
+ " This cannot be interpreted as the actual disappearance of past bankruptcies.",
+ ""]
 report+=["","## Largest within-source monthly shocks",
  "", "| Region | Metric | Date | Before | After | Change |",
  "| --- | --- | --- | ---: | ---: | ---: |"]
