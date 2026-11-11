@@ -192,7 +192,7 @@ jobs:
             *) echo 'Invalid FNS mode' >&2; exit 2 ;;
           esac
 
-fns-1yur:
+  fns-1yur:
     needs: fns-sme
     if: >-
       always() && !cancelled() &&
