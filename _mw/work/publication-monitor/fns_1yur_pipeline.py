@@ -214,7 +214,7 @@ def release_years(mode, first, last):
     begin, end = date.fromisoformat(first), date.fromisoformat(last)
     # January can appear on the previous reporting year's page.
     years = range(begin.year - 1, end.year + 1)
-    return [year for year in years if year in source.PAGES]
+    return [year for year in years if year in source.PAGES or year >= 2027]
 
 
 def process(mode, first=None, last=None):
