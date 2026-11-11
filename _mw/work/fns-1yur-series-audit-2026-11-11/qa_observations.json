@@ -1,0 +1,687 @@
+{
+  "source_releases": 178,
+  "geographic_rows": 16999,
+  "metric_field_transitions": {
+    "total": [
+      [
+        "2012-01-01",
+        "c01_1010"
+      ],
+      [
+        "2019-03-01",
+        "c01_1000"
+      ]
+    ],
+    "status": [
+      [
+        "2021-02-01",
+        "c09_1000"
+      ],
+      [
+        "2023-02-01",
+        "c08_1000"
+      ]
+    ],
+    "ceased": [
+      [
+        "2012-01-01",
+        "c11_1010"
+      ],
+      [
+        "2019-03-01",
+        "c12_1000"
+      ],
+      [
+        "2021-02-01",
+        "c13_1000"
+      ],
+      [
+        "2023-02-01",
+        "c12_1000"
+      ]
+    ]
+  },
+  "monthly_shocks": [
+    {
+      "region": "Башкортостан",
+      "code": "02",
+      "metric": "status",
+      "field": "c09_1000",
+      "date": "2022-03-01",
+      "previous": 676,
+      "current": 804,
+      "monthly_change_pct": 18.935
+    },
+    {
+      "region": "Краснодарский край",
+      "code": "23",
+      "metric": "status",
+      "field": "c09_1000",
+      "date": "2022-03-01",
+      "previous": 1083,
+      "current": 1280,
+      "monthly_change_pct": 18.19
+    },
+    {
+      "region": "Новосибирская область",
+      "code": "54",
+      "metric": "total",
+      "field": "c01_1010",
+      "date": "2013-01-01",
+      "previous": 150422,
+      "current": 138988,
+      "monthly_change_pct": -7.601
+    },
+    {
+      "region": "Санкт-Петербург",
+      "code": "78",
+      "metric": "total",
+      "field": "c01_1010",
+      "date": "2017-01-01",
+      "previous": 370965,
+      "current": 349194,
+      "monthly_change_pct": -5.869
+    },
+    {
+      "region": "Московская область",
+      "code": "50",
+      "metric": "total",
+      "field": "c01_1000",
+      "date": "2019-10-01",
+      "previous": 199388,
+      "current": 209771,
+      "monthly_change_pct": 5.207
+    },
+    {
+      "region": "Москва",
+      "code": "77",
+      "metric": "total",
+      "field": "c01_1000",
+      "date": "2019-06-01",
+      "previous": 783086,
+      "current": 746354,
+      "monthly_change_pct": -4.691
+    },
+    {
+      "region": "Москва",
+      "code": "77",
+      "metric": "total",
+      "field": "c01_1010",
+      "date": "2016-10-01",
+      "previous": 1025965,
+      "current": 982251,
+      "monthly_change_pct": -4.261
+    },
+    {
+      "region": "Татарстан",
+      "code": "16",
+      "metric": "total",
+      "field": "c01_1010",
+      "date": "2017-08-01",
+      "previous": 123088,
+      "current": 118032,
+      "monthly_change_pct": -4.108
+    },
+    {
+      "region": "Москва",
+      "code": "77",
+      "metric": "total",
+      "field": "c01_1010",
+      "date": "2016-09-01",
+      "previous": 1069408,
+      "current": 1025965,
+      "monthly_change_pct": -4.062
+    },
+    {
+      "region": "Москва",
+      "code": "77",
+      "metric": "total",
+      "field": "c01_1000",
+      "date": "2021-10-01",
+      "previous": 591045,
+      "current": 567695,
+      "monthly_change_pct": -3.951
+    },
+    {
+      "region": "Свердловская область",
+      "code": "66",
+      "metric": "total",
+      "field": "c01_1010",
+      "date": "2018-01-01",
+      "previous": 155301,
+      "current": 149188,
+      "monthly_change_pct": -3.936
+    },
+    {
+      "region": "Краснодарский край",
+      "code": "23",
+      "metric": "total",
+      "field": "c01_1000",
+      "date": "2019-05-01",
+      "previous": 127537,
+      "current": 123334,
+      "monthly_change_pct": -3.296
+    },
+    {
+      "region": "Санкт-Петербург",
+      "code": "78",
+      "metric": "total",
+      "field": "c01_1010",
+      "date": "2018-01-01",
+      "previous": 349379,
+      "current": 337913,
+      "monthly_change_pct": -3.282
+    },
+    {
+      "region": "Московская область",
+      "code": "50",
+      "metric": "total",
+      "field": "c01_1010",
+      "date": "2012-08-01",
+      "previous": 227772,
+      "current": 220506,
+      "monthly_change_pct": -3.19
+    },
+    {
+      "region": "Новосибирская область",
+      "code": "54",
+      "metric": "total",
+      "field": "c01_1010",
+      "date": "2019-01-01",
+      "previous": 115165,
+      "current": 111502,
+      "monthly_change_pct": -3.181
+    },
+    {
+      "region": "Москва",
+      "code": "77",
+      "metric": "total",
+      "field": "c01_1000",
+      "date": "2020-08-01",
+      "previous": 677360,
+      "current": 656665,
+      "monthly_change_pct": -3.055
+    }
+  ],
+  "bankruptcy_cessation_declines": [
+    {
+      "region": "Россия",
+      "code": "RU",
+      "metric": "ceased",
+      "field": "c11_1010",
+      "date": "2012-11-01",
+      "previous": 191013,
+      "current": 190531,
+      "monthly_change_pct": -0.252
+    },
+    {
+      "region": "Татарстан",
+      "code": "16",
+      "metric": "ceased",
+      "field": "c11_1010",
+      "date": "2012-11-01",
+      "previous": 4724,
+      "current": 4689,
+      "monthly_change_pct": -0.741
+    },
+    {
+      "region": "Новосибирская область",
+      "code": "54",
+      "metric": "ceased",
+      "field": "c12_1000",
+      "date": "2024-03-01",
+      "previous": 8668,
+      "current": 8574,
+      "monthly_change_pct": -1.084
+    },
+    {
+      "region": "Ростовская область",
+      "code": "61",
+      "metric": "ceased",
+      "field": "c11_1010",
+      "date": "2016-02-01",
+      "previous": 5552,
+      "current": 5425,
+      "monthly_change_pct": -2.287
+    }
+  ],
+  "major_region_levels": {
+    "Москва": {
+      "total": {
+        "first": [
+          "2012-01-01",
+          1057462
+        ],
+        "last": [
+          "2026-11-01",
+          572680
+        ],
+        "observations": 178
+      },
+      "status": {
+        "first": [
+          "2021-02-01",
+          5040
+        ],
+        "last": [
+          "2026-11-01",
+          7781
+        ],
+        "observations": 70
+      },
+      "ceased": {
+        "first": [
+          "2012-01-01",
+          2113
+        ],
+        "last": [
+          "2026-11-01",
+          20475
+        ],
+        "observations": 178
+      }
+    },
+    "Санкт-Петербург": {
+      "total": {
+        "first": [
+          "2012-01-01",
+          361827
+        ],
+        "last": [
+          "2026-11-01",
+          196607
+        ],
+        "observations": 178
+      },
+      "status": {
+        "first": [
+          "2021-02-01",
+          2282
+        ],
+        "last": [
+          "2026-11-01",
+          2432
+        ],
+        "observations": 70
+      },
+      "ceased": {
+        "first": [
+          "2012-01-01",
+          7453
+        ],
+        "last": [
+          "2026-11-01",
+          13386
+        ],
+        "observations": 178
+      }
+    },
+    "Московская область": {
+      "total": {
+        "first": [
+          "2012-01-01",
+          223232
+        ],
+        "last": [
+          "2026-11-01",
+          181337
+        ],
+        "observations": 178
+      },
+      "status": {
+        "first": [
+          "2021-02-01",
+          2039
+        ],
+        "last": [
+          "2026-11-01",
+          2916
+        ],
+        "observations": 70
+      },
+      "ceased": {
+        "first": [
+          "2012-01-01",
+          2738
+        ],
+        "last": [
+          "2026-11-01",
+          8111
+        ],
+        "observations": 178
+      }
+    },
+    "Краснодарский край": {
+      "total": {
+        "first": [
+          "2012-01-01",
+          123640
+        ],
+        "last": [
+          "2026-11-01",
+          97766
+        ],
+        "observations": 178
+      },
+      "status": {
+        "first": [
+          "2021-02-01",
+          1020
+        ],
+        "last": [
+          "2026-11-01",
+          1493
+        ],
+        "observations": 70
+      },
+      "ceased": {
+        "first": [
+          "2012-01-01",
+          5067
+        ],
+        "last": [
+          "2026-11-01",
+          7797
+        ],
+        "observations": 178
+      }
+    },
+    "Татарстан": {
+      "total": {
+        "first": [
+          "2012-01-01",
+          98784
+        ],
+        "last": [
+          "2026-11-01",
+          91404
+        ],
+        "observations": 178
+      },
+      "status": {
+        "first": [
+          "2021-02-01",
+          927
+        ],
+        "last": [
+          "2026-11-01",
+          854
+        ],
+        "observations": 70
+      },
+      "ceased": {
+        "first": [
+          "2012-01-01",
+          4502
+        ],
+        "last": [
+          "2026-11-01",
+          7699
+        ],
+        "observations": 178
+      }
+    },
+    "Свердловская область": {
+      "total": {
+        "first": [
+          "2012-01-01",
+          193149
+        ],
+        "last": [
+          "2026-11-01",
+          104269
+        ],
+        "observations": 178
+      },
+      "status": {
+        "first": [
+          "2021-02-01",
+          1209
+        ],
+        "last": [
+          "2026-11-01",
+          906
+        ],
+        "observations": 70
+      },
+      "ceased": {
+        "first": [
+          "2012-01-01",
+          4465
+        ],
+        "last": [
+          "2026-11-01",
+          8008
+        ],
+        "observations": 178
+      }
+    },
+    "Башкортостан": {
+      "total": {
+        "first": [
+          "2012-01-01",
+          78450
+        ],
+        "last": [
+          "2026-11-01",
+          64718
+        ],
+        "observations": 178
+      },
+      "status": {
+        "first": [
+          "2021-02-01",
+          667
+        ],
+        "last": [
+          "2026-11-01",
+          764
+        ],
+        "observations": 70
+      },
+      "ceased": {
+        "first": [
+          "2012-01-01",
+          8577
+        ],
+        "last": [
+          "2026-11-01",
+          10948
+        ],
+        "observations": 178
+      }
+    },
+    "Нижегородская область": {
+      "total": {
+        "first": [
+          "2012-01-01",
+          85241
+        ],
+        "last": [
+          "2026-11-01",
+          64387
+        ],
+        "observations": 178
+      },
+      "status": {
+        "first": [
+          "2021-02-01",
+          561
+        ],
+        "last": [
+          "2026-11-01",
+          554
+        ],
+        "observations": 70
+      },
+      "ceased": {
+        "first": [
+          "2012-01-01",
+          5526
+        ],
+        "last": [
+          "2026-11-01",
+          8211
+        ],
+        "observations": 178
+      }
+    },
+    "Новосибирская область": {
+      "total": {
+        "first": [
+          "2012-01-01",
+          156553
+        ],
+        "last": [
+          "2026-11-01",
+          77327
+        ],
+        "observations": 178
+      },
+      "status": {
+        "first": [
+          "2021-02-01",
+          849
+        ],
+        "last": [
+          "2026-11-01",
+          816
+        ],
+        "observations": 70
+      },
+      "ceased": {
+        "first": [
+          "2012-01-01",
+          8735
+        ],
+        "last": [
+          "2026-11-01",
+          8985
+        ],
+        "observations": 178
+      }
+    },
+    "Ростовская область": {
+      "total": {
+        "first": [
+          "2012-01-01",
+          87715
+        ],
+        "last": [
+          "2026-11-01",
+          60605
+        ],
+        "observations": 178
+      },
+      "status": {
+        "first": [
+          "2021-02-01",
+          572
+        ],
+        "last": [
+          "2026-11-01",
+          886
+        ],
+        "observations": 70
+      },
+      "ceased": {
+        "first": [
+          "2012-01-01",
+          4457
+        ],
+        "last": [
+          "2026-11-01",
+          6559
+        ],
+        "observations": 178
+      }
+    },
+    "Красноярский край": {
+      "total": {
+        "first": [
+          "2012-01-01",
+          69255
+        ],
+        "last": [
+          "2026-11-01",
+          53295
+        ],
+        "observations": 178
+      },
+      "status": {
+        "first": [
+          "2021-02-01",
+          504
+        ],
+        "last": [
+          "2026-11-01",
+          592
+        ],
+        "observations": 70
+      },
+      "ceased": {
+        "first": [
+          "2012-01-01",
+          3588
+        ],
+        "last": [
+          "2026-11-01",
+          4209
+        ],
+        "observations": 178
+      }
+    },
+    "Самарская область": {
+      "total": {
+        "first": [
+          "2012-01-01",
+          98841
+        ],
+        "last": [
+          "2026-11-01",
+          67759
+        ],
+        "observations": 178
+      },
+      "status": {
+        "first": [
+          "2021-02-01",
+          734
+        ],
+        "last": [
+          "2026-11-01",
+          481
+        ],
+        "observations": 70
+      },
+      "ceased": {
+        "first": [
+          "2012-01-01",
+          6916
+        ],
+        "last": [
+          "2026-11-01",
+          9076
+        ],
+        "observations": 178
+      }
+    }
+  },
+  "source_months_per_year": {
+    "2012": 12,
+    "2013": 12,
+    "2014": 12,
+    "2015": 11,
+    "2016": 12,
+    "2017": 12,
+    "2018": 12,
+    "2019": 12,
+    "2020": 12,
+    "2021": 12,
+    "2022": 12,
+    "2023": 12,
+    "2024": 12,
+    "2025": 12,
+    "2026": 11
+  }
+}
