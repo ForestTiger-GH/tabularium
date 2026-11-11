@@ -31,12 +31,16 @@ jobs:
       - name: July 2015 XLSX in RAR
         run: python scripts/backfill_fns_1yur_history.py --from-date 2015-07-01 --to-date 2015-07-01 --dry-run
       - name: April 2018 OOXML mislabeled XLS
+        if: always()
         run: python scripts/backfill_fns_1yur_history.py --from-date 2018-04-01 --to-date 2018-04-01 --dry-run
       - name: February 2019 OOXML mislabeled XLS
+        if: always()
         run: python scripts/backfill_fns_1yur_history.py --from-date 2019-02-01 --to-date 2019-02-01 --dry-run
       - name: June 2019 source-incomplete per-kind geographic data
+        if: always()
         run: python scripts/backfill_fns_1yur_history.py --from-date 2019-06-01 --to-date 2019-06-01 --dry-run
       - name: Explicitly refuse September 2016 archive with Part II only
+        if: always()
         run: |
           python - <<'PY'
           from datetime import date
@@ -54,4 +58,30 @@ jobs:
               print("EXPECTED_SOURCE_ONLY_PART_II_PRESENT",d,asset)
           else:
               raise SystemExit("Invalid Part II accepted as Part I")
+          PY
+
+      - name: Inspect official July 2015 workbook sheets without modifying data
+        if: always()
+        run: |
+          python - <<'PY'
+          import sys
+          from datetime import date
+          sys.path.insert(0,"scripts")
+          import capture_fns_1yur_history as h
+          day=date(2015,7,1)
+          releases,_=h.discover(day,day)
+          page,asset=releases[day]
+          content,member,outer=h.workbook_from_asset(h.retrieve(asset),asset)
+          book=h.open_source_workbook(content)
+          try:
+              print("FNS_2015_07_STRUCTURE",member,outer,len(book.sheet_names()),
+                    book.sheet_names()[:90])
+              first=book.sheet_by_name(book.sheet_names()[0])
+              print("FNS_2015_07_FIRST_SHEET",first.name,first.nrows,first.ncols)
+              for row in range(min(16,first.nrows)):
+                  print("FNS_2015_07_FIRST_ROW",row+1,
+                        [str(first.cell_value(row,col))[:90]
+                         for col in range(min(6,first.ncols))])
+          finally:
+              book.release_resources()
           PY
