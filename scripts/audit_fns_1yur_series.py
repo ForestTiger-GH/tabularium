@@ -17,18 +17,18 @@ BASE=Path("scrolls/russia/authorities/federal-tax-service/legal-entity-registrat
 OUT=Path("_mw/work/fns-1yur-series-audit-2026-11-11")
 OUT.mkdir(parents=True,exist_ok=True)
 REGIONS=[
- ("77","Москва"),("78","Санкт-Петербург"),("50","Московская область"),
- ("23","Краснодарский край"),("16","Татарстан"),("66","Свердловская область"),
- ("02","Башкортостан"),("52","Нижегородская область"),("54","Новосибирская область"),
- ("61","Ростовская область"),("24","Красноярский край"),("63","Самарская область")]
+ ("77","Moscow"),("78","Saint Petersburg"),("50","Moscow Oblast"),
+ ("23","Krasnodar Krai"),("16","Tatarstan"),("66","Sverdlovsk Oblast"),
+ ("02","Bashkortostan"),("52","Nizhny Novgorod Oblast"),("54","Novosibirsk Oblast"),
+ ("61","Rostov Oblast"),("24","Krasnoyarsk Krai"),("63","Samara Oblast")]
 COLUMNS={
  "total":("le_not_ceased__all",),
  "status":("le_bankruptcy_proceedings__all",),
  "ceased":("le_ceased_bankruptcy_liquidation__all",)}
 TITLES={
- "total":"Юридические лица, не прекратившие деятельность",
- "status":"Юридические лица в процедурах банкротства",
- "ceased":"Прекратившие деятельность через банкротство"}
+ "total":"Legal entities with no registered cessation",
+ "status":"Legal entities in bankruptcy proceedings",
+ "ceased":"Legal entities ceased through bankruptcy"}
 COLORS={"total":"#69d1e8","status":"#ffbb72","ceased":"#70dfbb"}
 BG="#0b1122";PANEL="#142038";INK="#e8f1fa";MUTED="#9bacc3";GRID="#34445b"
 plt.rcParams.update({"font.family":"DejaVu Sans","figure.facecolor":BG,
@@ -100,8 +100,8 @@ def format_axis(ax):
  ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
  ax.set_xlim(datetime(2011,11,1),datetime(2027,1,1))
  ax.yaxis.set_major_formatter(FuncFormatter(
-  lambda y,_:("{:.1f} млн".format(y/1e6) if y>=1e6 else
-              "{:.0f} тыс.".format(y/1e3) if y>=10000 else "{:.0f}".format(y))))
+  lambda y,_:("{:.1f} M".format(y/1e6) if y>=1e6 else
+              "{:.0f} k".format(y/1e3) if y>=10000 else "{:.0f}".format(y))))
  ax.margins(y=.08)
 def source_boundaries(ax,metric):
  prior=None
@@ -121,9 +121,9 @@ def chart(metric,path):
   ax.set_title(label,loc="left",fontweight="bold",fontsize=12,pad=10)
   format_axis(ax)
  subtitles={
-  "total":"1010 (ранние формы) и 1000 (поздние) сопоставлены только для поиска возможных разрывов.",
-  "status":"Сохраняются только действительно опубликованные значения; отсутствие показателя — не ноль.",
-  "ceased":"Число прекращений через банкротство по публикации ФНС; исторические номера колонок менялись."}
+  "total":"Historical 1010 / modern 1000 is a reported-value alias, not proof of identical methodology.",
+  "status":"Only published status values are shown; missing is not zero.",
+  "ceased":"FNS Part I bankruptcy cessation stock; original indicator numbers varied."}
  fig.suptitle(TITLES[metric],fontsize=23,x=.048,y=.991,ha="left",fontweight="bold")
  fig.text(.048,.968,subtitles[metric],color=MUTED,fontsize=10.5,ha="left")
  fig.text(.048,.015,"Pink dashed lines mark source-method epochs; lines are not connected across methodological boundaries.",
@@ -137,7 +137,7 @@ chart("ceased","03_bankruptcy_cessation_regions.png")
 # Only same published field, consecutive months: analytical month-on-month QA.
 matrix=np.full((len(REGIONS),len(series)),np.nan)
 changes=[]
-for code,label in [("RU","Россия")]+REGIONS:
+for code,label in [("RU","Russia")]+REGIONS:
  for metric in ("total","status","ceased"):
   for i in range(1,len(series)):
    a,b=series[i-1],series[i]
@@ -166,7 +166,7 @@ for i in xticks:ax.axvline(i-.5,color=INK,linewidth=.5,alpha=.19)
 ax.set_title("Month-on-month change in legal entities, %",fontsize=22,loc="left",pad=18)
 ax.set_xlabel("Grey cells: missing month or source epoch boundary",color=MUTED,labelpad=10)
 bar=fig.colorbar(heat,ax=ax,orientation="horizontal",fraction=.052,pad=.14,aspect=55)
-bar.set_label("Изменение к предыдущему месяцу; шкала ограничена ±7%")
+bar.set_label("Month-on-month change, visualization capped at ±7%")
 fig.subplots_adjust(left=.16,right=.987,top=.9,bottom=.14)
 fig.savefig(OUT/"04_mom_changes_heatmap.png",dpi=150,facecolor=BG);plt.close(fig)
 
@@ -179,8 +179,8 @@ for ax,metric in zip(axes,("total","ceased")):
  ax.set_title("Российская Федерация: "+TITLES[metric],loc="left",fontsize=15,pad=12)
  format_axis(ax)
  ax.xaxis.set_major_locator(mdates.YearLocator(1))
-fig.suptitle("Общероссийские показатели из исходных строк ФНС",fontsize=22,ha="left",x=.07)
-fig.text(.07,.023,"Строка РФ не вычислялась суммированием регионов или федеральных округов.",
+fig.suptitle("Reported Russian Federation total rows",fontsize=22,ha="left",x=.07)
+fig.text(.07,.023,"The national total is the publisher's row; no territorial sums were substituted.",
          color=MUTED,fontsize=10)
 fig.subplots_adjust(left=.07,right=.98,top=.89,bottom=.08,hspace=.28)
 fig.savefig(OUT/"05_russia_totals.png",dpi=150,facecolor=BG);plt.close(fig)
@@ -229,7 +229,7 @@ report=[
  "- [Russian Federation: original national rows](05_russia_totals.png)",
  "- [Confirmed 2019 and 2023 source-break checks](06_confirmed_source_breaks.png)",
  "",
- "## Source field transitions",
+ "## Source-methodology epoch transitions",
  ""]
 for metric,groups in transitions.items():
  report.append("- "+metric+": "+", ".join(date+": "+str(field) for date,field in groups))
@@ -256,7 +256,7 @@ report+=["",
  "## Interpretation boundaries",
  "",
  "- Canonical aliases do not prove uniform economic constructs across A, B, C1, C2 and C3 source-method epochs. The source column lineage remains in field-provenance.json.",
- "- In 2019-06, only the complete 1000 category is retained; missing category columns are absent, not zero.",
+ "- In 2019-06, only complete overall-kind categories are retained; missing category fields are absent, not zero.",
  "- Moscow Oblast uses the uncombined row, not the source line including Baikonur.",
  "- A gap in source bankruptcy-status reporting is not a zero. Some historical kinds have no bankruptcy columns.",
  "- Changes in the geographic source name do not automatically establish changed territorial perimeter.",
