@@ -1,4 +1,4 @@
-name: One-shot FNS 1-YUR history inspection (public only)
+name: One-shot FNS 1-YUR history validation (public only)
 on:
   push:
     branches: [main]
@@ -9,23 +9,33 @@ concurrency:
   group: tabularium-fns-1yur-history-probe
   cancel-in-progress: false
 jobs:
-  probe:
+  validate:
     if: github.repository == 'ForestTiger-GH/tabularium' && github.event.repository.private == false
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.12'
       - name: Install legacy archive reader
         run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends libarchive-tools
-      - name: Install read-only BIFF inspector
+      - name: Install XLS reader
         run: pip install -r scripts/requirements_fns_1yur.txt
-      - name: Probe official historical FNS pages (read-only)
-        run: python _mw/work/publication-monitor/fns_1yur_history_probe.py
-
-# Re-probe historical year attachment markup.
-
-# Probe archives and reviewed national category labels.
-
-# Probe RAR member and historical Part-I workbook schemas.
-
-# Inspect historical FNS numbered indicators and source semantics.
+      - name: Validate first 2012 releases
+        run: python scripts/backfill_fns_1yur_history.py --from-date 2012-01-01 --to-date 2012-12-01 --max-releases 3 --dry-run
+      - name: Validate 2018 historical classification
+        if: always()
+        run: python scripts/backfill_fns_1yur_history.py --from-date 2018-01-01 --to-date 2018-12-01 --max-releases 1 --dry-run
+      - name: Validate 2022 historical indicator mapping
+        if: always()
+        run: python scripts/backfill_fns_1yur_history.py --from-date 2022-01-01 --to-date 2022-12-01 --max-releases 1 --dry-run
+      - name: Validate 2024 historical indicator mapping
+        if: always()
+        run: python scripts/backfill_fns_1yur_history.py --from-date 2024-01-01 --to-date 2024-12-01 --max-releases 1 --dry-run
+      - name: Validate 2026 current schema
+        if: always()
+        run: python scripts/backfill_fns_1yur_history.py --from-date 2026-10-01 --to-date 2026-11-01 --max-releases 1 --dry-run
