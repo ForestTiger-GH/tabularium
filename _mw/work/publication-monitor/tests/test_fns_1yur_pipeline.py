@@ -134,6 +134,7 @@ class Lifecycle(unittest.TestCase):
                  patch.object(source, "capture", return_value=(fake, meta)), \
                  patch.object(source, "compare", return_value=("NEW", 88)), \
                  patch.object(p, "append_events") as log, \
+                 patch.object(p, "relative", side_effect=lambda path: str(path)), \
                  patch.object(p, "safe_publish", side_effect=published), \
                  patch.object(p, "flush_outbox", side_effect=lambda: order.append("notify")), \
                  patch.object(p, "git", return_value=Mock(stdout="cafe")):
