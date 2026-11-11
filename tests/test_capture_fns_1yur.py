@@ -117,8 +117,8 @@ class Archives(unittest.TestCase):
             src.choose_member(data, DAY)
         data = self.build_zip("Отчет 1-ЮР_2026_11_01(1).xls",
                               "Отчет 1-ЮР_2026_11_01 (1).xls")
-        # No fallback from an unrecognized alternative to a second member.
-        self.assertEqual(src.choose_member(data, DAY)[1], "Отчет 1-ЮР_2026_11_01(1).xls")
+        with self.assertRaisesRegex(src.SourceError, "ARCHIVE_MEMBER_MISSING_OR_AMBIGUOUS"):
+            src.choose_member(data, DAY)
 
     def test_member_date_conflict_blocks_capture(self):
         with self.assertRaisesRegex(src.SourceError, "ARCHIVE_MEMBER_DATE_CONFLICT"):
