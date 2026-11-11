@@ -29,32 +29,6 @@ jobs:
         run: |
           python -m unittest discover -s tests -p 'test_capture_fns_1yur.py' -q
           python -m unittest discover -s _mw/work/publication-monitor/tests -p 'test_fns_1yur_pipeline.py' -q
-      - name: Inspect legacy category sheet exceptions
-        run: |
-          python - <<'PY'
-          from datetime import date
-          import sys, xlrd
-          sys.path.insert(0,"scripts")
-          import capture_fns_1yur_history as h
-          for day, codes in ((date(2012,1,1),("1010","1040")),
-                             (date(2018,2,1),("1010","1050"))):
-              selected, _ = h.discover(day, day)
-              page, url = selected[day]
-              raw, _, _ = h.workbook_from_asset(h.retrieve(url),url)
-              book=xlrd.open_workbook(file_contents=raw,on_demand=True)
-              for code in codes:
-                  sh=book.sheet_by_name(code)
-                  hdr=h._header_row(sh)
-                  print("EXCEPTION_KIND",day,code,"columns",sh.ncols,"header_row",hdr+1)
-                  for col in range(7,sh.ncols):
-                      text=[(rr+1,str(sh.cell_value(rr,col)).replace(chr(10)," ")[:130])
-                            for rr in range(4,hdr) if str(sh.cell_value(rr,col)).strip()]
-                      print("EXCEPTION_COL",day,code,col,"indicator",str(sh.cell_value(hdr,col)),text)
-                  print("EXCEPTION_FIRST_VALUES",day,code,
-                        [(rr+1,str(sh.cell_value(rr,1)),[str(sh.cell_value(rr,col)) for col in range(7, min(sh.ncols, 15))])
-                         for rr in range(hdr+1,min(hdr+4,sh.nrows))])
-              book.release_resources()
-          PY
       - name: Validate first 2012 releases
         run: python scripts/backfill_fns_1yur_history.py --from-date 2012-01-01 --to-date 2012-12-01 --max-releases 3 --dry-run
       - name: Validate 2018 historical classification
