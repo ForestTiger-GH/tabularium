@@ -24,8 +24,10 @@ import zipfile
 CORPUS = Path("scrolls/russia/authorities/federal-tax-service/legal-entity-registration")
 PAGES = {
     2026: "16601803", 2025: "15764462", 2024: "14414858",
-    2023: "13134463", 2022: "11892431",
-    2014: "4558837", 2010: "4171583", 2004: "4171556",
+    2023: "13134463", 2022: "11892431", 2021: "10553558",
+    2020: "9558929", 2019: "8376083", 2018: "7243238",
+    2017: "6427754", 2016: "5953348", 2015: "5404042",
+    2014: "4558837", 2013: "4161934", 2012: "4171842",
 }
 BASE = "https://www.nalog.gov.ru/rn77/related_activities/statistics_and_analytics/forms/"
 INDICATORS = ((1, "c01"), (8, "c08"), (12, "c12"))
@@ -69,8 +71,11 @@ def allowed_url(url, kind):
         check(p.path.startswith("/rn") and "/related_activities/statistics_and_analytics/forms/" in p.path
               and p.path.endswith("/"), "SOURCE_PAGE_PATH_INVALID")
     else:
-        check("/related_activities/statistics_and_analytics/forms/reg/" in p.path
-              and p.path.lower().endswith(".zip"), "SOURCE_ZIP_PATH_INVALID")
+        source_path = p.path.replace("\\", "/")
+        check(source_path.lower().endswith((".zip", ".rar", ".xls"))
+              and ("/related_activities/statistics_and_analytics/forms/reg/" in source_path
+                   or "/docs/otchet/" in source_path
+                   or "/files/docs/gosreg/" in source_path), "SOURCE_ASSET_PATH_INVALID")
     return url
 
 
@@ -144,9 +149,9 @@ def extract_releases(html, page):
     parser.feed(html.decode("utf-8-sig"))
     found = {}
     for href, label in parser.entries:
-        url = urljoin(page, href)
+        url = urljoin(page, href.strip())
         try:
-            allowed_url(url, "zip")
+            allowed_url(url, "source")
         except SourceError:
             continue
         dates = DATE_RE.findall(label)
@@ -211,8 +216,12 @@ def discover(years=None):
             raise SourceError("YEAR_PAGE_UNAVAILABLE")
         for d, url in extract_releases(download(page, "page", MAX_HTML), page).items():
             if d in releases and releases[d][1] != url:
-                raise SourceError("CROSS_PAGE_DATE_AMBIGUOUS")
-            releases[d] = (page, url)
+                if year == d.year:
+                    releases[d] = (page, url)
+                elif d.year != year + 1:
+                    raise SourceError("CROSS_PAGE_DATE_AMBIGUOUS")
+            else:
+                releases[d] = (page, url)
     check(releases, "SOURCE_RELEASES_MISSING")
     return dict(sorted(releases.items()))
 
@@ -231,8 +240,7 @@ def display_name(name):
 def member_matches(name, d):
     for variant in display_name(name):
         simple = re.sub(r"\s+", " ", variant).lower()
-        if (re.search(r"(?:^|[^a-zа-я0-9])1\s*[-_]\s*(?:юр|yur)", simple)
-                and re.search(r"\(1\)\.xls\Z", simple)
+        if (re.search(r"\(1\)\.xls\Z", simple)
                 and not simple.startswith(("/", "\\")) and ".." not in simple.split("/")):
             dates = re.findall(r"(20\d{2})[_-](\d{2})[_-](\d{2})", simple)
             if dates and any(tuple(map(int, a)) != (d.year, d.month, d.day) for a in dates):
