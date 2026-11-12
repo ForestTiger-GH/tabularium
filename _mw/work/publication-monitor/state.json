@@ -152,15 +152,15 @@
     },
     "minfin-fedbud-monthly": {
       "first_seen_at": "2026-11-10T16:20:05Z",
-      "last_change_at": null,
-      "resolved_url": "https://minfin.gov.ru/common/upload/library/2026/10/main/Prilozhenie_3_dannye_109-111_%E2%80%94_mes.xlsx",
-      "sha256": "f88b5bc12a597af9f0e413f4a21b2aa60cc9862b51ff6a48210a505df8932dfb"
+      "last_change_at": "2026-11-12T21:53:29Z",
+      "resolved_url": "https://minfin.gov.ru/common/upload/library/2026/11/main/Prilozhenie_3_dannye_109-111_%E2%80%94_mes.xlsx",
+      "sha256": "d8b5d2ba865697a56f25e93a06ba8a66440f80359b0c12304e97a954e8368bb3"
     },
     "minfin-fedbud-quarterly": {
       "first_seen_at": "2026-11-10T16:20:06Z",
-      "last_change_at": null,
-      "resolved_url": "https://minfin.gov.ru/common/upload/library/2026/10/main/Prilozhenie_3_dannye_109-111_%E2%80%94_kvartal.xlsx",
-      "sha256": "36165a38c686031c40d6403794b2d48bcc3e22a451640db49b041c3eb8ef0fa9"
+      "last_change_at": "2026-11-12T21:53:32Z",
+      "resolved_url": "https://minfin.gov.ru/common/upload/library/2026/11/main/Prilozhenie_3_dannye_109-111_%E2%80%94_kvartal.xlsx",
+      "sha256": "1f8daa7e9f17a56c2a0bbcf6353542b111c5ac713fbc2981781a678bb1f87638"
     },
     "monetary_agg": {
       "first_seen_at": "2026-11-10T16:19:50Z",
