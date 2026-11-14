@@ -56,6 +56,7 @@ This map lists populated material classes and documented source routes.
 
 - [Short-Term Economic Indicators](originals/russia/authorities/rosstat/short-term-economic-indicators/) — source XLSX workbooks.
 - [Population of the Russian Federation by Municipalities](originals/russia/authorities/rosstat/population-by-municipality/) — native annual Rosstat population workbooks; prepared for direct uploads.
+- [Social and Economic Situation of Russia's Regions](originals/russia/authorities/rosstat/social-economic-position-regions/) — original Rosstat regional statistical bulletin archives.
 
 ## Economic observation routes
 

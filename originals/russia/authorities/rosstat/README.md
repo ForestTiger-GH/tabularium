@@ -6,3 +6,4 @@ Native Rosstat publisher files archived without conversion. Route by stable publ
 
 - [`short-term-economic-indicators/`](short-term-economic-indicators/) — monthly Short-Term Economic Indicators XLSX workbooks.
 - [`population-by-municipality/`](population-by-municipality/) — annual Population of the Russian Federation by Municipalities XLSX bulletins.
+- [`social-economic-position-regions/`](social-economic-position-regions/) — Rosstat's Social and Economic Situation of the Russian Federation's Constituent Entities archive releases.
