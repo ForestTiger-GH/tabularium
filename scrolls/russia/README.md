@@ -1,6 +1,6 @@
 # Russia
 
-Primary machine-readable publications for the Russian Federation.
+Source-faithful, AI-readable primary publications for the Russian Federation. Unmodified source workbooks selected for archival instead belong under [`originals/russia/`](../../originals/russia/).
 
 ## Route
 

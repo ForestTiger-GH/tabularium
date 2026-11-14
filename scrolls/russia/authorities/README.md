@@ -1,6 +1,6 @@
 # Authorities
 
-Primary machine-readable publications issued by Russian public authorities and official statistical, regulatory, and policy institutions.
+Source-faithful, AI-readable publications issued by Russian public authorities and official statistical, regulatory, and policy institutions. Selected untouched publisher files are archived separately under [`originals/russia/authorities/`](../../../originals/russia/authorities/).
 
 ## Route
 

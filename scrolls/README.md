@@ -1,8 +1,8 @@
 # Scrolls
 
-`scrolls/` is the authoritative primary-source corpus of Tabularium.
+`scrolls/` contains source-faithful, AI-readable primary publications and representations, as well as documented bridges to canonical high-volume primary datasets.
 
-It contains source-faithful primary public-source artifacts and documented bridges to canonical high-volume primary datasets.
+Selected untouched publisher files belong in [`originals/`](../originals/). A source already suitable for AI reading, such as a publisher HTML page, can be retained here directly without an additional original-file copy. A source series stored exclusively under `originals/` does not require a scroll conversion.
 
 ## Route
 

@@ -1,0 +1,9 @@
+# Short-Term Economic Indicators of the Russian Federation
+
+Untouched native XLSX issues of the recurring Rosstat publication `Краткосрочные экономические показатели Российской Федерации`.
+
+## Route
+
+Name monthly workbooks by reference period as `YYYY-MM.xlsx`. Preserve workbook content and structure unchanged.
+
+There is no mandatory `scrolls/` representation for this multi-sheet series. Create source-extracted algorithm-readable artifacts only as distinct traceable series when needed.

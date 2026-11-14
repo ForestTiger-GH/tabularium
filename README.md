@@ -4,9 +4,11 @@ Machine-readable corpus of primary public financial, corporate, statistical, and
 
 ## Route
 
-Start from the source corpus or the source-extracted economic observation layer.
+Start from the source corpus or the source-extracted algorithm-readable layer.
 
-- [scrolls/](scrolls/) — authoritative primary-source corpus.
+- [originals/](originals/) — selectively archived, byte-for-byte original publisher files.
+  - [Rosstat](originals/russia/authorities/rosstat/) — native statistical workbooks.
+- [scrolls/](scrolls/) — source-faithful publications and AI-readable representations.
   - [russia/](scrolls/russia/) — Russian public-source corpus.
   - [world/](scrolls/world/) — non-Russian and international public-source corpus.
 - [flakes/](flakes/) — source-extracted published observations routed by economic meaning.
@@ -31,7 +33,6 @@ This map lists populated material classes and documented source routes.
   - [Ministry of Economic Development](scrolls/russia/authorities/ministry-of-economic-development/)
     - [Socio-Economic Development Forecast](scrolls/russia/authorities/ministry-of-economic-development/socio-economic-development-forecast/).
   - [Rosstat](scrolls/russia/authorities/rosstat/)
-    - [Short-Term Economic Indicators of the Russian Federation](scrolls/russia/authorities/rosstat/short-term-economic-indicators/).
     - [Social and Economic Situation of Russia](scrolls/russia/authorities/rosstat/social-economic-position-russia/).
 - [Surveys](scrolls/russia/surveys/)
   - [DOM.RF Analytics](scrolls/russia/surveys/dom-rf-analytics/)
@@ -51,6 +52,11 @@ This map lists populated material classes and documented source routes.
   - [McKinsey](scrolls/world/surveys/usa-mckinsey/) — admitted public publications from McKinsey & Company preserved as source objects of that publisher.
   - [ICCO](scrolls/world/surveys/icco/) — primary public publications of the International Cocoa Organization.
 
+## Native Rosstat source archives
+
+- [Short-Term Economic Indicators](originals/russia/authorities/rosstat/short-term-economic-indicators/) — source XLSX workbooks.
+- [Population of the Russian Federation by Municipalities](originals/russia/authorities/rosstat/population-by-municipality/) — native annual Rosstat population workbooks; prepared for direct uploads.
+
 ## Economic observation routes
 
 - [Bank-by-region offices](flakes/banking/service-network/bank-regional-offices/) and [monthly territorial offices](flakes/banking/service-network/territorial-offices/) — distinct Bank of Russia source-extracted series.
@@ -59,11 +65,11 @@ This map lists populated material classes and documented source routes.
 
 ## Scope
 
-This repository stores source-faithful primary publications under `scrolls/`, source-extracted published observations under `flakes/`, minimal routing metadata, and documented remote-source bridges for official high-volume datasets.
+This repository selectively archives untouched publisher artifacts under `originals/`, preserves source-faithful AI-readable publications under `scrolls/`, and stores algorithm-readable, source-traceable, series-specific records under `flakes/`, along with minimal routing metadata and documented remote-source bridges for official high-volume datasets. The stages are optional rather than a mandatory chain. An integrated cross-series database and downstream marts or visualizations can operate outside Tabularium.
 
 A bridge is a retrieval contract, not a local copy of the dataset. It must preserve primary-source identity and clearly distinguish reported values, disclosure suppression, source unavailability, and retrieval failure.
 
-`flakes/` preserves published values without a guarantee of harmonized time series. When a source is accessed directly without being archived in `scrolls/`, no artificial scroll link is required. Analytical work, derived calculations, commentary, and private/internal materials belong elsewhere.
+`flakes/` preserves programmatically usable series with source values and semantics; structures may differ markedly between series, and common names do not guarantee harmonized observations. A source does not require an archived `originals/` or `scrolls/` copy before being captured into `flakes/`. Operational monitoring and source-local analytical alerts may use flakes directly; derived results must remain distinguishable from source evidence. General cross-series analytics, integrated marts, and visualizations belong to downstream systems.
 
 When an original primary publication is no longer publicly accessible, an explicitly documented third-party preservation proxy may be retained to preserve the historical record. Such a proxy must retain its actual provenance and must not be represented as the unavailable primary-source original.
 
