@@ -110,9 +110,9 @@
     },
     "exchange_rate": {
       "first_seen_at": "2026-11-10T16:23:30Z",
-      "last_change_at": null,
+      "last_change_at": "2026-11-17T14:57:31Z",
       "resolved_url": "https://www.cbr.ru/vfs/statistics/credit_statistics/ex_rate_ind/exchange_rate.xlsx",
-      "sha256": "d8d10f7050e107c25379e8f36d345c2992493b4218a02a06d87f8e7f7e5b29f2"
+      "sha256": "69e0f0d59d7612782e6e11048634d27b921157e1c9ff1c17ca778a2b251bd1d8"
     },
     "funds_all": {
       "first_seen_at": "2026-11-10T16:19:37Z",
