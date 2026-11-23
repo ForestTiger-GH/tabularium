@@ -2,15 +2,15 @@
   "items": {
     "annex_survey_dc": {
       "first_seen_at": "2026-11-10T16:19:57Z",
-      "last_change_at": null,
+      "last_change_at": "2026-11-23T22:13:31Z",
       "resolved_url": "https://www.cbr.ru/vfs/statistics/credit_statistics/survey/annex_survey_dc.xlsx",
-      "sha256": "143e2cc0f17f46993fa88a75c83d6669d7e78cb1fd0fab034117edb09cc49fdf"
+      "sha256": "ebf8ecc3038c4e152b9207d6b62694e2f6971de4987c2e7431ad6eababc4209f"
     },
     "balance_odc": {
       "first_seen_at": "2026-11-10T16:19:53Z",
-      "last_change_at": null,
+      "last_change_at": "2026-11-23T22:13:25Z",
       "resolved_url": "https://www.cbr.ru/vfs/statistics/credit_statistics/survey/balance_odc.xlsx",
-      "sha256": "fed261a5b380298e22e82f7f7b5035065bccd7ee21399ac2626908329bc884c5"
+      "sha256": "fb0c7dd301f4dba1d21dee0d22ac66a288cad060ef9bb598a1ae3d06499cf15b"
     },
     "budget_all": {
       "first_seen_at": "2026-11-10T16:19:48Z",
@@ -164,9 +164,9 @@
     },
     "monetary_agg": {
       "first_seen_at": "2026-11-10T16:19:50Z",
-      "last_change_at": null,
+      "last_change_at": "2026-11-23T22:13:20Z",
       "resolved_url": "https://www.cbr.ru/vfs/statistics/credit_statistics/monetary_agg.xlsx",
-      "sha256": "40d1395de5bca24a72a168a401c83821128152254e28cf4773da0e9fb81069ef"
+      "sha256": "9499d4ffb9d17688b77fb94682325215d940f919afd1e49adb101f925a5c138c"
     },
     "mortgage_debt": {
       "first_seen_at": "2026-11-10T16:19:11Z",
@@ -248,21 +248,21 @@
     },
     "survey_cb": {
       "first_seen_at": "2026-11-10T16:19:52Z",
-      "last_change_at": null,
+      "last_change_at": "2026-11-23T22:13:22Z",
       "resolved_url": "https://www.cbr.ru/vfs/statistics/credit_statistics/survey/survey_cb.xlsx",
-      "sha256": "e3030363197da5b456ebe4ad441260799548d8d047a2ed01073b3bf8b6e2c130"
+      "sha256": "0c9d6328aed467a7ebb4935b36c8059f73b05feb071fb890a3daf9df8dcb872a"
     },
     "survey_dc_new": {
       "first_seen_at": "2026-11-10T16:19:56Z",
-      "last_change_at": null,
+      "last_change_at": "2026-11-23T22:13:29Z",
       "resolved_url": "https://www.cbr.ru/vfs/statistics/credit_statistics/survey/survey_dc_new.xlsx",
-      "sha256": "c652e19b558ba819086e96e43d9a3e3d65efef43a65845abe9f0aa995e9ffebb"
+      "sha256": "3b54c7f4b6be582b3a6aaa94047ac62a8fa6edaf0d7f4a46b05cd665fcd88934"
     },
     "survey_odc": {
       "first_seen_at": "2026-11-10T16:19:55Z",
-      "last_change_at": null,
+      "last_change_at": "2026-11-23T22:13:27Z",
       "resolved_url": "https://www.cbr.ru/vfs/statistics/credit_statistics/survey/survey_odc.xlsx",
-      "sha256": "be018f0b903e082181ac56ad843d702b4f025b328b7daf9c89e2313e4fb1280a"
+      "sha256": "072d4b11453aaa7f13e51f71fff4489b82a4ee54546879acb6d8beb5963106a0"
     }
   },
   "version": 1
