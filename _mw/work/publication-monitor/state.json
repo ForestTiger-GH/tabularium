@@ -68,9 +68,9 @@
     },
     "debt_securities": {
       "first_seen_at": "2026-11-10T16:19:36Z",
-      "last_change_at": null,
+      "last_change_at": "2026-11-24T16:30:57Z",
       "resolved_url": "https://www.cbr.ru/vfs/statistics/debt_securities/66-debt_securities.xlsx",
-      "sha256": "cf599f91c8a51fc2f10e2fc4d7ad4b2b75e969b3345059c658de0f6e96d0abb3"
+      "sha256": "15f954997765a3cfaa023ba164c2c4af3f16aeafa7efd20acca978afba983409"
     },
     "debt_structure_benchmark_rate": {
       "first_seen_at": "2026-11-10T16:23:23Z",
